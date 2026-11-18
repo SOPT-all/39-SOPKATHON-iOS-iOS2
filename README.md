@@ -1,0 +1,2 @@
+# 39-SOPKATHON-iOS-iOS2
+PLAY SOPT 39기 iOS 2조 iOS 레포지토리
