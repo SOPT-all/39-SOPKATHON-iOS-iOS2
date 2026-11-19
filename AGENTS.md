@@ -285,6 +285,7 @@ struct HomeView: View {
 
 ### View
 
+- **UI를 만들거나 고치면 반드시 10번의 세 기종(iPhone 13 mini, 18 Pro, 18 Pro Max)에서 실행해 기기 대응을 확인합니다.**
 - 순서: 프로퍼티 → `init` → `body` → 하위 View → `private func`
 - `@State`, `@FocusState`는 항상 `private`으로 선언합니다.
 - View는 `viewModel.state`를 읽어 그리기만 합니다. 네트워크 호출, 데이터 가공, 에러 문구 결정을 View에 두지 않습니다.
@@ -381,10 +382,54 @@ struct HomeView: View {
 - 빌드가 실패하는 상태로 커밋하지 않습니다.
 - 커밋 메시지와 PR 설명에 에이전트 관련 문구(Co-Authored-By, "Generated with ..." 등)를 넣지 않습니다.
 
-## 10. 끝내기 전 확인
+## 10. 기기 대응 확인
+
+해커톤 심사 기준에 기기 대응이 있습니다. 화면(View)을 만들거나 고친 작업은 아래 세 기종 시뮬레이터에서 직접 실행해 확인한 뒤에 끝냅니다. 빌드 성공만으로 끝내지 않습니다.
+
+| 기종 | 확인하는 이유 |
+|---|---|
+| iPhone 13 mini | 가장 작은 화면 |
+| iPhone 18 Pro | 기준 화면 |
+| iPhone 18 Pro Max | 가장 큰 화면 |
+
+순서는 다음과 같습니다.
+
+1. 시뮬레이터용으로 빌드합니다. 결과물은 git에서 제외된 `build/` 폴더에 생깁니다.
+
+   ```bash
+   xcodebuild -project sopkathon-ios2/sopkathon-ios2.xcodeproj -scheme sopkathon-ios2 -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+   ```
+
+2. 세 기종 각각에 대해 부팅, 설치, 실행, 스크린샷을 합니다. `<기종>`에는 위 표의 이름을 그대로 넣습니다.
+
+   ```bash
+   xcrun simctl boot "<기종>"
+   xcrun simctl bootstatus "<기종>"
+   xcrun simctl install "<기종>" build/Build/Products/Debug-iphonesimulator/sopkathon-ios2.app
+   xcrun simctl launch "<기종>" com.h2e.sopkathon-ios2
+   xcrun simctl io "<기종>" screenshot build/<기종>.png
+   xcrun simctl shutdown "<기종>"
+   ```
+
+3. 작업한 화면까지 이동해 스크린샷을 직접 열어 보고 아래를 확인합니다.
+   - 잘리거나 겹치는 글자, 버튼, 이미지가 없는가
+   - 13 mini에서 내용이 화면 밖으로 넘치면 스크롤로 끝까지 볼 수 있는가
+   - Pro Max에서 한쪽으로 쏠리거나 어색하게 비는 곳이 없는가
+   - 노치·다이내믹 아일랜드·홈 인디케이터에 가려지는 요소가 없는가
+   - 입력 화면이면 키보드가 올라왔을 때 입력창과 버튼이 가려지지 않는가
+
+4. 문제가 있으면 고친 뒤 세 기종을 처음부터 다시 확인합니다.
+
+5. 끝낼 때 세 기종에서 확인한 결과를 사용자에게 알립니다. 확인하지 못한 기종이나 화면이 있으면 그것도 그대로 알립니다.
+
+- 시뮬레이터를 조작하는 전용 도구가 있으면 `simctl` 대신 그 도구를 써도 됩니다.
+- 해당 기종의 시뮬레이터가 설치되어 있지 않으면 다른 기종으로 바꾸지 말고 사용자에게 알립니다.
+
+## 11. 끝내기 전 확인
 
 1. 2번의 명령으로 빌드가 성공했는가
 2. 새 타입 이름이 4번의 표와 맞는가
 3. DTO와 Model에 변환 코드가 없고, 변환이 전부 Mapper에 있는가
 4. 한 번만 쓰이는 View를 `struct`로 빼지 않았는가
 5. 헤더 주석이 있고, 그 외 주석과 `#Preview`는 없는가
+6. 화면을 건드렸다면 10번의 세 기종에서 실행해 확인했는가
