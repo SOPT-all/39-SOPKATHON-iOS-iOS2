@@ -4,7 +4,7 @@ sopkathon-ios2에서 작업하는 코딩 에이전트가 따라야 하는 규칙
 
 ## 1. 프로젝트 정보
 
-- SwiftUI 앱, 최소 iOS 27.0, Swift 5 언어 모드
+- SwiftUI 앱, 최소 iOS 17.0, Swift 5 언어 모드
 - 구조: MVVM, 기능(Feature) 단위 폴더
 - 라이브러리: Alamofire(통신), Kingfisher(이미지)
 - 기본 actor 격리가 `MainActor`입니다(`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`). View, ViewModel, Service에 `@MainActor`를 붙이거나 `DispatchQueue.main`, `MainActor.run`으로 감싸지 않습니다.
