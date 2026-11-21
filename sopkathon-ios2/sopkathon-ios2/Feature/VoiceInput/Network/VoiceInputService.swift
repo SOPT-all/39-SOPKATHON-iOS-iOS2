@@ -10,7 +10,7 @@ import Speech
 
 protocol VoiceInputServiceProtocol {
     func requestAuthorization() async -> Bool
-    func startRecognition() throws -> AsyncStream<String>
+    func startRecognition(contextualStrings: [String]) throws -> AsyncStream<String>
     func stopRecognition()
 }
 
@@ -34,7 +34,7 @@ extension VoiceInputService: VoiceInputServiceProtocol {
         return await AVAudioApplication.requestRecordPermission()
     }
 
-    func startRecognition() throws -> AsyncStream<String> {
+    func startRecognition(contextualStrings: [String]) throws -> AsyncStream<String> {
         stopRecognition()
 
         guard let speechRecognizer, speechRecognizer.isAvailable else {
@@ -43,6 +43,7 @@ extension VoiceInputService: VoiceInputServiceProtocol {
 
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
+        request.contextualStrings = contextualStrings
 
         do {
             try startAudioEngine(appendingTo: request)
