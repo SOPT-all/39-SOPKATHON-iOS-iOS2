@@ -232,13 +232,7 @@ import Observation
 
 @Observable
 final class HomeViewModel {
-    enum State {
-        case loading
-        case loaded(HomeModel)
-        case failed(message: String)
-    }
-
-    private(set) var state: State = .loading
+    private(set) var home: HomeModel?
 
     private let service: any HomeServiceProtocol
 
@@ -247,25 +241,8 @@ final class HomeViewModel {
     }
 
     func fetchHome() async {
-        state = .loading
-
-        do {
-            let home = try await service.fetchHome()
-            state = .loaded(home)
-        } catch {
-            state = .failed(message: makeErrorMessage(from: error))
-        }
-    }
-
-    private func makeErrorMessage(from error: any Error) -> String {
-        switch error {
-        case NetworkError.networkConnection:
-            return "네트워크 연결을 확인해 주세요."
-        case NetworkError.timeout:
-            return "요청 시간이 초과됐어요. 다시 시도해 주세요."
-        default:
-            return "정보를 불러오지 못했어요."
-        }
+        guard let home = try? await service.fetchHome() else { return }
+        self.home = home
     }
 }
 ```
@@ -283,37 +260,11 @@ struct HomeView: View {
     }
 
     var body: some View {
-        contentView
-            .task {
-                await viewModel.fetchHome()
-            }
-    }
-
-    @ViewBuilder
-    private var contentView: some View {
-        switch viewModel.state {
-        case .loading:
-            ProgressView()
-        case .loaded(let home):
-            loadedView(home)
-        case .failed(let message):
-            failedView(message)
-        }
-    }
-
-    private func loadedView(_ home: HomeModel) -> some View {
-        List(home.posts) { post in
+        List(viewModel.home?.posts ?? []) { post in
             Text(post.title)
         }
-    }
-
-    private func failedView(_ message: String) -> some View {
-        VStack(spacing: 12) {
-            Text(message)
-
-            Button("다시 시도") {
-                Task { await viewModel.fetchHome() }
-            }
+        .task {
+            await viewModel.fetchHome()
         }
     }
 }
@@ -321,11 +272,10 @@ struct HomeView: View {
 
 ### 화면 등록과 이동: `App/Route.swift`, `App/RootView.swift`
 
-화면을 새로 만들면 `Route`에 case를 추가하고, `RootView`의 `destinationView(for:)`에서 그 화면을 만듭니다. ViewModel은 여기서 `AppDependency`의 Service를 넣어 만듭니다.
+화면을 새로 만들면 `Route`에 case를 추가하고, `RootView`의 `destinationView(for:)`에서 그 화면을 만듭니다. ViewModel은 여기서 `AppDependency`의 Service를 넣어 만듭니다. 첫 화면인 `HomeView`는 `Route`에 넣지 않고 `NavigationStack` 안에 직접 둡니다.
 
 ```swift
 enum Route: Hashable {
-    case home
     case postDetail(postID: Int)
 }
 ```
@@ -339,7 +289,7 @@ struct RootView: View {
         @Bindable var router = router
 
         NavigationStack(path: $router.path) {
-            ContentView()
+            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
                 .navigationDestination(for: Route.self) { route in
                     destinationView(for: route)
                 }
@@ -349,8 +299,6 @@ struct RootView: View {
     @ViewBuilder
     private func destinationView(for route: Route) -> some View {
         switch route {
-        case .home:
-            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
         case .postDetail(let postID):
             PostDetailView(
                 viewModel: PostDetailViewModel(
@@ -392,7 +340,7 @@ struct HomeView: View {
 
 - 화면 이동은 `AppRouter` 하나로 합니다. `push(_:)`로 들어가고, `pop()`으로 한 단계 돌아가고, `popToRoot()`로 첫 화면까지 돌아갑니다.
 - 이동할 수 있는 화면은 모두 `App/Route.swift`의 `Route` enum에 case로 등록합니다. 화면에 넘길 값은 case의 연관값으로 넣고, 연관값에는 `Hashable`한 값(ID 등)만 넣습니다. Model이나 ViewModel을 통째로 넣지 않습니다.
-- `Route`의 case 이름은 화면 이름에서 `View`를 뺀 lowerCamelCase로 짓습니다. (`HomeView` → `.home`, `PostDetailView` → `.postDetail`)
+- `Route`의 case 이름은 화면 이름에서 `View`를 뺀 lowerCamelCase로 짓습니다. (`ChildDetailView` → `.childDetail`, `PostDetailView` → `.postDetail`)
 - case를 추가하면 `App/RootView.swift`의 `destinationView(for:)`에 그 화면을 만드는 코드를 같이 추가합니다.
 - `NavigationStack`과 `navigationDestination`은 `RootView` 한 곳에만 둡니다. 기능 화면에서 `NavigationStack`을 새로 만들지 않습니다.
 - 기능 화면에서 `NavigationLink`를 쓰지 않습니다. `Button`에서 `router.push(_:)`를 호출합니다.
@@ -404,7 +352,8 @@ struct HomeView: View {
 - **UI를 만들거나 고치면 반드시 10번의 세 기종(iPhone 13 mini, 18 Pro, 18 Pro Max)에서 실행해 기기 대응을 확인합니다.**
 - 순서: 프로퍼티 → `init` → `body` → 하위 View → `private func`
 - `@State`, `@FocusState`는 항상 `private`으로 선언합니다.
-- View는 `viewModel.state`를 읽어 그리기만 합니다. 네트워크 호출, 데이터 가공, 에러 문구 결정을 View에 두지 않습니다.
+- View는 ViewModel의 값을 읽어 그리기만 합니다. 네트워크 호출과 데이터 가공을 View에 두지 않습니다.
+- 로딩 화면과 실패 화면을 만들지 않습니다. `ProgressView`, "다시 시도" 버튼, 에러 문구를 넣지 않고, 데이터가 아직 없으면 빈 상태로 둡니다.
 - 첫 데이터 요청은 `.task`에서 합니다.
 - View는 ViewModel을 직접 만들지 않고 `init`으로 받습니다. 화면에 넘길 값(`postID` 등)은 띄우는 쪽에서 ViewModel을 만들 때 넣습니다.
 
@@ -420,10 +369,11 @@ struct HomeView: View {
 
 - `@Observable final class`로 만듭니다. `ObservableObject`, `@Published`는 쓰지 않습니다.
 - 순서: 공개 상태 → `private` 상태 → 의존성 → `init` → 공개 메서드 → `private` 메서드
-- 서버에서 받아 오는 화면 상태는 `State` enum(`loading`, `loaded`, `failed`) 하나로 표현합니다. `isLoading`, `errorMessage`, 데이터를 따로따로 두지 않습니다.
+- 서버에서 받아 온 데이터는 ViewModel의 프로퍼티로 그대로 둡니다. 하나짜리는 옵셔널(`var home: HomeModel?`), 목록은 빈 배열(`var posts: [HomePostModel] = []`)로 시작합니다.
+- 로딩·실패 상태를 만들지 않습니다. `State` enum, `isLoading`, `errorMessage`를 두지 않습니다.
+- 요청이 실패하면 기존 값을 그대로 두고 아무것도 하지 않습니다. (`guard let home = try? await service.fetchHome() else { return }`)
 - View가 읽기만 하는 값은 `private(set)`으로 선언합니다.
 - `~ServiceProtocol`에만 의존하고 `init`에서 기본값 없이 주입받습니다. `BaseService`, `Endpoint`, DTO, Mapper를 직접 쓰지 않습니다.
-- 사용자에게 보여 줄 에러 문구는 ViewModel에서 정합니다.
 
 ### Model
 
