@@ -1,10 +1,12 @@
 # 39-SOPKATHON-iOS-iOS2
-PLAY SOPT 39기 iOS 2조 iOS 레포지토리
+PLAY SOPT 39기 iOS 2조 iOS 레포지토리 🍏
 
-## 🧸 어린이집 교사를 위한 돌봄 기록 서비스
+## 🧸 speakids: 어린이집 교사를 위한 돌봄 기록 서비스
+
+<img src="https://github.com/user-attachments/assets/89512cd2-2161-4bd7-92c6-af827a655808" />
 
 ### 개요
-20대 및 신규 부임 어린이집 교사가 아이별 돌봄 내용을 간편하게 기록하고, 하루 업무를 마친 뒤 학부모에게 일일 브리핑을 보낼 수 있도록 돕는 서비스다.
+speakids는 20대 및 신규 부임 어린이집 교사가 아이별 돌봄 내용을 간편하게 기록하고, 하루 업무를 마친 뒤 학부모에게 일일 브리핑을 보낼 수 있도록 돕는 서비스 입니다.
 
 ### 핵심 메시지
 > 여러 영유아를 돌보는 교사가 일상 중 기록을 빠르고 편하게 남겨 학부모와 돌봄 정보를 공유할 수 있도록 한다.
@@ -13,7 +15,6 @@ PLAY SOPT 39기 iOS 2조 iOS 레포지토리
 - 교사는 여러 아이를 담당하며, 학부모가 자녀의 관심과 돌봄 여부에 민감하게 반응하는 상황을 겪는다.
 - 아이별 돌봄 내용을 일상에서 언제든 기록할 수 있도록 지원한다.
 - 학부모 연락처를 서비스에 등록한 뒤 매일 기록을 작성한다.
-- 우선 휴대폰 앱에 집중하며, 워치 연동은 후순위로 둔다.
 
 <br>
 
@@ -21,8 +22,8 @@ PLAY SOPT 39기 iOS 2조 iOS 레포지토리
 
 | <img src="https://github.com/user-attachments/assets/f68742e2-90d6-4d1d-87d9-a946cc3d1e3f" width="200"> | <img src="https://github.com/user-attachments/assets/6118a728-fb50-4996-bc13-e8aa1f7a299b" width="200"> | <img src="https://github.com/user-attachments/assets/61d4238d-8414-4190-b1cb-7e0141d7d4ad" width="200"> | <img src="https://github.com/user-attachments/assets/9f03e051-68cc-4a43-a927-bce3d56a0109" width="200"> |
 | :---: | :---: | :---: | :---: |
-| <b>[최주희](https://github.com/dearosmar)</b> | <b>[이서영](https://github.com/amie-lee)</b> | <b>[김보민](https://github.com/bominnnkimmm)</b> | <b>[허다연](https://github.com/ser0kim)</b> |
-| `역할` | `역할` | `역할` | `역할` |
+| <b>[최주희](https://github.com/dearosmar)</b> | <b>[이서영](https://github.com/amie-lee)</b> | <b>[김보민](https://github.com/bominnnkimmm)</b> | <b>[허다연](https://github.com/dxxeon)</b> |
+| `돌봄 기록·음성 입력 및 공통 UI` | `일일 브리핑·메시지 발송` | `아이 등록·관리` | `홈 화면 및 공통 컴포넌트` |
 
 ### ios 팀원 사진 
 | Before | After |
@@ -36,12 +37,17 @@ PLAY SOPT 39기 iOS 2조 iOS 레포지토리
 <br>
 
 ## 🛠 주요 기능 및 기술 스택 
-| 구분 | 기술 |
-|:---:|---|
-| UI | SwiftUI |
-| Network | Alamofire |
-| Image | Kingfisher |
-| Animation | Lottie |
+
+<div align="center">
+  <img alt="SwiftUI" src="https://img.shields.io/badge/SwiftUI-0D96F6?style=for-the-badge&logo=swift&logoColor=white" />
+  <img alt="MVVM" src="https://img.shields.io/badge/MVVM-334155?style=for-the-badge" />
+  <img alt="Alamofire" src="https://img.shields.io/badge/Alamofire-7C3AED?style=for-the-badge" />
+  <img alt="Kingfisher" src="https://img.shields.io/badge/Kingfisher-F97316?style=for-the-badge" />
+  <br><br>
+  <b>Apple Native Frameworks</b><br>
+  <img alt="Speech" src="https://img.shields.io/badge/Speech-111827?style=for-the-badge&logo=apple&logoColor=white" />
+  <img alt="AVFoundation" src="https://img.shields.io/badge/AVFoundation-111827?style=for-the-badge&logo=apple&logoColor=white" />
+</div>
 
 <br>
 
