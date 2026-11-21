@@ -85,7 +85,7 @@ struct RootView: View {
     private var tabContentView: some View {
         switch router.selectedTab {
         case .home:
-            HomeView()
+            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
         case .briefing:
             BriefingView()
         case .childList:
