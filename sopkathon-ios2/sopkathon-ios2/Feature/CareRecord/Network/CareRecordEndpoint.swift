@@ -9,7 +9,7 @@ import Foundation
 
 enum CareRecordEndpoint {
     case fetchCareRecords(childID: Int, date: String, category: String?, sort: String?)
-    case createCareRecord
+    case createCareRecord(CreateCareRecordRequestDTO)
 }
 
 extension CareRecordEndpoint: Endpoint {
@@ -44,6 +44,15 @@ extension CareRecordEndpoint: Endpoint {
             return items
         case .createCareRecord:
             return []
+        }
+    }
+
+    var body: (any Encodable)? {
+        switch self {
+        case .fetchCareRecords:
+            return nil
+        case .createCareRecord(let request):
+            return request
         }
     }
 }

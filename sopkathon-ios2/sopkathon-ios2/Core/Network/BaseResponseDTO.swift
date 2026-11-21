@@ -7,6 +7,10 @@
 
 struct BaseResponseDTO<T: Decodable>: Decodable {
     let data: T?
+
+    enum CodingKeys: String, CodingKey {
+        case data = "result"
+    }
 }
 
 struct ErrorResponseDTO: Decodable {
