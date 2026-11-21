@@ -10,6 +10,7 @@ import Observation
 @Observable
 final class AppRouter {
     var path: [Route] = []
+    var presentedSheet: AppSheet?
     private(set) var selectedTab: AppTab = .home
 
     func push(_ route: Route) {
@@ -27,5 +28,13 @@ final class AppRouter {
 
     func selectTab(_ tab: AppTab) {
         selectedTab = tab
+    }
+
+    func presentSheet(_ sheet: AppSheet) {
+        presentedSheet = sheet
+    }
+
+    func dismissSheet() {
+        presentedSheet = nil
     }
 }

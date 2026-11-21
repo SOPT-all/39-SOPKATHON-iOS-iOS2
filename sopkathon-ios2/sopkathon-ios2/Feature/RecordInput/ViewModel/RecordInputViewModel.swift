@@ -9,9 +9,5 @@ import Observation
 
 @Observable
 final class RecordInputViewModel {
-    var content: String
-
-    init(content: String) {
-        self.content = content
-    }
+    var content = ""
 }

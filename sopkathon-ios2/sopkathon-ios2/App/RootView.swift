@@ -24,6 +24,9 @@ struct RootView: View {
                     destinationView(for: route)
                 }
         }
+        .sheet(item: $router.presentedSheet) { sheet in
+            sheetView(for: sheet)
+        }
     }
 
     @ViewBuilder
@@ -76,10 +79,21 @@ struct RootView: View {
             ChildRegisterView()
         case .childDetail(let childID):
             ChildDetailView(childID: childID)
-        case .recordInput(let content):
-            RecordInputView(viewModel: RecordInputViewModel(content: content))
+        case .recordInput:
+            RecordInputView(viewModel: RecordInputViewModel())
+        }
+    }
+
+    @ViewBuilder
+    private func sheetView(for sheet: AppSheet) -> some View {
+        switch sheet {
         case .voiceInput:
-            VoiceInputView(viewModel: VoiceInputViewModel(service: dependency.voiceInputService))
+            VoiceInputView(
+                viewModel: VoiceInputViewModel(
+                    service: dependency.voiceInputService,
+                    careRecordService: dependency.careRecordService
+                )
+            )
         }
     }
 }
