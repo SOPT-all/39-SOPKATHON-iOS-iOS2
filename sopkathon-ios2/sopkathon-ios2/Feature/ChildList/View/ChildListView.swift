@@ -41,22 +41,48 @@ struct ChildListView: View {
     }
 
     private var childListView: some View {
-        List(viewModel.children) { child in
-            childRowView(child)
-                .listRowInsets(Metric.rowInsets)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(Title.delete) {
-                        deletingChild = child
-                    }
-                    .tint(.red)
+        List {
+            if viewModel.hasFetched {
+                ForEach(viewModel.children) { child in
+                    childRowView(child)
+                        .listRowInsets(Metric.rowInsets)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(Title.delete) {
+                                deletingChild = child
+                            }
+                            .tint(.red)
+                        }
                 }
+            } else {
+                ForEach(0..<Metric.skeletonRowCount, id: \.self) { _ in
+                    childSkeletonRowView
+                        .listRowInsets(Metric.rowInsets)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+            }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.bottom, Metric.listBottomMargin, for: .scrollContent)
+    }
+
+    private var childSkeletonRowView: some View {
+        HStack(spacing: Metric.rowSpacing) {
+            SkeletonBox(
+                width: ProfileCardSize.small.length,
+                height: ProfileCardSize.small.length,
+                cornerRadius: ProfileCardSize.small.cornerRadius
+            )
+
+            SkeletonBox(width: Metric.skeletonNameWidth, height: Metric.skeletonNameHeight)
+
+            Spacer()
+        }
+        .frame(height: Metric.rowHeight)
     }
 
     private var registerButton: some View {
@@ -208,6 +234,9 @@ private extension ChildListView {
         static let modalCornerRadius: CGFloat = 30
         static let modalMaxWidth: CGFloat = 331
         static let modalMargin: CGFloat = 31
+        static let skeletonRowCount = 6
+        static let skeletonNameWidth: CGFloat = 72
+        static let skeletonNameHeight: CGFloat = 16
     }
 
     enum Title {

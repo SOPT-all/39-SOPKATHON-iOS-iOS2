@@ -12,6 +12,7 @@ import Observation
 final class ChildListViewModel {
     var keyword = ""
     private(set) var children: [ChildModel] = []
+    private(set) var hasFetched = false
 
     private var trimmedKeyword: String? {
         let keyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -25,6 +26,8 @@ final class ChildListViewModel {
     }
 
     func fetchChildren() async {
+        defer { hasFetched = true }
+
         guard let children = try? await service.fetchChildren(keyword: trimmedKeyword) else { return }
         self.children = children
     }
