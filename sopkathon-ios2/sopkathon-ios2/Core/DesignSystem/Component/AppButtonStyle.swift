@@ -21,7 +21,7 @@ struct AppButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .typography(.subHeader2)
-            .foregroundStyle(appearance.foregroundColor(isEnabled: isEnabled))
+            .foregroundStyle(.baseWhite)
             .frame(height: size.height)
             .background(
                 appearance.backgroundColor(
