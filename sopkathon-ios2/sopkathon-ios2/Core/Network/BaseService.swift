@@ -51,6 +51,10 @@ final class BaseService {
 
         var request = try endpoint.makeURLRequest(baseURL: baseURL)
         request.setValue(
+            HeaderValue.memberID,
+            forHTTPHeaderField: HeaderType.memberID.rawValue
+        )
+        request.setValue(
             ContentType.json.rawValue,
             forHTTPHeaderField: HeaderType.accept.rawValue
         )
@@ -131,5 +135,9 @@ private extension BaseService {
 
     enum StatusCode {
         static let success = 200..<300
+    }
+
+    enum HeaderValue {
+        static let memberID = "1"
     }
 }

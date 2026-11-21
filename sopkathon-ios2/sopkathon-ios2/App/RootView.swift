@@ -87,7 +87,7 @@ struct RootView: View {
         case .home:
             HomeView()
         case .briefing:
-            BriefingView()
+            BriefingView(viewModel: BriefingViewModel(service: dependency.briefingService))
         case .childList:
             ChildListView()
         }
