@@ -10,11 +10,13 @@ import SwiftUI
 @main
 struct sopkathon_ios2App: App {
     @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+    @State private var router = AppRouter()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
                 .environment(dependency)
+                .environment(router)
         }
     }
 }
