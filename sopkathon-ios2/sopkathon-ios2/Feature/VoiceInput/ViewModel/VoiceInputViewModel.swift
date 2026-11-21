@@ -68,17 +68,18 @@ final class VoiceInputViewModel {
         service.stopRecognition()
     }
 
-    func completeRecording() async {
+    func completeRecording() async -> Bool {
         service.stopRecognition()
         await transcriptTask?.value
 
         let text = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
+        guard !text.isEmpty else { return false }
         await childrenTask?.value
-        _ = await careRecordService.createCareRecords(
+        let records = await careRecordService.createCareRecords(
             fromSpokenText: text,
             mentioning: children
         )
+        return !records.isEmpty
     }
 }
 

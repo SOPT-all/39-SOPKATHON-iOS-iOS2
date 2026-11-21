@@ -9,6 +9,7 @@ import SwiftUI
 
 struct VoiceInputView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(WatchSyncReceiver.self) private var watchSyncReceiver
 
     @State private var viewModel: VoiceInputViewModel
 
@@ -75,7 +76,8 @@ struct VoiceInputView: View {
 
             FullWidthButton(title: Title.complete) {
                 Task {
-                    await viewModel.completeRecording()
+                    guard await viewModel.completeRecording() else { return }
+                    watchSyncReceiver.markCareRecordSaved()
                 }
                 router.dismissSheet()
             }

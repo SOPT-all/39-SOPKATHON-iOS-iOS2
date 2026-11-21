@@ -7,4 +7,14 @@
 
 enum AppSheet: Equatable {
     case voiceInput(teacherName: String)
+    case childDelete(child: ChildModel)
+
+    var isCentered: Bool {
+        switch self {
+        case .voiceInput:
+            return false
+        case .childDelete:
+            return true
+        }
+    }
 }

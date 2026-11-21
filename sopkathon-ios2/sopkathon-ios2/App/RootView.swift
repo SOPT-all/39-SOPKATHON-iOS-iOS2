@@ -44,33 +44,43 @@ struct RootView: View {
     }
 
     private var sheetOverlayView: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: router.presentedSheet?.isCentered == true ? .center : .bottom) {
             if let sheet = router.presentedSheet {
                 Color.baseBlack
-                    .opacity(Metric.sheetDimOpacity)
+                    .opacity(sheet.isCentered ? Metric.modalDimOpacity : Metric.sheetDimOpacity)
                     .ignoresSafeArea()
                     .transition(.opacity)
 
-                sheetView(for: sheet)
-                    .frame(maxWidth: .infinity)
-                    .background {
-                        UnevenRoundedRectangle(
-                            topLeadingRadius: Metric.sheetCornerRadius,
-                            topTrailingRadius: Metric.sheetCornerRadius
-                        )
-                        .fill(.baseWhite)
-                        .ignoresSafeArea(edges: .bottom)
-                    }
-                    .offset(y: sheetDragOffset)
-                    .gesture(sheetDragGesture)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
+                if sheet.isCentered {
+                    sheetView(for: sheet)
+                        .transition(.opacity)
+                        .zIndex(1)
+                } else {
+                    bottomSheetView(for: sheet)
+                }
             }
         }
         .onChange(of: router.presentedSheet) { _, sheet in
             guard sheet != nil else { return }
             sheetDragOffset = 0
         }
+    }
+
+    private func bottomSheetView(for sheet: AppSheet) -> some View {
+        sheetView(for: sheet)
+            .frame(maxWidth: .infinity)
+            .background {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: Metric.sheetCornerRadius,
+                    topTrailingRadius: Metric.sheetCornerRadius
+                )
+                .fill(.baseWhite)
+                .ignoresSafeArea(edges: .bottom)
+            }
+            .offset(y: sheetDragOffset)
+            .gesture(sheetDragGesture)
+            .transition(.move(edge: .bottom))
+            .zIndex(1)
     }
 
     private var sheetDragGesture: some Gesture {
@@ -169,6 +179,14 @@ struct RootView: View {
             if let voiceInputViewModel {
                 VoiceInputView(teacherName: teacherName, viewModel: voiceInputViewModel)
             }
+        case .childDelete(let child):
+            ChildListDeleteModalView(
+                child: child,
+                viewModel: ChildListDeleteViewModel(
+                    childID: child.id,
+                    service: dependency.childService
+                )
+            )
         }
     }
 
@@ -195,6 +213,7 @@ private extension RootView {
         static let tabBarShadowRadius: CGFloat = 4
         static let sheetCornerRadius: CGFloat = 30
         static let sheetDimOpacity: Double = 0.56
+        static let modalDimOpacity: Double = 0.65
         static let sheetDismissDistance: CGFloat = 100
         static let sheetAnimationDuration: Double = 0.25
     }
