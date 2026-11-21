@@ -9,3 +9,14 @@ struct ChildModel: Identifiable, Hashable {
     let id: Int
     let name: String
 }
+
+extension ChildModel {
+    var spokenNames: [String] {
+        guard name.count > NameRule.surnameCount + 1 else { return [name] }
+        return [name, String(name.dropFirst(NameRule.surnameCount))]
+    }
+}
+
+private enum NameRule {
+    static let surnameCount = 1
+}

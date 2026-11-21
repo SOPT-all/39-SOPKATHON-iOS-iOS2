@@ -155,7 +155,8 @@ struct RootView: View {
             VoiceInputView(
                 viewModel: VoiceInputViewModel(
                     service: dependency.voiceInputService,
-                    careRecordService: dependency.careRecordService
+                    careRecordService: dependency.careRecordService,
+                    childService: dependency.childService
                 )
             )
         }

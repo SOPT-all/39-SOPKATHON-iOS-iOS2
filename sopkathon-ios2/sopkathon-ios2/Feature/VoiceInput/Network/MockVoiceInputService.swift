@@ -16,7 +16,7 @@ extension MockVoiceInputService: VoiceInputServiceProtocol {
         true
     }
 
-    func startRecognition() throws -> AsyncStream<String> {
+    func startRecognition(contextualStrings: [String]) throws -> AsyncStream<String> {
         stopRecognition()
 
         let (stream, continuation) = AsyncStream.makeStream(of: String.self)
