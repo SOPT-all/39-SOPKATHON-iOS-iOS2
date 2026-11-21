@@ -77,7 +77,7 @@ struct HomeView: View {
                 .foregroundStyle(.textBlack)
                 .padding(.top, Metric.dateTopPadding)
 
-            Text("\(viewModel.home?.teacherName ?? "") 선생님 반갑습니다")
+            Text("\(viewModel.home?.teacherName ?? "") 반갑습니다")
                 .typography(.header1)
                 .foregroundStyle(.textBlack)
                 .skeleton(!viewModel.hasFetched)

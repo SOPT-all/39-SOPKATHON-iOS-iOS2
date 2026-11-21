@@ -12,7 +12,7 @@ struct MockHomeService {}
 extension MockHomeService: HomeServiceProtocol {
     func fetchHome() async throws -> HomeModel {
         HomeModel(
-            teacherName: "한미녀",
+            teacherName: "한미녀 선생님",
             unrecordedChildren: [
                 HomeChildModel(id: 1, name: "이우진"),
                 HomeChildModel(id: 2, name: "조은하"),
