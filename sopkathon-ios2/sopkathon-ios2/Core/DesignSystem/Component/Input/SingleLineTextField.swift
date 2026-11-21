@@ -39,7 +39,8 @@ struct SingleLineTextField: View {
     var body: some View {
         InputFieldContainer(
             title: title,
-            errorMessage: isFocused ? nil : errorMessage
+            errorMessage: isFocused ? nil : errorMessage,
+            isFocused: isFocused
         ) {
             TextField(
                 "",

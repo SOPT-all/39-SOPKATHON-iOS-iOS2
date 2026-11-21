@@ -14,13 +14,7 @@ final class ChildRegisterViewModel {
     var birthDate: Date?
     var gender: ChildGenderModel?
     var parentName = ""
-    var parentPhoneNumber = "" {
-        didSet {
-            let formattedPhoneNumber = parentPhoneNumber.formattedPhoneNumber
-            guard parentPhoneNumber != formattedPhoneNumber else { return }
-            parentPhoneNumber = formattedPhoneNumber
-        }
-    }
+    var parentPhoneNumber = ""
     var relationship: ChildRelationshipModel?
     var notes = ""
 

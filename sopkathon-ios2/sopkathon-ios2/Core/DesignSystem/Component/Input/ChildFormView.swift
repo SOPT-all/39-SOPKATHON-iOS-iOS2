@@ -57,11 +57,6 @@ struct ChildFormView: View {
                 .padding(.top, Metric.sectionTitleTopPadding)
                 .padding(.bottom, Metric.bottomPadding)
         }
-        .onChange(of: parentPhoneNumber) { _, newValue in
-            let formattedValue = newValue.formattedPhoneNumber
-            guard formattedValue != newValue else { return }
-            parentPhoneNumber = formattedValue
-        }
     }
 
     private var childSectionView: some View {
@@ -159,28 +154,15 @@ struct ChildFormView: View {
     }
 
     private var phoneNumberFieldView: some View {
-        let hasError = focusedField != .parentPhoneNumber
-            && !parentPhoneNumber.isEmpty
-            && !isValidParentPhoneNumber
+        let hasError = !parentPhoneNumber.isEmpty && !isValidParentPhoneNumber
 
         return labeledView(title: Title.parentPhoneNumber) {
-            VStack(alignment: .leading, spacing: Metric.labelSpacing) {
-                TextField(Title.phoneNumberPlaceholder, text: $parentPhoneNumber)
-                    .keyboardType(.numberPad)
-                    .modifier(
-                        ChildFormFieldStyle(
-                            isFocused: focusedField == .parentPhoneNumber,
-                            hasError: hasError
-                        )
-                    )
-                    .focused($focusedField, equals: .parentPhoneNumber)
-
-                if hasError {
-                    Text(Title.phoneNumberError)
-                        .typography(.caption3)
-                        .foregroundStyle(Color(.systemRed))
-                }
-            }
+            SingleLineTextField(
+                text: $parentPhoneNumber,
+                placeholder: Title.phoneNumberPlaceholder,
+                inputType: .phoneNumber,
+                errorMessage: hasError ? Title.phoneNumberError : nil
+            )
         }
     }
 
@@ -236,7 +218,7 @@ struct ChildFormView: View {
     ) -> some View {
         labeledView(title: title) {
             TextField("", text: text)
-                .modifier(ChildFormFieldStyle(isFocused: focusedField == field, hasError: false))
+                .modifier(ChildFormFieldStyle(isFocused: focusedField == field))
                 .focused($focusedField, equals: field)
         }
     }
@@ -248,7 +230,7 @@ struct ChildFormView: View {
     ) -> some View {
         labeledView(title: title) {
             Button {
-                focusedField = nil
+                hideKeyboard()
                 action()
             } label: {
                 HStack {
@@ -296,7 +278,6 @@ struct ChildFormView: View {
 
 private struct ChildFormFieldStyle: ViewModifier {
     let isFocused: Bool
-    let hasError: Bool
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: ChildFormView.Metric.fieldCornerRadius)
@@ -308,15 +289,11 @@ private struct ChildFormFieldStyle: ViewModifier {
             .frame(height: ChildFormView.Metric.fieldHeight)
             .background(Color.gray50, in: shape)
             .overlay {
-                shape.strokeBorder(borderColor, lineWidth: ChildFormView.Metric.borderWidth)
+                shape.strokeBorder(
+                    isFocused ? Color.gray200 : .clear,
+                    lineWidth: ChildFormView.Metric.borderWidth
+                )
             }
-    }
-
-    private var borderColor: Color {
-        if hasError {
-            return Color(.systemRed)
-        }
-        return isFocused ? Color.gray200 : .clear
     }
 }
 
@@ -324,7 +301,6 @@ private extension ChildFormView {
     enum Field {
         case childName
         case parentName
-        case parentPhoneNumber
         case notes
     }
 
