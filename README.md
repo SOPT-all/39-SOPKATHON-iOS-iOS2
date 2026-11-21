@@ -112,6 +112,13 @@ API 연결 작업은 `feat`를 사용하고, 이슈와 PR에 `API` 라벨을 추
 ## 📂 폴더 구조
 
 ```
-
-  
+.
+├── docs/                       # 개발 문서
+└── sopkathon-ios2/
+    ├── sopkathon-ios2.xcodeproj/ # Xcode 프로젝트
+    └── sopkathon-ios2/
+        ├── App/                # 앱 진입점, 화면 이동, 의존성
+        ├── Core/               # 공통 디자인, 확장, 네트워크
+        ├── Feature/            # 기능별 화면과 로직
+        └── Resource/           # 이미지, 폰트, 앱 설정
 ```
