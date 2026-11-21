@@ -10,11 +10,4 @@ enum Route: Hashable {
     case childDetail(childID: Int)
     case recordInput(content: String = "")
     case voiceInput
-    case recordList(childID: Int)
-    case recordEdit(recordID: Int)
-    case briefing
-    case sendTarget
-    case sendConfirm
-    case sendResult
-    case sendHistory
 }
