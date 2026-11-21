@@ -30,6 +30,9 @@ struct BriefingView: View {
         .task(id: selectedDate) {
             await viewModel.fetchDailyBriefings(for: selectedDate)
         }
+        .onChange(of: selectedDate) { _, _ in
+            instructions.removeAll()
+        }
     }
 
     private var dateSelectionView: some View {
@@ -44,7 +47,7 @@ struct BriefingView: View {
 
     @ViewBuilder
     private var briefingListView: some View {
-        if let briefing = viewModel.briefing {
+        if let briefing = viewModel.briefing, viewModel.isBriefing(for: selectedDate) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("\(briefing.date) · 기록 있는 아이 \(briefing.recordedKidCount)명")
                     .font(.headline)
@@ -87,7 +90,7 @@ struct BriefingView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(viewModel.generatingKidID != nil)
+            .disabled(viewModel.generatingKidID != nil || viewModel.refiningBriefingID != nil)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
