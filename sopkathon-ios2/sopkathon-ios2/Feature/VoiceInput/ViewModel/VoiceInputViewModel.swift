@@ -13,6 +13,7 @@ final class VoiceInputViewModel {
     private(set) var audioLevel: Float = 0
 
     private var transcript = ""
+    private var children: [ChildModel] = []
     private var transcriptTask: Task<Void, Never>?
     private var audioLevelTask: Task<Void, Never>?
 
@@ -31,11 +32,13 @@ final class VoiceInputViewModel {
     }
 
     func startRecording() async {
-        async let childNames = fetchChildNames()
+        async let fetchedChildren = fetchChildren()
 
         guard await service.requestAuthorization(), !Task.isCancelled else { return }
-        guard let recognition = try? service.startRecognition(contextualStrings: await childNames)
-        else { return }
+        children = await fetchedChildren
+        guard let recognition = try? service.startRecognition(
+            contextualStrings: children.flatMap(\.spokenNames)
+        ) else { return }
 
         transcriptTask?.cancel()
         transcriptTask = Task {
@@ -63,11 +66,17 @@ final class VoiceInputViewModel {
 
         let text = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
-        _ = try? await careRecordService.createCareRecords(CareRecordDraftModel(text: text))
+        if children.isEmpty {
+            children = (try? await childService.fetchChildren(keyword: nil)) ?? []
+        }
+        _ = await careRecordService.createCareRecords(
+            fromSpokenText: text,
+            mentioning: children
+        )
     }
 
-    private func fetchChildNames() async -> [String] {
-        let children = await withTaskGroup(of: [ChildModel]?.self) { group in
+    private func fetchChildren() async -> [ChildModel] {
+        await withTaskGroup(of: [ChildModel]?.self) { group in
             group.addTask { [childService] in
                 try? await childService.fetchChildren(keyword: nil)
             }
@@ -80,7 +89,6 @@ final class VoiceInputViewModel {
             group.cancelAll()
             return children ?? []
         }
-        return children.flatMap(\.spokenNames)
     }
 }
 
