@@ -14,11 +14,11 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: Metric.spacing) {
                 FullWidthButton(title: Title.textMemo, appearance: .secondary) {
-                    router.push(.recordInput())
+                    router.push(.recordInput)
                 }
 
                 FullWidthButton(title: Title.voiceMemo, appearance: .secondary) {
-                    router.push(.voiceInput)
+                    router.presentSheet(.voiceInput)
                 }
 
                 FullWidthButton(title: Title.briefing, appearance: .secondary) {

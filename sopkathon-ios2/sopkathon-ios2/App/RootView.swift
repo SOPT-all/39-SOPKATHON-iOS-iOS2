@@ -11,6 +11,8 @@ struct RootView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AppDependency.self) private var dependency
 
+    @State private var sheetDragOffset: CGFloat = 0
+
     var body: some View {
         @Bindable var router = router
 
@@ -24,6 +26,59 @@ struct RootView: View {
                     destinationView(for: route)
                 }
         }
+        .overlay {
+            sheetOverlayView
+        }
+        .animation(
+            .easeOut(duration: Metric.sheetAnimationDuration),
+            value: router.presentedSheet
+        )
+    }
+
+    private var sheetOverlayView: some View {
+        ZStack(alignment: .bottom) {
+            if let sheet = router.presentedSheet {
+                Color.baseBlack
+                    .opacity(Metric.sheetDimOpacity)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+
+                sheetView(for: sheet)
+                    .frame(maxWidth: .infinity)
+                    .background {
+                        UnevenRoundedRectangle(
+                            topLeadingRadius: Metric.sheetCornerRadius,
+                            topTrailingRadius: Metric.sheetCornerRadius
+                        )
+                        .fill(.baseWhite)
+                        .ignoresSafeArea(edges: .bottom)
+                    }
+                    .offset(y: sheetDragOffset)
+                    .gesture(sheetDragGesture)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
+        }
+        .onChange(of: router.presentedSheet) { _, sheet in
+            guard sheet != nil else { return }
+            sheetDragOffset = 0
+        }
+    }
+
+    private var sheetDragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                sheetDragOffset = max(value.translation.height, 0)
+            }
+            .onEnded { value in
+                guard value.translation.height > Metric.sheetDismissDistance else {
+                    withAnimation(.easeOut(duration: Metric.sheetAnimationDuration)) {
+                        sheetDragOffset = 0
+                    }
+                    return
+                }
+                router.dismissSheet()
+            }
     }
 
     @ViewBuilder
@@ -76,10 +131,21 @@ struct RootView: View {
             ChildRegisterView()
         case .childDetail(let childID):
             ChildDetailView(childID: childID)
-        case .recordInput(let content):
-            RecordInputView(viewModel: RecordInputViewModel(content: content))
+        case .recordInput:
+            RecordInputView(viewModel: RecordInputViewModel())
+        }
+    }
+
+    @ViewBuilder
+    private func sheetView(for sheet: AppSheet) -> some View {
+        switch sheet {
         case .voiceInput:
-            VoiceInputView(viewModel: VoiceInputViewModel(service: dependency.voiceInputService))
+            VoiceInputView(
+                viewModel: VoiceInputViewModel(
+                    service: dependency.voiceInputService,
+                    careRecordService: dependency.careRecordService
+                )
+            )
         }
     }
 }
@@ -91,5 +157,9 @@ private extension RootView {
         static let tabBarOuterPadding: CGFloat = 16
         static let tabItemSpacing: CGFloat = 4
         static let tabIconSize: CGFloat = 22
+        static let sheetCornerRadius: CGFloat = 30
+        static let sheetDimOpacity: Double = 0.56
+        static let sheetDismissDistance: CGFloat = 100
+        static let sheetAnimationDuration: Double = 0.25
     }
 }

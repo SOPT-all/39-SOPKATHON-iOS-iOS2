@@ -17,47 +17,78 @@ struct VoiceInputView: View {
     }
 
     var body: some View {
-        VStack(spacing: Metric.spacing) {
-            ScrollView {
-                Text(viewModel.transcript)
-                    .typography(.body3)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+        VStack(spacing: 0) {
+            titleView
+                .padding(.top, Metric.topPadding)
 
-            FullWidthButton(title: buttonTitle) {
-                Task {
-                    await viewModel.toggleRecording()
+            Color.clear
+                .frame(height: Metric.graphicHeight)
+                .overlay {
+                    Image(.graphicVoice)
+                        .resizable()
+                        .scaledToFill()
                 }
-            }
+                .padding(.top, Metric.graphicTopPadding)
 
-            FullWidthButton(
-                title: Title.next,
-                appearance: .secondary,
-                isEnabled: viewModel.canSubmit
-            ) {
-                router.push(.recordInput(content: viewModel.transcript))
-            }
+            buttonRowView
+                .padding(.top, Metric.buttonTopPadding)
+                .padding(.bottom, Metric.bottomPadding)
         }
-        .padding(Metric.padding)
+        .task {
+            await viewModel.startRecording()
+        }
         .onDisappear {
-            viewModel.stopRecording()
+            viewModel.cancelRecording()
         }
     }
 
-    private var buttonTitle: String {
-        viewModel.isRecording ? Title.stop : Title.start
+    private var titleView: some View {
+        VStack(alignment: .leading, spacing: Metric.titleSpacing) {
+            Text(Title.status)
+                .font(Typography.caption1.font)
+
+            Text(Title.listening)
+                .font(Typography.header3.font)
+        }
+        .foregroundStyle(.textBlack)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, Metric.titleHorizontalPadding)
+    }
+
+    private var buttonRowView: some View {
+        HStack(spacing: Metric.buttonSpacing) {
+            FullWidthButton(title: Title.cancel, appearance: .secondary) {
+                router.dismissSheet()
+            }
+
+            FullWidthButton(title: Title.complete) {
+                Task {
+                    await viewModel.completeRecording()
+                }
+                router.dismissSheet()
+            }
+        }
+        .padding(.horizontal, Metric.buttonHorizontalPadding)
     }
 }
 
 private extension VoiceInputView {
     enum Metric {
-        static let spacing: CGFloat = 12
-        static let padding: CGFloat = 20
+        static let topPadding: CGFloat = 29
+        static let titleSpacing: CGFloat = 5
+        static let titleHorizontalPadding: CGFloat = 45
+        static let graphicTopPadding: CGFloat = 86
+        static let graphicHeight: CGFloat = 69
+        static let buttonTopPadding: CGFloat = 100
+        static let buttonSpacing: CGFloat = 15
+        static let buttonHorizontalPadding: CGFloat = 24
+        static let bottomPadding: CGFloat = 15
     }
 
     enum Title {
-        static let start = "음성 입력 시작"
-        static let stop = "음성 입력 종료"
-        static let next = "기록으로 옮기기"
+        static let status = "음성 인식중"
+        static let listening = "선생님의 기록을 듣고있어요."
+        static let cancel = "중단"
+        static let complete = "완료"
     }
 }
