@@ -22,7 +22,9 @@ enum HomeMapper {
 
     private static func map(_ dto: HomeResponseDTO.Record) -> HomeRecordModel? {
         guard let category = category(from: dto.category),
-              let recordedAt = createdAtFormatter.date(from: dto.createdAt) else { return nil }
+              let recordedAt = createdAtFormatter.date(
+                from: String(dto.createdAt.prefix(Format.createdAt.count - Format.quoteCount))
+              ) else { return nil }
 
         return HomeRecordModel(
             id: dto.recordID,
@@ -64,6 +66,7 @@ enum HomeMapper {
 private extension HomeMapper {
     enum Format {
         static let createdAt = "yyyy-MM-dd'T'HH:mm:ss"
+        static let quoteCount = 2
         static let localeIdentifier = "en_US_POSIX"
         static let timeZoneIdentifier = "Asia/Seoul"
     }

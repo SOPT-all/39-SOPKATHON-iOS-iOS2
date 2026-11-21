@@ -147,6 +147,7 @@ struct HomeView: View {
                 .padding(.horizontal, Metric.recordHorizontalPadding)
                 .padding(.vertical, Metric.recordVerticalPadding)
             }
+            .frame(maxWidth: .infinity)
             .frame(height: Metric.recordBoxHeight)
             .background(.baseWhite)
             .clipShape(RoundedRectangle(cornerRadius: Metric.cardCornerRadius))
