@@ -5,6 +5,8 @@
 //  Created by h2e on 11/22/26.
 //
 
+import SwiftUI
+
 enum AppTab: CaseIterable {
     case home
     case briefing
@@ -21,14 +23,23 @@ enum AppTab: CaseIterable {
         }
     }
 
-    var symbolName: String {
+    var iconSize: CGFloat {
+        switch self {
+        case .home, .briefing:
+            return 24
+        case .childList:
+            return 30
+        }
+    }
+
+    func icon(isSelected: Bool) -> ImageResource {
         switch self {
         case .home:
-            return "house.fill"
+            return isSelected ? .iconHomeOn : .iconHomeOff
         case .briefing:
-            return "text.bubble.fill"
+            return isSelected ? .iconBriefingOn : .iconBriefingOff
         case .childList:
-            return "person.2.fill"
+            return isSelected ? .iconManageOn : .iconManageOff
         }
     }
 }

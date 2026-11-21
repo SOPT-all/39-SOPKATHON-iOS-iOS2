@@ -10,7 +10,6 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AppDependency.self) private var dependency
-
     @State private var sheetDragOffset: CGFloat = 0
 
     var body: some View {
@@ -94,14 +93,15 @@ struct RootView: View {
     }
 
     private var tabBarView: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: Metric.tabItemSpacing) {
             ForEach(AppTab.allCases, id: \.self) { tab in
                 tabItemView(tab)
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, Metric.tabBarInnerPadding)
         .frame(height: Metric.tabBarHeight)
-        .background(Color.gray100)
+        .background(.baseWhite)
         .clipShape(Capsule())
         .padding(.horizontal, Metric.tabBarOuterPadding)
     }
@@ -110,15 +110,18 @@ struct RootView: View {
         Button {
             router.selectTab(tab)
         } label: {
-            VStack(spacing: Metric.tabItemSpacing) {
-                Image(systemName: tab.symbolName)
-                    .font(.system(size: Metric.tabIconSize))
+            let isSelected = tab == router.selectedTab
+
+            VStack(spacing: Metric.tabIconTitleSpacing) {
+                Image(tab.icon(isSelected: isSelected))
+                    .resizable()
+                    .frame(width: tab.iconSize, height: tab.iconSize)
 
                 Text(tab.title)
                     .typography(.caption3)
+                    .foregroundStyle(isSelected ? .primary500 : .disabled150)
             }
-            .foregroundStyle(tab == router.selectedTab ? Color.baseBlack : Color.disabled200)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(width: Metric.tabItemSize, height: Metric.tabItemSize)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -153,10 +156,11 @@ struct RootView: View {
 private extension RootView {
     enum Metric {
         static let tabBarHeight: CGFloat = 84
-        static let tabBarInnerPadding: CGFloat = 40
-        static let tabBarOuterPadding: CGFloat = 16
-        static let tabItemSpacing: CGFloat = 4
-        static let tabIconSize: CGFloat = 22
+        static let tabBarInnerPadding: CGFloat = 35
+        static let tabBarOuterPadding: CGFloat = 24
+        static let tabItemSpacing: CGFloat = 50
+        static let tabItemSize: CGFloat = 48
+        static let tabIconTitleSpacing: CGFloat = 3
         static let sheetCornerRadius: CGFloat = 30
         static let sheetDimOpacity: Double = 0.56
         static let sheetDismissDistance: CGFloat = 100
