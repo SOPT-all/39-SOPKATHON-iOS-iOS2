@@ -127,6 +127,8 @@ struct ChildFormView: View {
                 }
                 .pickerStyle(.wheel)
                 .labelsHidden()
+                .frame(height: optionPickerHeight(ChildGenderModel.allCases.count))
+                .clipped()
             } onConfirm: {
                 gender = selectedGender
             }
@@ -148,6 +150,8 @@ struct ChildFormView: View {
                 }
                 .pickerStyle(.wheel)
                 .labelsHidden()
+                .frame(height: optionPickerHeight(ChildRelationshipModel.allCases.count))
+                .clipped()
             } onConfirm: {
                 relationship = selectedRelationship
             }
@@ -266,6 +270,10 @@ struct ChildFormView: View {
         }
     }
 
+    private func optionPickerHeight(_ optionCount: Int) -> CGFloat {
+        Metric.pickerRowHeight * CGFloat(optionCount + 1)
+    }
+
     private func isPresented(_ picker: PickerType) -> Binding<Bool> {
         Binding(
             get: { presentedPicker == picker },
@@ -330,6 +338,7 @@ private extension ChildFormView {
         static let notesInnerPadding: CGFloat = 8
         static let borderWidth: CGFloat = 1
         static let pickerSpacing: CGFloat = 16
+        static let pickerRowHeight: CGFloat = 36
     }
 
     enum Title {
