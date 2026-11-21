@@ -52,7 +52,7 @@ final class WatchSyncReceiver: NSObject {
         careRecordSavedCount += 1
         await notificationService.sendNotification(
             title: Message.savedTitle,
-            body: records.map(makeSummary).joined(separator: Message.recordSeparator)
+            body: makeSavedBody(of: records)
         )
     }
 
@@ -67,19 +67,22 @@ final class WatchSyncReceiver: NSObject {
         return try? await careRecordService.createCareRecords(CareRecordDraftModel(text: text))
     }
 
-    private func makeSummary(of record: CareRecordModel) -> String {
-        guard let category = record.category else { return record.childName }
-        return record.childName + Message.categorySeparator + category.title
+    private func makeSavedBody(of records: [CareRecordModel]) -> String {
+        var childNames: [String] = []
+        for record in records where !childNames.contains(record.childName) {
+            childNames.append(record.childName)
+        }
+        return childNames.joined(separator: Message.nameSeparator) + Message.childSuffix
     }
 }
 
 private extension WatchSyncReceiver {
     enum Message {
-        static let savedTitle = "돌봄 기록이 저장됐어요"
+        static let savedTitle = "돌봄 기록이 저장됐어요."
         static let failedTitle = "기록을 저장하지 못했어요"
         static let failedBody = "아이 이름과 함께 다시 말해 주세요."
-        static let categorySeparator = " · "
-        static let recordSeparator = ", "
+        static let nameSeparator = ", "
+        static let childSuffix = " 어린이"
     }
 }
 
