@@ -18,4 +18,12 @@ extension MockChildService: ChildServiceProtocol {
         guard let keyword else { return children }
         return children.filter { $0.name.contains(keyword) }
     }
+
+    func createChild(_ draft: ChildDraftModel) async throws -> Int {
+        5
+    }
+
+    func updateChild(childID: Int, _ draft: ChildDraftModel) async throws {}
+
+    func deleteChild(childID: Int) async throws {}
 }
