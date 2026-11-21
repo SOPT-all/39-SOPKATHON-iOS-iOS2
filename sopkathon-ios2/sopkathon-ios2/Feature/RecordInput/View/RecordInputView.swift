@@ -8,8 +8,26 @@
 import SwiftUI
 
 struct RecordInputView: View {
+    @State private var viewModel: RecordInputViewModel
+
+    init(viewModel: RecordInputViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+
     var body: some View {
-        Text("기록 입력")
-            .typography(.subHeader2)
+        ScrollView {
+            MultiLineTextField(title: Title.content, text: $viewModel.content)
+                .padding(Metric.padding)
+        }
+    }
+}
+
+private extension RecordInputView {
+    enum Metric {
+        static let padding: CGFloat = 20
+    }
+
+    enum Title {
+        static let content = "기록 내용"
     }
 }

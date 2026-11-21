@@ -8,7 +8,7 @@
 enum Route: Hashable {
     case childRegister
     case childDetail(childID: Int)
-    case recordInput
+    case recordInput(content: String = "")
     case voiceInput
     case recordList(childID: Int)
     case recordEdit(recordID: Int)
