@@ -26,7 +26,7 @@ final class HomeViewModel {
         guard let home = try? await service.fetchHome() else { return }
         self.home = HomeModel(
             teacherName: home.teacherName,
-            children: home.children.shuffled(),
+            unrecordedChildren: home.unrecordedChildren.shuffled(),
             records: home.records.sorted { $0.recordedAt > $1.recordedAt }
         )
     }

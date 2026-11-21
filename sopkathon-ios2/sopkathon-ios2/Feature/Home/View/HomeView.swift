@@ -43,7 +43,7 @@ struct HomeView: View {
     }
 
     private var children: [HomeChildModel] {
-        viewModel.home?.children ?? []
+        viewModel.home?.unrecordedChildren ?? []
     }
 
     private var records: [HomeRecordModel] {
@@ -137,8 +137,8 @@ struct HomeView: View {
                 VStack(spacing: Metric.recordSpacing) {
                     ForEach(records) { record in
                         HomeRecordRow(
-                            childID: record.childID,
                             name: record.childName,
+                            colorID: record.colorID,
                             time: viewModel.timeText(for: record.recordedAt),
                             category: record.category
                         )

@@ -9,7 +9,7 @@ import Foundation
 
 struct HomeModel {
     let teacherName: String
-    let children: [HomeChildModel]
+    let unrecordedChildren: [HomeChildModel]
     let records: [HomeRecordModel]
 }
 
@@ -20,8 +20,8 @@ struct HomeChildModel: Identifiable {
 
 struct HomeRecordModel: Identifiable {
     let id: Int
-    let childID: Int
     let childName: String
+    let colorID: Int
     let category: CareRecordCategoryModel
     let recordedAt: Date
 }
