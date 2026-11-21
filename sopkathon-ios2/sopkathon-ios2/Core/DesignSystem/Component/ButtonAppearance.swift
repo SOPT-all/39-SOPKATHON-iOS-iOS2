@@ -25,17 +25,19 @@ enum ButtonAppearance {
         }
     }
 
-    func backgroundColor(isEnabled: Bool) -> Color {
+    func backgroundColor(isEnabled: Bool, isPressed: Bool) -> Color {
         guard isEnabled else { return Color(.systemGray5) }
 
+        let color: Color
         switch self {
         case .primary:
-            return .accentColor
+            color = .accentColor
         case .secondary:
-            return .clear
+            color = .clear
         case .destructive:
-            return Color(.systemRed).opacity(Opacity.destructiveBackground)
+            color = Color(.systemRed).opacity(Opacity.destructiveBackground)
         }
+        return isPressed ? color.opacity(Opacity.pressed) : color
     }
 
     func borderColor(isEnabled: Bool) -> Color {
@@ -52,4 +54,5 @@ enum ButtonAppearance {
 
 private enum Opacity {
     static let destructiveBackground: Double = 0.15
+    static let pressed: Double = 0.7
 }

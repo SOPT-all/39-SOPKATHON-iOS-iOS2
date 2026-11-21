@@ -10,17 +10,20 @@ import SwiftUI
 struct FullWidthButton: View {
     private let title: String
     private let appearance: ButtonAppearance
+    private let size: ButtonSize
     private let isEnabled: Bool
     private let action: () -> Void
 
     init(
         title: String,
         appearance: ButtonAppearance = .primary,
+        size: ButtonSize = .large,
         isEnabled: Bool = true,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.appearance = appearance
+        self.size = size
         self.isEnabled = isEnabled
         self.action = action
     }
@@ -28,28 +31,9 @@ struct FullWidthButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .typography(.body2)
-                .foregroundStyle(appearance.foregroundColor(isEnabled: isEnabled))
                 .frame(maxWidth: .infinity)
-                .frame(height: Metric.height)
-                .background(appearance.backgroundColor(isEnabled: isEnabled))
-                .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Metric.cornerRadius)
-                        .stroke(
-                            appearance.borderColor(isEnabled: isEnabled),
-                            lineWidth: Metric.borderWidth
-                        )
-                }
         }
+        .buttonStyle(AppButtonStyle(appearance: appearance, size: size))
         .disabled(!isEnabled)
-    }
-}
-
-private extension FullWidthButton {
-    enum Metric {
-        static let height: CGFloat = 52
-        static let cornerRadius: CGFloat = 12
-        static let borderWidth: CGFloat = 1
     }
 }
