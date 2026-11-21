@@ -10,6 +10,7 @@ import Observation
 @Observable
 final class AppRouter {
     var path: [Route] = []
+    private(set) var selectedTab: AppTab = .home
 
     func push(_ route: Route) {
         path.append(route)
@@ -22,5 +23,9 @@ final class AppRouter {
 
     func popToRoot() {
         path.removeAll()
+    }
+
+    func selectTab(_ tab: AppTab) {
+        selectedTab = tab
     }
 }

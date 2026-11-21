@@ -15,11 +15,58 @@ struct RootView: View {
         @Bindable var router = router
 
         NavigationStack(path: $router.path) {
-            HomeView()
+            tabContentView
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .safeAreaInset(edge: .bottom) {
+                    tabBarView
+                }
                 .navigationDestination(for: Route.self) { route in
                     destinationView(for: route)
                 }
         }
+    }
+
+    @ViewBuilder
+    private var tabContentView: some View {
+        switch router.selectedTab {
+        case .home:
+            HomeView()
+        case .briefing:
+            BriefingView(viewModel: BriefingViewModel(service: dependency.briefingService))
+        case .childList:
+            ChildListView()
+        }
+    }
+
+    private var tabBarView: some View {
+        HStack(spacing: 0) {
+            ForEach(AppTab.allCases, id: \.self) { tab in
+                tabItemView(tab)
+            }
+        }
+        .padding(.horizontal, Metric.tabBarInnerPadding)
+        .frame(height: Metric.tabBarHeight)
+        .background(Color.gray100)
+        .clipShape(Capsule())
+        .padding(.horizontal, Metric.tabBarOuterPadding)
+    }
+
+    private func tabItemView(_ tab: AppTab) -> some View {
+        Button {
+            router.selectTab(tab)
+        } label: {
+            VStack(spacing: Metric.tabItemSpacing) {
+                Image(systemName: tab.symbolName)
+                    .font(.system(size: Metric.tabIconSize))
+
+                Text(tab.title)
+                    .typography(.caption3)
+            }
+            .foregroundStyle(tab == router.selectedTab ? Color.baseBlack : Color.disabled200)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -33,20 +80,16 @@ struct RootView: View {
             RecordInputView(viewModel: RecordInputViewModel(content: content))
         case .voiceInput:
             VoiceInputView(viewModel: VoiceInputViewModel(service: dependency.voiceInputService))
-        case .recordList(let childID):
-            RecordListView(childID: childID)
-        case .recordEdit(let recordID):
-            RecordEditView(recordID: recordID)
-        case .briefing:
-            BriefingView(viewModel: BriefingViewModel(service: dependency.briefingService))
-        case .sendTarget:
-            SendTargetView()
-        case .sendConfirm:
-            SendConfirmView()
-        case .sendResult:
-            SendResultView()
-        case .sendHistory:
-            SendHistoryView()
         }
+    }
+}
+
+private extension RootView {
+    enum Metric {
+        static let tabBarHeight: CGFloat = 84
+        static let tabBarInnerPadding: CGFloat = 40
+        static let tabBarOuterPadding: CGFloat = 16
+        static let tabItemSpacing: CGFloat = 4
+        static let tabIconSize: CGFloat = 22
     }
 }

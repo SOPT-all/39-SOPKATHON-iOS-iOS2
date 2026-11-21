@@ -272,7 +272,7 @@ struct HomeView: View {
 
 ### 화면 등록과 이동: `App/Route.swift`, `App/RootView.swift`
 
-화면을 새로 만들면 `Route`에 case를 추가하고, `RootView`의 `destinationView(for:)`에서 그 화면을 만듭니다. ViewModel은 여기서 `AppDependency`의 Service를 넣어 만듭니다. 첫 화면인 `HomeView`는 `Route`에 넣지 않고 `NavigationStack` 안에 직접 둡니다.
+화면을 새로 만들면 `Route`에 case를 추가하고, `RootView`의 `destinationView(for:)`에서 그 화면을 만듭니다. ViewModel은 여기서 `AppDependency`의 Service를 넣어 만듭니다. 탭의 첫 화면(`HomeView`, `BriefingView`, `ChildListView`)은 `Route`에 넣지 않고 `RootView`의 `tabContentView`에 둡니다.
 
 ```swift
 enum Route: Hashable {
@@ -289,10 +289,25 @@ struct RootView: View {
         @Bindable var router = router
 
         NavigationStack(path: $router.path) {
-            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
+            tabContentView
+                .safeAreaInset(edge: .bottom) {
+                    tabBarView
+                }
                 .navigationDestination(for: Route.self) { route in
                     destinationView(for: route)
                 }
+        }
+    }
+
+    @ViewBuilder
+    private var tabContentView: some View {
+        switch router.selectedTab {
+        case .home:
+            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
+        case .briefing:
+            BriefingView()
+        case .childList:
+            ChildListView()
         }
     }
 
@@ -339,6 +354,8 @@ struct HomeView: View {
 ### 화면 이동
 
 - 화면 이동은 `AppRouter` 하나로 합니다. `push(_:)`로 들어가고, `pop()`으로 한 단계 돌아가고, `popToRoot()`로 첫 화면까지 돌아갑니다.
+- 하단 탭은 `App/AppTab.swift`의 `AppTab`(홈·브리핑·아이관리)으로 정하고, 탭을 바꿀 때는 `router.selectTab(_:)`을 호출합니다. 탭 바는 `RootView`에만 두고, `push`로 들어간 화면에서는 보이지 않습니다.
+- 탭의 첫 화면은 `Route`에 넣지 않습니다. 탭을 추가하면 `AppTab`에 case를 추가하고 `RootView`의 `tabContentView`에 화면을 둡니다.
 - 이동할 수 있는 화면은 모두 `App/Route.swift`의 `Route` enum에 case로 등록합니다. 화면에 넘길 값은 case의 연관값으로 넣고, 연관값에는 `Hashable`한 값(ID 등)만 넣습니다. Model이나 ViewModel을 통째로 넣지 않습니다.
 - `Route`의 case 이름은 화면 이름에서 `View`를 뺀 lowerCamelCase로 짓습니다. (`ChildDetailView` → `.childDetail`, `PostDetailView` → `.postDetail`)
 - case를 추가하면 `App/RootView.swift`의 `destinationView(for:)`에 그 화면을 만드는 코드를 같이 추가합니다.
