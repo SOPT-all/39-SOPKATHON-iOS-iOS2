@@ -36,7 +36,7 @@ speakids는 20대 및 신규 부임 어린이집 교사가 아이별 돌봄 내�
 
 | 음성 메모 | 워치 음성 주입 | 개별 문자 전송 | 아이 관리 |
 |---|---|---|---|
-|<video src="https://github.com/user-attachments/assets/db08ade0-6cd9-45f2-983d-d39d6d53ed7f">|<video src="https://github.com/user-attachments/assets/890c5c67-d6fc-4cc3-af93-d86b4e6998bd">|<video src="https://github.com/user-attachments/assets/1750d20d-381b-4392-84a8-64eb5faa7562">|<video src="https://github.com/user-attachments/assets/084dad72-c1d2-4192-b86e-1325dde25e50">|
+|<video src="https://github.com/user-attachments/assets/c73cdd1d-c3f5-41b3-9e56-5ee1ba98353e">|<video src="https://github.com/user-attachments/assets/9cf4c649-daa4-4b4a-8bfb-307815ad736d">|<video src="https://github.com/user-attachments/assets/d6fb9e9f-c9d2-4a42-85d0-240e769c70f6">|<video src="https://github.com/user-attachments/assets/084dad72-c1d2-4192-b86e-1325dde25e50">|
 
 <br>
 
