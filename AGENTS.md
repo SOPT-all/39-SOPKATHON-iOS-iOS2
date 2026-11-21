@@ -427,6 +427,7 @@ struct HomeView: View {
 - 한 번만 쓰이는 View를 미리 `struct`로 빼지 않습니다. 두 번째로 쓰이게 될 때 분리합니다.
 - `body`가 40줄을 넘으면 `private var` 하위 View로 나눕니다. 이때도 `struct`로 빼지 않습니다.
 - 새로 만들기 전에 `Core/DesignSystem`과 같은 기능 폴더에 같은 역할의 컴포넌트가 있는지 먼저 찾아봅니다.
+- 공통 컴포넌트는 `Core/DesignSystem/Component` 아래 종류별 폴더에 둡니다: `Button`(버튼), `Input`(입력 필드·검색), `Overlay`(바텀시트·모달), `Chip`(칩·태그). 맞는 폴더가 없으면 새 폴더를 만듭니다.
 
 ## 8. 코드 스타일
 
