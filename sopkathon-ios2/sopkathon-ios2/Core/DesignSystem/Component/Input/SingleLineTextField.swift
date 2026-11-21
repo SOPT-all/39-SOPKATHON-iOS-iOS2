@@ -39,11 +39,15 @@ struct SingleLineTextField: View {
     var body: some View {
         InputFieldContainer(
             title: title,
-            errorMessage: isFocused ? nil : errorMessage,
-            isFocused: isFocused
+            errorMessage: isFocused ? nil : errorMessage
         ) {
-            TextField(placeholder, text: $text)
-                .typography(.body5)
+            TextField(
+                "",
+                text: $text,
+                prompt: Text(placeholder).foregroundStyle(.disabled200)
+            )
+                .font(Typography.body5.font)
+                .foregroundStyle(.textBlack)
                 .keyboardType(keyboardType)
                 .focused($isFocused)
                 .frame(height: Metric.height)
@@ -72,5 +76,5 @@ struct SingleLineTextField: View {
 }
 
 private enum Metric {
-    static let height: CGFloat = 52
+    static let height: CGFloat = 43
 }

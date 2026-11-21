@@ -139,7 +139,12 @@ struct RootView: View {
         case .childDetail(let childID):
             ChildDetailView(childID: childID)
         case .recordInput:
-            RecordInputView(viewModel: RecordInputViewModel())
+            RecordInputView(
+                viewModel: RecordInputViewModel(
+                    childService: dependency.childService,
+                    careRecordService: dependency.careRecordService
+                )
+            )
         }
     }
 

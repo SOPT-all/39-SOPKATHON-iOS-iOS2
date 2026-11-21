@@ -23,10 +23,10 @@ struct CareRecordDraftModel {
 
 enum CareRecordCategoryModel: CaseIterable {
     case feeding
-    case meal
-    case sleep
-    case diaper
     case play
+    case meal
+    case diaper
+    case sleep
     case health
 
     var title: String {
