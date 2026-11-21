@@ -24,7 +24,7 @@ xcodebuild -project sopkathon-ios2/sopkathon-ios2.xcodeproj -scheme sopkathon-io
 
 ```
 sopkathon-ios2/sopkathon-ios2/
-├─ App/                      앱 진입점, 루트 화면, AppDependency
+├─ App/                      앱 진입점, RootView, AppDependency, AppRouter, Route
 ├─ Core/
 │  ├─ Network/               공통 네트워크 레이어 (6개 파일 고정)
 │  ├─ DesignSystem/          색, 폰트, 두 기능 이상에서 쓰는 공통 컴포넌트
@@ -319,16 +319,60 @@ struct HomeView: View {
 }
 ```
 
-### 화면을 띄우는 쪽
+### 화면 등록과 이동: `App/Route.swift`, `App/RootView.swift`
 
-`HomeView`를 띄우는 상위 View가 `AppDependency`에서 Service를 꺼내 ViewModel을 만들어 넘깁니다.
+화면을 새로 만들면 `Route`에 case를 추가하고, `RootView`의 `destinationView(for:)`에서 그 화면을 만듭니다. ViewModel은 여기서 `AppDependency`의 Service를 넣어 만듭니다.
 
 ```swift
-struct ContentView: View {
+enum Route: Hashable {
+    case home
+    case postDetail(postID: Int)
+}
+```
+
+```swift
+struct RootView: View {
+    @Environment(AppRouter.self) private var router
     @Environment(AppDependency.self) private var dependency
 
     var body: some View {
-        HomeView(viewModel: HomeViewModel(service: dependency.homeService))
+        @Bindable var router = router
+
+        NavigationStack(path: $router.path) {
+            ContentView()
+                .navigationDestination(for: Route.self) { route in
+                    destinationView(for: route)
+                }
+        }
+    }
+
+    @ViewBuilder
+    private func destinationView(for route: Route) -> some View {
+        switch route {
+        case .home:
+            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
+        case .postDetail(let postID):
+            PostDetailView(
+                viewModel: PostDetailViewModel(
+                    postID: postID,
+                    service: dependency.postDetailService
+                )
+            )
+        }
+    }
+}
+```
+
+화면에서는 `AppRouter`로 이동합니다.
+
+```swift
+struct HomeView: View {
+    @Environment(AppRouter.self) private var router
+
+    private func postRowView(_ post: HomePostModel) -> some View {
+        Button(post.title) {
+            router.push(.postDetail(postID: post.id))
+        }
     }
 }
 ```
@@ -341,8 +385,19 @@ struct ContentView: View {
 - Service와 ViewModel의 `init`에 기본값을 주지 않습니다. (`= BaseService.shared`, `= HomeService()` 금지)
 - 실제 구현과 Mock 중 무엇을 쓸지는 앱 루트의 `AppDependency(mode:)` 한 곳에서 정합니다. `.live`는 실제 Service, `.mock`은 Mock Service를 씁니다.
 - 기능마다 `<기능>Service.swift` 맨 아래에 `extension AppDependency`를 두고, `mode`에 따라 실제 Service나 Mock Service를 돌려주는 프로퍼티를 만듭니다. `App/AppDependency.swift`는 수정하지 않습니다.
-- View는 `@Environment(AppDependency.self)`로 꺼낸 Service로 하위 화면의 ViewModel을 만들어 넘깁니다. View가 Service의 메서드를 직접 호출하지 않습니다.
+- ViewModel은 `RootView`의 `destinationView(for:)`에서 `AppDependency`의 Service를 넣어 만듭니다. 기능 화면은 `AppDependency`를 직접 꺼내 쓰지 않습니다.
 - `mode: .mock`으로 바꾼 채 커밋하지 않습니다.
+
+### 화면 이동
+
+- 화면 이동은 `AppRouter` 하나로 합니다. `push(_:)`로 들어가고, `pop()`으로 한 단계 돌아가고, `popToRoot()`로 첫 화면까지 돌아갑니다.
+- 이동할 수 있는 화면은 모두 `App/Route.swift`의 `Route` enum에 case로 등록합니다. 화면에 넘길 값은 case의 연관값으로 넣고, 연관값에는 `Hashable`한 값(ID 등)만 넣습니다. Model이나 ViewModel을 통째로 넣지 않습니다.
+- `Route`의 case 이름은 화면 이름에서 `View`를 뺀 lowerCamelCase로 짓습니다. (`HomeView` → `.home`, `PostDetailView` → `.postDetail`)
+- case를 추가하면 `App/RootView.swift`의 `destinationView(for:)`에 그 화면을 만드는 코드를 같이 추가합니다.
+- `NavigationStack`과 `navigationDestination`은 `RootView` 한 곳에만 둡니다. 기능 화면에서 `NavigationStack`을 새로 만들지 않습니다.
+- 기능 화면에서 `NavigationLink`를 쓰지 않습니다. `Button`에서 `router.push(_:)`를 호출합니다.
+- 화면 이동은 View에서 합니다. ViewModel이 `AppRouter`를 갖지 않습니다.
+- `App/AppRouter.swift`는 수정하지 않습니다.
 
 ### View
 
@@ -606,3 +661,4 @@ API 연결 작업은 `feat`를 사용하고, 이슈와 PR에 `API` 라벨을 추
 5. 헤더 주석이 있고, 그 외 주석과 `#Preview`는 없는가
 6. 화면을 건드렸다면 10번의 세 기종에서 실행해 확인했는가
 7. `BaseService.shared`를 직접 쓰거나 `init`에 기본값을 준 곳이 없는가
+8. 새 화면을 `Route`와 `RootView`에 등록했고, `NavigationLink` 대신 `AppRouter`로 이동하는가

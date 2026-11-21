@@ -489,13 +489,13 @@ struct HomeView: View {
 }
 ```
 
-View는 ViewModel을 직접 만들지 않고 `init`으로 받습니다. 화면을 띄우는 상위 View가 `AppDependency`에서 Service를 꺼내 ViewModel을 만들어 넘깁니다.
+View는 ViewModel을 직접 만들지 않고 `init`으로 받습니다. `App/RootView.swift`의 `destinationView(for:)`가 `AppDependency`에서 Service를 꺼내 ViewModel을 만들어 넘깁니다. 화면 등록과 이동 방법은 `AGENTS.md`의 "화면 이동"을 확인하세요.
 
 ```swift
-struct ContentView: View {
-    @Environment(AppDependency.self) private var dependency
-
-    var body: some View {
+@ViewBuilder
+private func destinationView(for route: Route) -> some View {
+    switch route {
+    case .home:
         HomeView(viewModel: HomeViewModel(service: dependency.homeService))
     }
 }
