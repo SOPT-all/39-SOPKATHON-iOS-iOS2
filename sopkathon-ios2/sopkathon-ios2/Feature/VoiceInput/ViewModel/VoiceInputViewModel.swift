@@ -10,11 +10,11 @@ import Observation
 
 @Observable
 final class VoiceInputViewModel {
-    let teacherName: String
     private(set) var audioLevel: Float = 0
 
     private var transcript = ""
     private var children: [ChildModel] = []
+    private var childrenTask: Task<Void, Never>?
     private var transcriptTask: Task<Void, Never>?
     private var audioLevelTask: Task<Void, Never>?
 
@@ -23,22 +23,27 @@ final class VoiceInputViewModel {
     private let childService: any ChildServiceProtocol
 
     init(
-        teacherName: String,
         service: any VoiceInputServiceProtocol,
         careRecordService: any CareRecordServiceProtocol,
         childService: any ChildServiceProtocol
     ) {
-        self.teacherName = teacherName
         self.service = service
         self.careRecordService = careRecordService
         self.childService = childService
     }
 
+    func fetchChildren() async {
+        guard let children = try? await childService.fetchChildren(keyword: nil) else { return }
+        self.children = children
+    }
+
     func startRecording() async {
-        async let fetchedChildren = fetchChildren()
+        transcript = ""
+        childrenTask = Task {
+            await fetchChildren()
+        }
 
         guard await service.requestAuthorization(), !Task.isCancelled else { return }
-        children = await fetchedChildren
         guard let recognition = try? service.startRecognition(
             contextualStrings: children.flatMap(\.spokenNames)
         ) else { return }
@@ -69,35 +74,16 @@ final class VoiceInputViewModel {
 
         let text = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
-        if children.isEmpty {
-            children = (try? await childService.fetchChildren(keyword: nil)) ?? []
-        }
+        await childrenTask?.value
         _ = await careRecordService.createCareRecords(
             fromSpokenText: text,
             mentioning: children
         )
     }
-
-    private func fetchChildren() async -> [ChildModel] {
-        await withTaskGroup(of: [ChildModel]?.self) { group in
-            group.addTask { [childService] in
-                try? await childService.fetchChildren(keyword: nil)
-            }
-            group.addTask {
-                try? await Task.sleep(for: Limit.childNamesTimeout)
-                return nil
-            }
-
-            let children = await group.next() ?? nil
-            group.cancelAll()
-            return children ?? []
-        }
-    }
 }
 
 private extension VoiceInputViewModel {
     enum Limit {
-        static let childNamesTimeout: Duration = .milliseconds(700)
         static let audioLevelDecay: Float = 0.85
     }
 }
