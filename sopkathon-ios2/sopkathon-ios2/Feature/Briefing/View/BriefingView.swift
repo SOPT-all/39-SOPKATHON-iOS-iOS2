@@ -2,7 +2,7 @@
 //  BriefingView.swift
 //  sopkathon-ios2
 //
-//  Created by h2e on 11/21/26.
+//  Created by Seoyoung Lee on 11/21/26.
 //
 
 import SwiftUI

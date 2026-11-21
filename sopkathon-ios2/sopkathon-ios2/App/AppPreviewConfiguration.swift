@@ -2,7 +2,7 @@
 //  AppPreviewConfiguration.swift
 //  sopkathon-ios2
 //
-//  Created by h2e on 11/22/26.
+//  Created by Seoyoung Lee on 11/22/26.
 //
 
 import Foundation
