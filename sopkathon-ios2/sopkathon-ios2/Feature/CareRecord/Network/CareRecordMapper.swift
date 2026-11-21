@@ -26,7 +26,9 @@ enum CareRecordMapper {
             childID: dto.childID,
             childName: dto.childName,
             category: CareRecordCategoryModel.allCases.first { $0.serverValue == dto.category },
-            recordedAt: recordedAtFormatter.date(from: dto.recordedAt)
+            recordedAt: recordedAtFormatter.date(
+                from: String(dto.recordedAt.prefix(Format.recordedAt.count - Format.quoteCount))
+            )
         )
     }
 
@@ -42,6 +44,7 @@ enum CareRecordMapper {
 private extension CareRecordMapper {
     enum Format {
         static let recordedAt = "yyyy-MM-dd'T'HH:mm:ss"
+        static let quoteCount = 2
         static let localeIdentifier = "en_US_POSIX"
         static let timeZoneIdentifier = "Asia/Seoul"
     }
