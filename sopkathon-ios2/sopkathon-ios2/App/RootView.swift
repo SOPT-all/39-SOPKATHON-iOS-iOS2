@@ -38,7 +38,7 @@ struct RootView: View {
         case .recordEdit(let recordID):
             RecordEditView(recordID: recordID)
         case .briefing:
-            BriefingView()
+            BriefingView(viewModel: BriefingViewModel(service: dependency.briefingService))
         case .sendTarget:
             SendTargetView()
         case .sendConfirm:
