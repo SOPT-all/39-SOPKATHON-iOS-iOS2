@@ -23,6 +23,7 @@ struct ChildDetailView: View {
             ScrollView {
                 ChildFormView(
                     childName: $viewModel.childName,
+                    birthDate: $viewModel.birthDate,
                     gender: $viewModel.gender,
                     parentName: $viewModel.parentName,
                     parentPhoneNumber: $viewModel.parentPhoneNumber,
@@ -42,7 +43,10 @@ struct ChildDetailView: View {
 
     private var submitButtonView: some View {
         FullWidthButton(title: Title.submit, isEnabled: viewModel.canSubmit) {
-            router.pop()
+            Task {
+                guard await viewModel.updateChild() else { return }
+                router.pop()
+            }
         }
         .padding(.horizontal, Metric.horizontalPadding)
         .padding(.vertical, Metric.buttonVerticalPadding)

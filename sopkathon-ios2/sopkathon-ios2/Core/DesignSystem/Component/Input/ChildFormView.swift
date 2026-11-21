@@ -9,26 +9,31 @@ import SwiftUI
 
 struct ChildFormView: View {
     @Binding private var childName: String
-    @Binding private var gender: String?
+    @Binding private var birthDate: Date?
+    @Binding private var gender: ChildGenderModel?
     @Binding private var parentName: String
     @Binding private var parentPhoneNumber: String
-    @Binding private var relationship: String?
+    @Binding private var relationship: ChildRelationshipModel?
     @Binding private var notes: String
 
     @FocusState private var focusedField: Field?
+    @State private var isBirthDatePickerPresented = false
+    @State private var selectedBirthDate = Date()
 
     private let isValidParentPhoneNumber: Bool
 
     init(
         childName: Binding<String>,
-        gender: Binding<String?>,
+        birthDate: Binding<Date?>,
+        gender: Binding<ChildGenderModel?>,
         parentName: Binding<String>,
         parentPhoneNumber: Binding<String>,
-        relationship: Binding<String?>,
+        relationship: Binding<ChildRelationshipModel?>,
         notes: Binding<String>,
         isValidParentPhoneNumber: Bool
     ) {
         _childName = childName
+        _birthDate = birthDate
         _gender = gender
         _parentName = parentName
         _parentPhoneNumber = parentPhoneNumber
@@ -66,7 +71,8 @@ struct ChildFormView: View {
             dropdownFieldView(
                 title: Title.gender,
                 selection: $gender,
-                options: Option.genders
+                options: ChildGenderModel.allCases,
+                optionTitle: \.title
             )
         }
         .padding(.horizontal, Metric.horizontalPadding)
@@ -86,7 +92,8 @@ struct ChildFormView: View {
             dropdownFieldView(
                 title: Title.relationship,
                 selection: $relationship,
-                options: Option.relationships
+                options: ChildRelationshipModel.allCases,
+                optionTitle: \.title
             )
             .padding(.bottom, Metric.notesTopPadding - Metric.fieldSpacing)
 
@@ -97,18 +104,59 @@ struct ChildFormView: View {
 
     private var birthDateFieldView: some View {
         labeledView(title: Title.birthDate) {
-            HStack {
-                Text(Title.placeholder)
-                    .typography(.body5)
-                    .foregroundStyle(Color.disabled200)
+            Button {
+                focusedField = nil
+                selectedBirthDate = birthDate ?? Date()
+                isBirthDatePickerPresented = true
+            } label: {
+                HStack {
+                    birthDateTextView
 
-                Spacer()
+                    Spacer()
 
-                chevronView
+                    chevronView
+                }
+                .padding(.horizontal, Metric.fieldHorizontalPadding)
+                .frame(height: Metric.fieldHeight)
+                .background(Color.gray50, in: fieldShape)
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, Metric.fieldHorizontalPadding)
-            .frame(height: Metric.fieldHeight)
-            .background(Color.gray50, in: fieldShape)
+            .buttonStyle(.plain)
+        }
+        .bottomSheet(isPresented: $isBirthDatePickerPresented, title: Title.birthDate) {
+            birthDatePickerView
+        }
+    }
+
+    @ViewBuilder
+    private var birthDateTextView: some View {
+        if let birthDate {
+            Text(birthDate.formatted(Format.birthDate))
+                .typography(.body5)
+                .foregroundStyle(Color.textBlack)
+        } else {
+            Text(Title.placeholder)
+                .typography(.body5)
+                .foregroundStyle(Color.disabled200)
+        }
+    }
+
+    private var birthDatePickerView: some View {
+        VStack(spacing: Metric.pickerSpacing) {
+            DatePicker(
+                "",
+                selection: $selectedBirthDate,
+                in: ...Date(),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.wheel)
+            .labelsHidden()
+            .environment(\.locale, Format.locale)
+
+            FullWidthButton(title: Title.confirm) {
+                birthDate = selectedBirthDate
+                isBirthDatePickerPresented = false
+            }
         }
     }
 
@@ -195,14 +243,15 @@ struct ChildFormView: View {
         }
     }
 
-    private func dropdownFieldView(
+    private func dropdownFieldView<Option: Hashable>(
         title: String,
-        selection: Binding<String?>,
-        options: [String]
+        selection: Binding<Option?>,
+        options: [Option],
+        optionTitle: @escaping (Option) -> String
     ) -> some View {
         labeledView(title: title) {
             HStack {
-                Text(selection.wrappedValue ?? Title.placeholder)
+                Text(selection.wrappedValue.map(optionTitle) ?? Title.placeholder)
                     .typography(.body5)
                     .foregroundStyle(
                         selection.wrappedValue == nil ? Color.disabled200 : Color.textBlack
@@ -218,7 +267,7 @@ struct ChildFormView: View {
             .overlay {
                 Menu {
                     ForEach(options, id: \.self) { option in
-                        Button(option) {
+                        Button(optionTitle(option)) {
                             selection.wrappedValue = option
                         }
                     }
@@ -284,6 +333,7 @@ private extension ChildFormView {
         static let notesCornerRadius: CGFloat = 4
         static let notesInnerPadding: CGFloat = 8
         static let borderWidth: CGFloat = 1
+        static let pickerSpacing: CGFloat = 16
     }
 
     enum Title {
@@ -298,10 +348,11 @@ private extension ChildFormView {
         static let placeholder = "Select…"
         static let phoneNumberPlaceholder = "010-0000-0000"
         static let phoneNumberError = "휴대폰 번호 형식을 확인해 주세요"
+        static let confirm = "선택 완료"
     }
 
-    enum Option {
-        static let genders = ["남자", "여자"]
-        static let relationships = ["엄마", "아빠", "보호자"]
+    enum Format {
+        static let locale = Locale(identifier: "ko_KR")
+        static let birthDate = Date.FormatStyle(date: .long, time: .omitted, locale: locale)
     }
 }
