@@ -45,7 +45,7 @@ struct VoiceInputView: View {
             Text(Title.status)
                 .font(Typography.caption1.font)
 
-            Text(Title.listening)
+            Text("\(viewModel.teacherName)\(Title.listeningSuffix)")
                 .font(Typography.header3.font)
         }
         .foregroundStyle(.textBlack)
@@ -117,7 +117,7 @@ private extension VoiceInputView {
 
     enum Title {
         static let status = "음성 인식중"
-        static let listening = "선생님의 기록을 듣고있어요."
+        static let listeningSuffix = "님의 기록을 듣고있어요."
         static let cancel = "중단"
         static let complete = "완료"
     }

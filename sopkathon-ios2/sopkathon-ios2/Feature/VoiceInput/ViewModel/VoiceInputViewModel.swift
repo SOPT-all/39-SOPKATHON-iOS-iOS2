@@ -10,6 +10,7 @@ import Observation
 
 @Observable
 final class VoiceInputViewModel {
+    let teacherName: String
     private(set) var audioLevel: Float = 0
 
     private var transcript = ""
@@ -22,10 +23,12 @@ final class VoiceInputViewModel {
     private let childService: any ChildServiceProtocol
 
     init(
+        teacherName: String,
         service: any VoiceInputServiceProtocol,
         careRecordService: any CareRecordServiceProtocol,
         childService: any ChildServiceProtocol
     ) {
+        self.teacherName = teacherName
         self.service = service
         self.careRecordService = careRecordService
         self.childService = childService
