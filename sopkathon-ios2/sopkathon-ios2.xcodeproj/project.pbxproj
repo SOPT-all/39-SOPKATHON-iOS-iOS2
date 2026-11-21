@@ -20,9 +20,6 @@
 		940CF22030AF390700CB7472 /* Exceptions for "sopkathon-ios2" folder in "sopkathon-ios2" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Core/DesignSystem/.gitkeep,
-				Core/Extension/.gitkeep,
-				Feature/.gitkeep,
 				Resource/Info.plist,
 			);
 			target = 940CF21130AF390600CB7472 /* sopkathon-ios2 */;
