@@ -14,7 +14,7 @@ struct RootView: View {
         @Bindable var router = router
 
         NavigationStack(path: $router.path) {
-            ContentView()
+            HomeView()
                 .navigationDestination(for: Route.self) { route in
                     destinationView(for: route)
                 }
@@ -23,5 +23,29 @@ struct RootView: View {
 
     @ViewBuilder
     private func destinationView(for route: Route) -> some View {
+        switch route {
+        case .childRegister:
+            ChildRegisterView()
+        case .childDetail(let childID):
+            ChildDetailView(childID: childID)
+        case .recordInput:
+            RecordInputView()
+        case .voiceInput:
+            VoiceInputView()
+        case .recordList(let childID):
+            RecordListView(childID: childID)
+        case .recordEdit(let recordID):
+            RecordEditView(recordID: recordID)
+        case .briefing:
+            BriefingView()
+        case .sendTarget:
+            SendTargetView()
+        case .sendConfirm:
+            SendConfirmView()
+        case .sendResult:
+            SendResultView()
+        case .sendHistory:
+            SendHistoryView()
+        }
     }
 }
