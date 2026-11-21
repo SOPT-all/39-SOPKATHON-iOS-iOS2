@@ -11,6 +11,7 @@ struct RootView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AppDependency.self) private var dependency
     @State private var sheetDragOffset: CGFloat = 0
+    @State private var voiceInputViewModel: VoiceInputViewModel?
 
     var body: some View {
         @Bindable var router = router
@@ -38,6 +39,7 @@ struct RootView: View {
             if AppPreviewConfiguration.isBriefingEnabled {
                 router.selectTab(.briefing)
             }
+            await prepareVoiceInput()
         }
     }
 
@@ -164,15 +166,20 @@ struct RootView: View {
     private func sheetView(for sheet: AppSheet) -> some View {
         switch sheet {
         case .voiceInput(let teacherName):
-            VoiceInputView(
-                viewModel: VoiceInputViewModel(
-                    teacherName: teacherName,
-                    service: dependency.voiceInputService,
-                    careRecordService: dependency.careRecordService,
-                    childService: dependency.childService
-                )
-            )
+            if let voiceInputViewModel {
+                VoiceInputView(teacherName: teacherName, viewModel: voiceInputViewModel)
+            }
         }
+    }
+
+    private func prepareVoiceInput() async {
+        let viewModel = VoiceInputViewModel(
+            service: dependency.voiceInputService,
+            careRecordService: dependency.careRecordService,
+            childService: dependency.childService
+        )
+        voiceInputViewModel = viewModel
+        await viewModel.fetchChildren()
     }
 }
 
