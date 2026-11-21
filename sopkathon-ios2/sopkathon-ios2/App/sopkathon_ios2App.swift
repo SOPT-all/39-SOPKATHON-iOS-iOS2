@@ -11,12 +11,29 @@ import SwiftUI
 struct sopkathon_ios2App: App {
     @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
     @State private var router = AppRouter()
+    @State private var isSplashFinished = false
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environment(dependency)
-                .environment(router)
+            ZStack {
+                RootView()
+                    .environment(dependency)
+                    .environment(router)
+
+                if !isSplashFinished {
+                    SplashView {
+                        withAnimation(.easeOut(duration: Metric.splashFadeDuration)) {
+                            isSplashFinished = true
+                        }
+                    }
+                    .transition(.opacity)
+                    .zIndex(1)
+                }
+            }
         }
     }
+}
+
+private enum Metric {
+    static let splashFadeDuration: Double = 0.3
 }
