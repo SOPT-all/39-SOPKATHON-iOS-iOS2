@@ -11,6 +11,7 @@ import Observation
 @Observable
 final class BriefingViewModel {
     private(set) var briefing: BriefingModel?
+    private(set) var generatingKidID: Int?
 
     private let service: any BriefingServiceProtocol
 
@@ -22,6 +23,18 @@ final class BriefingViewModel {
         let dateString = formattedDate(date)
         guard let briefing = try? await service.fetchDailyBriefings(date: dateString) else { return }
         self.briefing = briefing
+    }
+
+    func createDailyBriefing(kidID: Int, for date: Date) async {
+        guard generatingKidID == nil else { return }
+        generatingKidID = kidID
+        defer { generatingKidID = nil }
+
+        let dateString = formattedDate(date)
+        guard (try? await service.createDailyBriefing(kidID: kidID, date: dateString)) != nil else {
+            return
+        }
+        await fetchDailyBriefings(for: date)
     }
 
     private func formattedDate(_ date: Date) -> String {
