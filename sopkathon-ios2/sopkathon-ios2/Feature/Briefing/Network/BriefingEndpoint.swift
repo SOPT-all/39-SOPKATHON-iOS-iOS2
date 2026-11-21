@@ -9,7 +9,7 @@ import Foundation
 
 enum BriefingEndpoint {
     case fetchDailyBriefings(date: String)
-    case createDailyBriefing
+    case createDailyBriefing(CreateBriefingRequestDTO)
     case updateDailyBriefing(briefingID: Int)
 }
 
@@ -40,6 +40,15 @@ extension BriefingEndpoint: Endpoint {
             return [URLQueryItem(name: "date", value: date)]
         default:
             return []
+        }
+    }
+
+    var body: (any Encodable)? {
+        switch self {
+        case .createDailyBriefing(let request):
+            return request
+        default:
+            return nil
         }
     }
 }
