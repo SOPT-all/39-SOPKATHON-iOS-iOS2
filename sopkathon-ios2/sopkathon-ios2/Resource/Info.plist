@@ -4,10 +4,6 @@
 <dict>
 	<key>BASE_URL</key>
 	<string>$(BASE_URL)</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>음성으로 돌봄 기록을 남기기 위해 마이크를 사용합니다.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>말한 내용을 글로 바꿔 돌봄 기록으로 저장하기 위해 음성 인식을 사용합니다.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Pretendard-Regular.otf</string>
@@ -15,7 +11,5 @@
 		<string>Pretendard-SemiBold.otf</string>
 		<string>Pretendard-Bold.otf</string>
 	</array>
-	<key>UIUserInterfaceStyle</key>
-	<string>Light</string>
 </dict>
 </plist>
