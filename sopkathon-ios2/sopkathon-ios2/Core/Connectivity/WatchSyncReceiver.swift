@@ -30,6 +30,10 @@ final class WatchSyncReceiver: NSObject {
         self.notificationService = notificationService
     }
 
+    func markCareRecordSaved() {
+        careRecordSavedCount += 1
+    }
+
     func activate() {
         guard WCSession.isSupported() else { return }
 
@@ -49,7 +53,7 @@ final class WatchSyncReceiver: NSObject {
             return
         }
 
-        careRecordSavedCount += 1
+        markCareRecordSaved()
         await notificationService.sendNotification(
             title: Message.savedTitle,
             body: makeSavedBody(of: records)
