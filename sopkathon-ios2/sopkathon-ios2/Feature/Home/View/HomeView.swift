@@ -80,6 +80,7 @@ struct HomeView: View {
             Text("\(viewModel.home?.teacherName ?? "") 선생님 반갑습니다")
                 .typography(.header1)
                 .foregroundStyle(.textBlack)
+                .skeleton(!viewModel.hasFetched)
                 .padding(.top, Metric.greetingTopPadding)
         }
     }
@@ -105,8 +106,18 @@ struct HomeView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Metric.cardSpacing) {
-                    ForEach(children) { child in
-                        ProfileCard(childID: child.id, name: child.name, size: .large)
+                    if viewModel.hasFetched {
+                        ForEach(children) { child in
+                            ProfileCard(childID: child.id, name: child.name, size: .large)
+                        }
+                    } else {
+                        ForEach(0..<Metric.skeletonChildCount, id: \.self) { _ in
+                            SkeletonBox(
+                                width: ProfileCardSize.large.length,
+                                height: ProfileCardSize.large.length,
+                                cornerRadius: ProfileCardSize.large.cornerRadius
+                            )
+                        }
                     }
                 }
             }
@@ -135,13 +146,19 @@ struct HomeView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: Metric.recordSpacing) {
-                    ForEach(records) { record in
-                        HomeRecordRow(
-                            name: record.childName,
-                            colorID: record.colorID,
-                            time: viewModel.timeText(for: record.recordedAt),
-                            category: record.category
-                        )
+                    if viewModel.hasFetched {
+                        ForEach(records) { record in
+                            HomeRecordRow(
+                                name: record.childName,
+                                colorID: record.colorID,
+                                time: viewModel.timeText(for: record.recordedAt),
+                                category: record.category
+                            )
+                        }
+                    } else {
+                        ForEach(0..<Metric.skeletonRecordCount, id: \.self) { _ in
+                            recordSkeletonRowView
+                        }
                     }
                 }
                 .padding(.horizontal, Metric.recordHorizontalPadding)
@@ -155,6 +172,26 @@ struct HomeView: View {
                 color: .baseBlack.opacity(Metric.recordShadowOpacity),
                 radius: Metric.recordShadowRadius
             )
+        }
+    }
+
+    private var recordSkeletonRowView: some View {
+        HStack(spacing: Metric.skeletonRowSpacing) {
+            SkeletonBox(
+                width: ProfileCardSize.small.length,
+                height: ProfileCardSize.small.length,
+                cornerRadius: ProfileCardSize.small.cornerRadius
+            )
+
+            VStack(alignment: .leading, spacing: Metric.skeletonLineSpacing) {
+                SkeletonBox(width: Metric.skeletonNameWidth, height: Metric.skeletonLineHeight)
+
+                SkeletonBox(width: Metric.skeletonTimeWidth, height: Metric.skeletonLineHeight)
+            }
+
+            Spacer()
+
+            SkeletonBox(width: Metric.skeletonLabelWidth, height: Metric.skeletonLabelHeight)
         }
     }
 
@@ -220,5 +257,14 @@ private extension HomeView {
         static let recordShadowRadius: CGFloat = 7.5
         static let shortcutHorizontalPadding: CGFloat = 15
         static let shortcutHeight: CGFloat = 70
+        static let skeletonChildCount = 4
+        static let skeletonRecordCount = 3
+        static let skeletonRowSpacing: CGFloat = 8
+        static let skeletonLineSpacing: CGFloat = 6
+        static let skeletonLineHeight: CGFloat = 14
+        static let skeletonNameWidth: CGFloat = 56
+        static let skeletonTimeWidth: CGFloat = 84
+        static let skeletonLabelWidth: CGFloat = 64
+        static let skeletonLabelHeight: CGFloat = 26
     }
 }

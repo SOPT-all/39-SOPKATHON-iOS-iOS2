@@ -11,6 +11,7 @@ import Observation
 @Observable
 final class HomeViewModel {
     private(set) var home: HomeModel?
+    private(set) var hasFetched = false
 
     private let service: any HomeServiceProtocol
 
@@ -23,6 +24,8 @@ final class HomeViewModel {
     }
 
     func fetchHome() async {
+        defer { hasFetched = true }
+
         guard let home = try? await service.fetchHome() else { return }
         self.home = HomeModel(
             teacherName: home.teacherName,

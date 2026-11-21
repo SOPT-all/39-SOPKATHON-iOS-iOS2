@@ -108,6 +108,7 @@ struct BriefingView: View {
             (Text("기록한 아이 ").font(Typography.caption1.font)
                 + Text("\(viewModel.briefing?.recordedKidNames.count ?? 0)명")
                     .font(Typography.body2.font))
+                .skeleton(!viewModel.hasFetched)
         }
         .foregroundStyle(.textBlack)
         .padding(.horizontal, 24)
@@ -118,18 +119,28 @@ struct BriefingView: View {
     private var profileSelectionView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(viewModel.briefing?.kids ?? []) { kid in
-                    Button {
-                        selectedKidID = kid.id
-                        instruction = ""
-                    } label: {
-                        BriefingCompletedProfileView(
-                            kid: kid,
-                            size: .medium,
-                            isCompleted: viewModel.isSent(kidID: kid.id)
+                if viewModel.hasFetched {
+                    ForEach(viewModel.briefing?.kids ?? []) { kid in
+                        Button {
+                            selectedKidID = kid.id
+                            instruction = ""
+                        } label: {
+                            BriefingCompletedProfileView(
+                                kid: kid,
+                                size: .medium,
+                                isCompleted: viewModel.isSent(kidID: kid.id)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } else {
+                    ForEach(0..<Metric.skeletonProfileCount, id: \.self) { _ in
+                        SkeletonBox(
+                            width: ProfileCardSize.medium.length,
+                            height: ProfileCardSize.medium.length,
+                            cornerRadius: ProfileCardSize.medium.cornerRadius
                         )
                     }
-                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 21)
@@ -167,7 +178,36 @@ struct BriefingView: View {
             .padding(.top, 25)
             .padding(.bottom, 30)
             .frame(maxWidth: .infinity, alignment: .leading)
+        } else if !viewModel.hasFetched {
+            childDetailsSkeletonView
         }
+    }
+
+    private var childDetailsSkeletonView: some View {
+        VStack(alignment: .leading, spacing: Metric.skeletonSectionSpacing) {
+            HStack(spacing: 20) {
+                SkeletonBox(
+                    width: ProfileCardSize.large.length,
+                    height: ProfileCardSize.large.length,
+                    cornerRadius: ProfileCardSize.large.cornerRadius
+                )
+
+                VStack(alignment: .leading, spacing: Metric.skeletonLineSpacing) {
+                    SkeletonBox(width: Metric.skeletonNameWidth, height: Metric.skeletonLineHeight)
+
+                    SkeletonBox(width: Metric.skeletonCountWidth, height: Metric.skeletonLineHeight)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: Metric.skeletonLineSpacing) {
+                ForEach(0..<Metric.skeletonSummaryCount, id: \.self) { _ in
+                    SkeletonBox(height: Metric.skeletonSummaryHeight)
+                }
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 25)
+        .padding(.bottom, 30)
     }
 
     private func summaryView(_ kid: BriefingKidModel) -> some View {
@@ -452,4 +492,12 @@ private enum BriefingPhase {
 private enum Metric {
     static let gradientHeight: CGFloat = 722
     static let gradientTopOverlap: CGFloat = 31
+    static let skeletonProfileCount = 4
+    static let skeletonSectionSpacing: CGFloat = 29
+    static let skeletonLineSpacing: CGFloat = 10
+    static let skeletonLineHeight: CGFloat = 16
+    static let skeletonNameWidth: CGFloat = 96
+    static let skeletonCountWidth: CGFloat = 132
+    static let skeletonSummaryCount = 3
+    static let skeletonSummaryHeight: CGFloat = 36
 }
