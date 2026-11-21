@@ -10,6 +10,6 @@ import SwiftUI
 struct ChildRegisterView: View {
     var body: some View {
         Text("아이 등록")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

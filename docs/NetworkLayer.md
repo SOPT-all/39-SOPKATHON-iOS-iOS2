@@ -409,13 +409,7 @@ import Observation
 
 @Observable
 final class HomeViewModel {
-    enum State {
-        case loading
-        case loaded(HomeModel)
-        case failed(message: String)
-    }
-
-    private(set) var state: State = .loading
+    private(set) var home: HomeModel?
 
     private let service: any HomeServiceProtocol
 
@@ -424,35 +418,13 @@ final class HomeViewModel {
     }
 
     func fetchHome() async {
-        state = .loading
-
-        do {
-            let home = try await service.fetchHome()
-            state = .loaded(home)
-        } catch {
-            state = .failed(message: makeErrorMessage(from: error))
-        }
-    }
-
-    private func makeErrorMessage(from error: any Error) -> String {
-        switch error {
-        case NetworkError.networkConnection:
-            return "네트워크 연결을 확인해 주세요."
-        case NetworkError.timeout:
-            return "요청 시간이 초과됐습니다. 다시 시도해 주세요."
-        case NetworkError.server(_, let code, _):
-            switch code {
-            case .unknown:
-                return "서버 에러가 발생했어요. 잠시 후에 다시 시도해주세요."
-            }
-        default:
-            return "알 수 없는 오류가 발생했습니다."
-        }
+        guard let home = try? await service.fetchHome() else { return }
+        self.home = home
     }
 }
 ```
 
-화면 상태는 `State` enum 하나로 관리합니다. `isLoading`, `errorMessage`, 데이터를 따로 두지 않습니다. `NetworkError`가 아닌 에러는 `default`에서 처리합니다.
+로딩 화면과 실패 화면은 만들지 않습니다. 받아 온 데이터만 프로퍼티로 두고, 요청이 실패하면 기존 값을 그대로 둡니다.
 
 ### 5-6. View
 
@@ -469,21 +441,11 @@ struct HomeView: View {
     }
 
     var body: some View {
-        contentView
-            .task {
-                await viewModel.fetchHome()
-            }
-    }
-
-    @ViewBuilder
-    private var contentView: some View {
-        switch viewModel.state {
-        case .loading:
-            ProgressView()
-        case .loaded(let home):
-            Text(home.nickname)
-        case .failed(let message):
-            Text(message)
+        List(viewModel.home?.posts ?? []) { post in
+            Text(post.title)
+        }
+        .task {
+            await viewModel.fetchHome()
         }
     }
 }
@@ -534,7 +496,7 @@ extension MockHomeService: HomeServiceProtocol {
 
 ## 6. 에러 처리
 
-네트워크 레이어는 오류의 종류만 정의합니다. 사용자에게 표시될 메시지는 ViewModel에서 결정합니다.
+네트워크 레이어는 오류의 종류만 정의합니다. 이번 MVP에서는 실패를 화면에 표시하지 않기로 해서, ViewModel은 실패한 요청을 무시합니다. 아래 내용은 오류 종류를 구분해 처리해야 할 때 참고하세요.
 
 ### NetworkError
 
@@ -571,7 +533,7 @@ enum ServerErrorCode: String {
 }
 ```
 
-case를 추가하면 ViewModel의 `switch code`에서 컴파일 에러가 발생하여 문구를 누락한 위치를 가리킵니다.
+코드별로 다르게 처리해야 한다면 아래처럼 `switch code`로 나눕니다. case를 추가하면 `switch`에서 컴파일 에러가 발생하여 처리를 누락한 위치를 가리킵니다.
 
 ```swift
 case NetworkError.server(_, let code, _):

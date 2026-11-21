@@ -29,7 +29,7 @@ struct InputFieldContainer<Content: View>: View {
         VStack(alignment: .leading, spacing: Metric.spacing) {
             if let title {
                 Text(title)
-                    .typography(.h3Md14)
+                    .typography(.caption2)
                     .foregroundStyle(Color.primary)
             }
 
@@ -44,7 +44,7 @@ struct InputFieldContainer<Content: View>: View {
 
             if let errorMessage {
                 Text(errorMessage)
-                    .typography(.bodyRg12)
+                    .typography(.caption3)
                     .foregroundStyle(Color(.systemRed))
             }
         }

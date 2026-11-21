@@ -12,6 +12,6 @@ struct ChildDetailView: View {
 
     var body: some View {
         Text("아이 상세/수정 \(childID)")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

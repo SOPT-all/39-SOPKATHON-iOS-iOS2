@@ -10,6 +10,6 @@ import SwiftUI
 struct SendResultView: View {
     var body: some View {
         Text("발송 결과")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

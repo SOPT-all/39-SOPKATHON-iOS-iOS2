@@ -41,7 +41,7 @@ private extension HomeView {
     static let shortcuts = [
         Shortcut(title: "아이 등록", route: .childRegister),
         Shortcut(title: "아이 상세/수정", route: .childDetail(childID: Metric.sampleID)),
-        Shortcut(title: "기록 입력", route: .recordInput),
+        Shortcut(title: "기록 입력", route: .recordInput()),
         Shortcut(title: "음성 입력", route: .voiceInput),
         Shortcut(title: "아이별 기록 목록", route: .recordList(childID: Metric.sampleID)),
         Shortcut(title: "기록 수정", route: .recordEdit(recordID: Metric.sampleID)),

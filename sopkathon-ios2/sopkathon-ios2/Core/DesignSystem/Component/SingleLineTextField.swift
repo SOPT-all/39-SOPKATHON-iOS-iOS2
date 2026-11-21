@@ -43,7 +43,7 @@ struct SingleLineTextField: View {
             isFocused: isFocused
         ) {
             TextField(placeholder, text: $text)
-                .typography(.h3Rg14)
+                .typography(.body5)
                 .keyboardType(keyboardType)
                 .focused($isFocused)
                 .frame(height: Metric.height)
