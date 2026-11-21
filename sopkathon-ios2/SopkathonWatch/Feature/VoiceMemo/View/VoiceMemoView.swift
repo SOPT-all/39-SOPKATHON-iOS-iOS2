@@ -33,8 +33,10 @@ struct VoiceMemoView: View {
 
     private var headerTitle: String {
         switch viewModel.phase {
-        case .ready, .recording, .paused:
+        case .ready:
             return Title.navigation
+        case .recording, .paused:
+            return Title.recordingHeader
         case .sending:
             return Title.sendingHeader
         case .sent:
@@ -56,23 +58,23 @@ struct VoiceMemoView: View {
         }
     }
 
-    @ViewBuilder
     private var backgroundView: some View {
-        switch viewModel.phase {
-        case .ready, .recording, .paused:
-            LinearGradient(
-                stops: [
-                    .init(color: .memoGradient100, location: Gradient.location100),
-                    .init(color: .memoGradient200, location: Gradient.location200),
-                    .init(color: .memoGradient300, location: Gradient.location300),
-                    .init(color: .memoGradient400, location: Gradient.location400)
-                ],
-                startPoint: .bottomTrailing,
-                endPoint: .topLeading
-            )
-        case .sending, .sent:
-            Color.black
+        LinearGradient(
+            stops: [
+                .init(color: .memoGradient100, location: Gradient.location100),
+                .init(color: .memoGradient200, location: Gradient.location200),
+                .init(color: .memoGradient300, location: Gradient.location300),
+                .init(color: .memoGradient400, location: Gradient.location400)
+            ],
+            startPoint: .bottomTrailing,
+            endPoint: .topLeading
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: Metric.screenCornerRadius)
+                .stroke(.white.opacity(Opacity.glow), lineWidth: Metric.glowWidth)
+                .blur(radius: Metric.glowBlurRadius)
         }
+        .ignoresSafeArea()
     }
 
     private var readyView: some View {
@@ -136,7 +138,11 @@ struct VoiceMemoView: View {
             ForEach(viewModel.levels.indices, id: \.self) { index in
                 RoundedRectangle(cornerRadius: Metric.barCornerRadius)
                     .fill(.white)
-                    .frame(width: Metric.barWidth, height: barHeight(for: viewModel.levels[index]))
+                    .frame(
+                        maxWidth: Metric.barWidth,
+                        minHeight: barHeight(for: viewModel.levels[index]),
+                        maxHeight: barHeight(for: viewModel.levels[index])
+                    )
             }
         }
         .frame(height: Metric.barMaxHeight)
@@ -144,65 +150,61 @@ struct VoiceMemoView: View {
     }
 
     private var sendingView: some View {
-        VStack(spacing: Metric.statusSpacing) {
-            Spacer(minLength: 0)
+        VStack(spacing: 0) {
+            Image(.graphicLogo)
 
-            Image(.iconSmartphone)
-                .resizable()
-                .frame(width: Metric.sendingIconSize, height: Metric.sendingIconSize)
+            Image(.iconTransferProgress)
+                .padding(.top, Metric.progressTopPadding)
 
-            Text(Title.sending)
-                .font(.pretendard(.bold, size: FontSize.statusTitle))
-
-            Text(viewModel.elapsedText + Title.sendingDetail)
-                .font(.pretendard(.regular, size: FontSize.statusDetail))
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: Metric.dotSpacing) {
-                ForEach(0..<Metric.dotCount, id: \.self) { _ in
-                    Circle()
-                        .fill(.secondary)
-                        .frame(width: Metric.dotSize, height: Metric.dotSize)
-                }
-            }
+            statusTextView(title: Title.sending, detail: Title.wait)
+                .padding(.top, Metric.sendingTextTopPadding)
 
             Spacer(minLength: 0)
-
-            Text(Title.wait)
-                .font(.pretendard(.regular, size: FontSize.statusDetail))
-                .foregroundStyle(.secondary)
         }
     }
 
     private var sentView: some View {
-        VStack(spacing: Metric.statusSpacing) {
+        VStack(spacing: 0) {
             Image(.iconCheck)
-                .resizable()
-                .frame(width: Metric.checkIconSize, height: Metric.checkIconSize)
-                .frame(width: Metric.checkCircleSize, height: Metric.checkCircleSize)
-                .overlay {
-                    Circle()
-                        .stroke(.tint, lineWidth: Metric.checkBorderWidth)
-                }
+                .frame(width: Metric.startIconSize, height: Metric.startIconSize)
+                .background(.white.opacity(Opacity.startIconBackground), in: Circle())
 
-            Text(Title.sent)
-                .font(.pretendard(.bold, size: FontSize.statusTitle))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+            statusTextView(title: Title.sent, detail: Title.sentDetail)
+                .padding(.top, Metric.sentTextTopPadding)
 
-            Text(Title.sentDetail)
-                .font(.pretendard(.regular, size: FontSize.statusDetail))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                viewModel.resetMemo()
+            } label: {
+                Text(Title.newMemo)
+                    .font(.pretendard(.semiBold, size: FontSize.guide))
+                    .foregroundStyle(.white)
+                    .shadow(
+                        color: .black.opacity(Opacity.textShadow),
+                        radius: Metric.textShadowRadius,
+                        y: Metric.textShadowOffset
+                    )
+                    .frame(maxWidth: Metric.newMemoMaxWidth)
+                    .frame(height: Metric.newMemoHeight)
+                    .background(.memoControl, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .padding(.top, Metric.newMemoTopPadding)
 
             Spacer(minLength: 0)
-
-            Button(Title.newMemo) {
-                viewModel.resetMemo()
-            }
-            .font(.pretendard(.bold, size: FontSize.guide))
         }
+    }
+
+    private func statusTextView(title: String, detail: String) -> some View {
+        VStack(spacing: Metric.statusSpacing) {
+            Text(title)
+                .font(.pretendard(.bold, size: FontSize.statusTitle))
+
+            Text(detail)
+                .font(.pretendard(.medium, size: FontSize.control))
+        }
+        .foregroundStyle(.white.opacity(Opacity.secondaryText))
+        .lineLimit(1)
+        .minimumScaleFactor(Metric.textMinimumScale)
     }
 
     private func emphasizedText(_ text: String) -> some View {
@@ -251,19 +253,22 @@ private extension VoiceMemoView {
         static let controlSize: CGFloat = 45
         static let controlLabelSpacing: CGFloat = 5
         static let barWidth: CGFloat = 3
-        static let barSpacing: CGFloat = 3
+        static let barSpacing: CGFloat = 4
         static let barCornerRadius: CGFloat = 2
         static let barMinHeight: CGFloat = 7
-        static let barMaxHeight: CGFloat = 52
+        static let barMaxHeight: CGFloat = 63
         static let barAnimationDuration: Double = 0.08
-        static let statusSpacing: CGFloat = 8
-        static let sendingIconSize: CGFloat = 38
-        static let dotCount = 3
-        static let dotSize: CGFloat = 5
-        static let dotSpacing: CGFloat = 8
-        static let checkIconSize: CGFloat = 32
-        static let checkCircleSize: CGFloat = 48
-        static let checkBorderWidth: CGFloat = 1
+        static let statusSpacing: CGFloat = 4
+        static let progressTopPadding: CGFloat = 7
+        static let sendingTextTopPadding: CGFloat = 18
+        static let sentTextTopPadding: CGFloat = 13
+        static let newMemoTopPadding: CGFloat = 22
+        static let newMemoHeight: CGFloat = 36
+        static let newMemoMaxWidth: CGFloat = 167
+        static let textMinimumScale: CGFloat = 0.8
+        static let screenCornerRadius: CGFloat = 44
+        static let glowWidth: CGFloat = 6
+        static let glowBlurRadius: CGFloat = 5
         static let textShadowRadius: CGFloat = 4
         static let textShadowOffset: CGFloat = 1
     }
@@ -272,7 +277,7 @@ private extension VoiceMemoView {
         static let guide: CGFloat = 14
         static let emphasis: CGFloat = 24
         static let control: CGFloat = 13
-        static let statusTitle: CGFloat = 17
+        static let statusTitle: CGFloat = 16
         static let statusDetail: CGFloat = 12
     }
 
@@ -281,6 +286,7 @@ private extension VoiceMemoView {
         static let navigationText: Double = 0.93
         static let startIconBackground: Double = 0.42
         static let textShadow: Double = 0.29
+        static let glow: Double = 0.8
     }
 
     enum Gradient {
@@ -292,18 +298,18 @@ private extension VoiceMemoView {
 
     enum Title {
         static let navigation = "돌봄 메모"
-        static let sendingHeader = "전송 중"
+        static let recordingHeader = "메모중"
+        static let sendingHeader = "전송중"
         static let sentHeader = "전송 완료"
         static let guide = "아이 이름과 함께\n돌봄 내용을 말해 주세요"
         static let start = "녹음 시작"
         static let pause = "일시 정지"
         static let resume = "계속"
         static let finish = "종료"
-        static let sending = "녹음을 보내는 중"
-        static let sendingDetail = " · 워치에 보관 중"
+        static let sending = "녹음을 보내고 있어요!"
         static let wait = "잠시만 기다려 주세요"
-        static let sent = "iPhone에서\n확인해 주세요"
-        static let sentDetail = "돌봄 기록으로\n저장돼요"
+        static let sent = "앱에서 확인해 주세요!"
+        static let sentDetail = "기록은 확인 후 저장돼요"
         static let newMemo = "새 메모"
     }
 
