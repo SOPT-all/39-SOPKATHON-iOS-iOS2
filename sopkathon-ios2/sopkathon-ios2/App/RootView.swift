@@ -84,7 +84,7 @@ struct RootView: View {
     private var tabContentView: some View {
         switch router.selectedTab {
         case .home:
-            HomeView()
+            HomeView(viewModel: HomeViewModel(service: dependency.homeService))
         case .briefing:
             BriefingView(viewModel: BriefingViewModel(service: dependency.briefingService))
         case .childList:
@@ -103,6 +103,10 @@ struct RootView: View {
         .frame(height: Metric.tabBarHeight)
         .background(.baseWhite)
         .clipShape(Capsule())
+        .shadow(
+            color: .baseBlack.opacity(Metric.tabBarShadowOpacity),
+            radius: Metric.tabBarShadowRadius
+        )
         .padding(.horizontal, Metric.tabBarOuterPadding)
     }
 
@@ -135,7 +139,12 @@ struct RootView: View {
         case .childDetail(let childID):
             ChildDetailView(viewModel: ChildDetailViewModel(childID: childID))
         case .recordInput:
-            RecordInputView(viewModel: RecordInputViewModel())
+            RecordInputView(
+                viewModel: RecordInputViewModel(
+                    childService: dependency.childService,
+                    careRecordService: dependency.careRecordService
+                )
+            )
         }
     }
 
@@ -161,6 +170,8 @@ private extension RootView {
         static let tabItemSpacing: CGFloat = 50
         static let tabItemSize: CGFloat = 48
         static let tabIconTitleSpacing: CGFloat = 3
+        static let tabBarShadowOpacity: Double = 0.1
+        static let tabBarShadowRadius: CGFloat = 4
         static let sheetCornerRadius: CGFloat = 30
         static let sheetDimOpacity: Double = 0.56
         static let sheetDismissDistance: CGFloat = 100

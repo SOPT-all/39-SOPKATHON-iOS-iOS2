@@ -8,11 +8,10 @@
 import SwiftUI
 
 enum ProfileColor: CaseIterable {
-    case lavender
-    case yellow
     case blue
-    case mint
+    case yellow
     case green
+    case lavender
 
     init(childID: Int) {
         let colors = Self.allCases
@@ -21,31 +20,27 @@ enum ProfileColor: CaseIterable {
 
     var background: Color {
         switch self {
-        case .lavender:
-            return .pointLavender100
-        case .yellow:
-            return .pointYellow100
         case .blue:
             return .pointBlue100
-        case .mint:
-            return .pointMint100
+        case .yellow:
+            return .pointYellow100
         case .green:
             return .pointGreen100
+        case .lavender:
+            return .pointLavender100
         }
     }
 
     var foreground: Color {
         switch self {
-        case .lavender:
-            return .pointLavender200
-        case .yellow:
-            return .pointYellow200
         case .blue:
             return .pointBlue200
-        case .mint:
-            return .pointMint200
+        case .yellow:
+            return .pointYellow200
         case .green:
             return .pointGreen200
+        case .lavender:
+            return .pointLavender200
         }
     }
 }
