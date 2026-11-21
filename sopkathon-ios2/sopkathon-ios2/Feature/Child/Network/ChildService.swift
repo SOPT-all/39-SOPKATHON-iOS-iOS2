@@ -7,6 +7,7 @@
 
 protocol ChildServiceProtocol {
     func fetchChildren(keyword: String?) async throws -> [ChildModel]
+    func fetchChild(childID: Int) async throws -> ChildDetailModel
     func createChild(_ draft: ChildDraftModel) async throws -> Int
     func updateChild(childID: Int, _ draft: ChildDraftModel) async throws
     func deleteChild(childID: Int) async throws
@@ -24,6 +25,13 @@ extension ChildService: ChildServiceProtocol {
     func fetchChildren(keyword: String?) async throws -> [ChildModel] {
         let response: ChildrenResponseDTO = try await baseService.request(
             ChildEndpoint.fetchChildren(keyword: keyword)
+        )
+        return ChildMapper.map(response)
+    }
+
+    func fetchChild(childID: Int) async throws -> ChildDetailModel {
+        let response: ChildDetailResponseDTO = try await baseService.request(
+            ChildEndpoint.fetchChild(childID: childID)
         )
         return ChildMapper.map(response)
     }

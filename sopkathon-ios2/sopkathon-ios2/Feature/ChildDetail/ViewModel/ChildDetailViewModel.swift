@@ -12,10 +12,10 @@ import Observation
 final class ChildDetailViewModel {
     var childName = ""
     var birthDate: Date?
-    var gender: String?
+    var gender: ChildGenderModel?
     var parentName = ""
     var parentPhoneNumber = ""
-    var relationship: String?
+    var relationship: ChildRelationshipModel?
     var notes = ""
 
     var isValidParentPhoneNumber: Bool {
@@ -23,17 +23,58 @@ final class ChildDetailViewModel {
     }
 
     var canSubmit: Bool {
-        !childName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && birthDate != nil
-            && gender != nil
-            && !parentName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && isValidParentPhoneNumber
-            && relationship != nil
+        draft != nil
+    }
+
+    private var isSubmitting = false
+
+    private var draft: ChildDraftModel? {
+        let childName = childName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parentName = parentName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !childName.isEmpty,
+              !parentName.isEmpty,
+              isValidParentPhoneNumber,
+              let birthDate,
+              let gender,
+              let relationship else { return nil }
+
+        return ChildDraftModel(
+            name: childName,
+            birthDate: birthDate,
+            gender: gender,
+            parentName: parentName,
+            parentPhoneNumber: parentPhoneNumber,
+            relationship: relationship,
+            note: notes
+        )
     }
 
     private let childID: Int
+    private let service: any ChildServiceProtocol
 
-    init(childID: Int) {
+    init(childID: Int, service: any ChildServiceProtocol) {
         self.childID = childID
+        self.service = service
+    }
+
+    func fetchChild() async {
+        guard let child = try? await service.fetchChild(childID: childID) else { return }
+        childName = child.name
+        birthDate = child.birthDate
+        gender = child.gender
+        parentName = child.parentName
+        parentPhoneNumber = child.parentPhoneNumber
+        relationship = child.relationship
+        notes = child.note
+    }
+
+    func updateChild() async -> Bool {
+        guard !isSubmitting, let draft else { return false }
+
+        isSubmitting = true
+        defer { isSubmitting = false }
+
+        return (try? await service.updateChild(childID: childID, draft)) != nil
     }
 }

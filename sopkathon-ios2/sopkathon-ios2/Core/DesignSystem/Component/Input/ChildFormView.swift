@@ -9,26 +9,34 @@ import SwiftUI
 
 struct ChildFormView: View {
     @Binding private var childName: String
-    @Binding private var gender: String?
+    @Binding private var birthDate: Date?
+    @Binding private var gender: ChildGenderModel?
     @Binding private var parentName: String
     @Binding private var parentPhoneNumber: String
-    @Binding private var relationship: String?
+    @Binding private var relationship: ChildRelationshipModel?
     @Binding private var notes: String
 
     @FocusState private var focusedField: Field?
+
+    @State private var presentedPicker: PickerType?
+    @State private var selectedBirthDate = Date()
+    @State private var selectedGender = ChildGenderModel.male
+    @State private var selectedRelationship = ChildRelationshipModel.mother
 
     private let isValidParentPhoneNumber: Bool
 
     init(
         childName: Binding<String>,
-        gender: Binding<String?>,
+        birthDate: Binding<Date?>,
+        gender: Binding<ChildGenderModel?>,
         parentName: Binding<String>,
         parentPhoneNumber: Binding<String>,
-        relationship: Binding<String?>,
+        relationship: Binding<ChildRelationshipModel?>,
         notes: Binding<String>,
         isValidParentPhoneNumber: Bool
     ) {
         _childName = childName
+        _birthDate = birthDate
         _gender = gender
         _parentName = parentName
         _parentPhoneNumber = parentPhoneNumber
@@ -50,11 +58,6 @@ struct ChildFormView: View {
                 .padding(.top, Metric.sectionTitleTopPadding)
                 .padding(.bottom, Metric.bottomPadding)
         }
-        .onChange(of: parentPhoneNumber) { _, newValue in
-            let formattedValue = newValue.formattedPhoneNumber
-            guard formattedValue != newValue else { return }
-            parentPhoneNumber = formattedValue
-        }
     }
 
     private var childSectionView: some View {
@@ -63,11 +66,7 @@ struct ChildFormView: View {
 
             birthDateFieldView
 
-            dropdownFieldView(
-                title: Title.gender,
-                selection: $gender,
-                options: Option.genders
-            )
+            genderFieldView
         }
         .padding(.horizontal, Metric.horizontalPadding)
     }
@@ -83,12 +82,8 @@ struct ChildFormView: View {
 
             phoneNumberFieldView
 
-            dropdownFieldView(
-                title: Title.relationship,
-                selection: $relationship,
-                options: Option.relationships
-            )
-            .padding(.bottom, Metric.notesTopPadding - Metric.fieldSpacing)
+            relationshipFieldView
+                .padding(.bottom, Metric.notesTopPadding - Metric.fieldSpacing)
 
             notesFieldView
         }
@@ -96,45 +91,79 @@ struct ChildFormView: View {
     }
 
     private var birthDateFieldView: some View {
-        labeledView(title: Title.birthDate) {
-            HStack {
-                Text(Title.placeholder)
-                    .typography(.body5)
-                    .foregroundStyle(Color.disabled200)
-
-                Spacer()
-
-                chevronView
+        selectFieldView(title: Title.birthDate, value: birthDate?.formatted(Format.birthDate)) {
+            selectedBirthDate = birthDate ?? Date()
+            presentedPicker = .birthDate
+        }
+        .bottomSheet(isPresented: isPresented(.birthDate), title: Title.birthDate) {
+            pickerSheetView {
+                DatePicker(
+                    "",
+                    selection: $selectedBirthDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .environment(\.locale, Format.locale)
+            } onConfirm: {
+                birthDate = selectedBirthDate
             }
-            .padding(.horizontal, Metric.fieldHorizontalPadding)
-            .frame(height: Metric.fieldHeight)
-            .background(Color.gray50, in: fieldShape)
+        }
+    }
+
+    private var genderFieldView: some View {
+        selectFieldView(title: Title.gender, value: gender?.title) {
+            selectedGender = gender ?? .male
+            presentedPicker = .gender
+        }
+        .bottomSheet(isPresented: isPresented(.gender), title: Title.gender) {
+            pickerSheetView {
+                Picker("", selection: $selectedGender) {
+                    ForEach(ChildGenderModel.allCases, id: \.self) { gender in
+                        Text(gender.title)
+                            .tag(gender)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .labelsHidden()
+            } onConfirm: {
+                gender = selectedGender
+            }
+        }
+    }
+
+    private var relationshipFieldView: some View {
+        selectFieldView(title: Title.relationship, value: relationship?.title) {
+            selectedRelationship = relationship ?? .mother
+            presentedPicker = .relationship
+        }
+        .bottomSheet(isPresented: isPresented(.relationship), title: Title.relationship) {
+            pickerSheetView {
+                Picker("", selection: $selectedRelationship) {
+                    ForEach(ChildRelationshipModel.allCases, id: \.self) { relationship in
+                        Text(relationship.title)
+                            .tag(relationship)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .labelsHidden()
+            } onConfirm: {
+                relationship = selectedRelationship
+            }
         }
     }
 
     private var phoneNumberFieldView: some View {
-        let hasError = focusedField != .parentPhoneNumber
-            && !parentPhoneNumber.isEmpty
-            && !isValidParentPhoneNumber
+        let hasError = !parentPhoneNumber.isEmpty && !isValidParentPhoneNumber
 
         return labeledView(title: Title.parentPhoneNumber) {
-            VStack(alignment: .leading, spacing: Metric.labelSpacing) {
-                TextField(Title.phoneNumberPlaceholder, text: $parentPhoneNumber)
-                    .keyboardType(.numberPad)
-                    .modifier(
-                        ChildFormFieldStyle(
-                            isFocused: focusedField == .parentPhoneNumber,
-                            hasError: hasError
-                        )
-                    )
-                    .focused($focusedField, equals: .parentPhoneNumber)
-
-                if hasError {
-                    Text(Title.phoneNumberError)
-                        .typography(.caption3)
-                        .foregroundStyle(Color(.systemRed))
-                }
-            }
+            SingleLineTextField(
+                text: $parentPhoneNumber,
+                placeholder: Title.phoneNumberPlaceholder,
+                inputType: .phoneNumber,
+                errorMessage: hasError ? Title.phoneNumberError : nil
+            )
         }
     }
 
@@ -190,51 +219,66 @@ struct ChildFormView: View {
     ) -> some View {
         labeledView(title: title) {
             TextField("", text: text)
-                .modifier(ChildFormFieldStyle(isFocused: focusedField == field, hasError: false))
+                .modifier(ChildFormFieldStyle(isFocused: focusedField == field))
                 .focused($focusedField, equals: field)
         }
     }
 
-    private func dropdownFieldView(
+    private func selectFieldView(
         title: String,
-        selection: Binding<String?>,
-        options: [String]
+        value: String?,
+        action: @escaping () -> Void
     ) -> some View {
         labeledView(title: title) {
-            HStack {
-                Text(selection.wrappedValue ?? Title.placeholder)
-                    .typography(.body5)
-                    .foregroundStyle(
-                        selection.wrappedValue == nil ? Color.disabled200 : Color.textBlack
-                    )
+            Button {
+                hideKeyboard()
+                action()
+            } label: {
+                HStack {
+                    Text(value ?? Title.placeholder)
+                        .typography(.body5)
+                        .foregroundStyle(value == nil ? Color.disabled200 : Color.textBlack)
 
-                Spacer()
+                    Spacer()
 
-                chevronView
-            }
-            .padding(.horizontal, Metric.fieldHorizontalPadding)
-            .frame(height: Metric.fieldHeight)
-            .background(Color.gray50, in: fieldShape)
-            .overlay {
-                Menu {
-                    ForEach(options, id: \.self) { option in
-                        Button(option) {
-                            selection.wrappedValue = option
-                        }
-                    }
-                } label: {
-                    Color.clear
-                        .contentShape(Rectangle())
+                    chevronView
                 }
-                .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
+                .padding(.horizontal, Metric.fieldHorizontalPadding)
+                .frame(height: Metric.fieldHeight)
+                .background(Color.gray50, in: fieldShape)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func pickerSheetView(
+        @ViewBuilder picker: () -> some View,
+        onConfirm: @escaping () -> Void
+    ) -> some View {
+        VStack(spacing: Metric.pickerSpacing) {
+            picker()
+
+            FullWidthButton(title: Title.confirm) {
+                onConfirm()
+                presentedPicker = nil
             }
         }
+    }
+
+    private func isPresented(_ picker: PickerType) -> Binding<Bool> {
+        Binding(
+            get: { presentedPicker == picker },
+            set: { isPresented in
+                guard !isPresented else { return }
+                presentedPicker = nil
+            }
+        )
     }
 }
 
 private struct ChildFormFieldStyle: ViewModifier {
     let isFocused: Bool
-    let hasError: Bool
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: ChildFormView.Metric.fieldCornerRadius)
@@ -246,15 +290,11 @@ private struct ChildFormFieldStyle: ViewModifier {
             .frame(height: ChildFormView.Metric.fieldHeight)
             .background(Color.gray50, in: shape)
             .overlay {
-                shape.strokeBorder(borderColor, lineWidth: ChildFormView.Metric.borderWidth)
+                shape.strokeBorder(
+                    isFocused ? Color.gray200 : .clear,
+                    lineWidth: ChildFormView.Metric.borderWidth
+                )
             }
-    }
-
-    private var borderColor: Color {
-        if hasError {
-            return Color(.systemRed)
-        }
-        return isFocused ? Color.gray200 : .clear
     }
 }
 
@@ -262,8 +302,13 @@ private extension ChildFormView {
     enum Field {
         case childName
         case parentName
-        case parentPhoneNumber
         case notes
+    }
+
+    enum PickerType {
+        case birthDate
+        case gender
+        case relationship
     }
 
     enum Metric {
@@ -284,6 +329,7 @@ private extension ChildFormView {
         static let notesCornerRadius: CGFloat = 4
         static let notesInnerPadding: CGFloat = 8
         static let borderWidth: CGFloat = 1
+        static let pickerSpacing: CGFloat = 16
     }
 
     enum Title {
@@ -298,10 +344,11 @@ private extension ChildFormView {
         static let placeholder = "Select…"
         static let phoneNumberPlaceholder = "010-0000-0000"
         static let phoneNumberError = "휴대폰 번호 형식을 확인해 주세요"
+        static let confirm = "선택 완료"
     }
 
-    enum Option {
-        static let genders = ["남자", "여자"]
-        static let relationships = ["엄마", "아빠", "보호자"]
+    enum Format {
+        static let locale = Locale(identifier: "ko_KR")
+        static let birthDate = Date.FormatStyle(date: .long, time: .omitted, locale: locale)
     }
 }

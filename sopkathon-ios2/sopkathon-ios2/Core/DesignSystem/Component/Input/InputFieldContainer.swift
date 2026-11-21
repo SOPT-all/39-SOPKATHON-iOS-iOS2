@@ -10,15 +10,18 @@ import SwiftUI
 struct InputFieldContainer<Content: View>: View {
     private let title: String?
     private let errorMessage: String?
+    private let isFocused: Bool
     private let content: Content
 
     init(
         title: String?,
         errorMessage: String? = nil,
+        isFocused: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.errorMessage = errorMessage
+        self.isFocused = isFocused
         self.content = content()
     }
 
@@ -35,10 +38,8 @@ struct InputFieldContainer<Content: View>: View {
                 .background(.gray50)
                 .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
                 .overlay {
-                    if errorMessage != nil {
-                        RoundedRectangle(cornerRadius: Metric.cornerRadius)
-                            .stroke(Color(.systemRed), lineWidth: Metric.borderWidth)
-                    }
+                    RoundedRectangle(cornerRadius: Metric.cornerRadius)
+                        .strokeBorder(borderColor, lineWidth: Metric.borderWidth)
                 }
 
             if let errorMessage {
@@ -47,6 +48,13 @@ struct InputFieldContainer<Content: View>: View {
                     .foregroundStyle(Color(.systemRed))
             }
         }
+    }
+
+    private var borderColor: Color {
+        if errorMessage != nil {
+            return Color(.systemRed)
+        }
+        return isFocused ? .gray200 : .clear
     }
 }
 
