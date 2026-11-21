@@ -19,6 +19,25 @@ extension ChildModel {
     }
 }
 
+extension [ChildModel] {
+    func mentioned(in text: String) -> [ChildModel] {
+        let compactText = text.filter { !$0.isWhitespace }
+        return compactMap { child -> (child: ChildModel, position: String.Index)? in
+            let positions = child.spokenNames
+                .filter { $0 == child.name || isUniqueSpokenName($0) }
+                .compactMap { compactText.range(of: $0)?.lowerBound }
+            guard let position = positions.min() else { return nil }
+            return (child, position)
+        }
+        .sorted { $0.position < $1.position }
+        .map(\.child)
+    }
+
+    private func isUniqueSpokenName(_ spokenName: String) -> Bool {
+        filter { $0.spokenNames.contains(spokenName) }.count == 1
+    }
+}
+
 struct ChildDraftModel {
     let name: String
     let birthDate: Date
