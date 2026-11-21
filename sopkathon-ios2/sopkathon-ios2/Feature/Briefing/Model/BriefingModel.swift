@@ -7,7 +7,7 @@
 
 struct BriefingModel {
     let date: String
-    let recordedKidCount: Int
+    let recordedKidNames: [String]
     var kids: [BriefingKidModel]
 }
 
@@ -16,15 +16,20 @@ struct BriefingKidModel: Identifiable {
     let name: String
     let age: Int
     let recordCount: Int
-    let summary: BriefingSummaryModel
-    let parent: BriefingParentModel
+    let summary: [BriefingSummaryItemModel]
+    let parent: BriefingParentModel?
     var briefing: BriefingMessageModel?
+
+    var summaryRows: [[BriefingSummaryItemModel]] {
+        stride(from: 0, to: summary.count, by: 2).map { index in
+            Array(summary[index..<min(index + 2, summary.count)])
+        }
+    }
 }
 
-struct BriefingSummaryModel {
-    let feeding: Int
-    let sleep: Int
-    let diaper: Int
+struct BriefingSummaryItemModel {
+    let category: CareRecordCategoryModel
+    let count: Int
 }
 
 struct BriefingParentModel {

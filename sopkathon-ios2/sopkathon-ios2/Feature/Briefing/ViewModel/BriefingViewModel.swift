@@ -13,6 +13,18 @@ final class BriefingViewModel {
     private(set) var briefing: BriefingModel?
     private(set) var generatingKidID: Int?
     private(set) var refiningBriefingID: Int?
+    private(set) var sentKidIDs: Set<Int> = []
+
+    var isMockPreview: Bool { service.isMock }
+    var briefingDateText: String {
+        guard let date = briefing?.date else { return "" }
+        let components = date.split(separator: "-")
+        guard components.count == 3,
+              let month = Int(components[1]),
+              let day = Int(components[2])
+        else { return date }
+        return "\(components[0])년 \(month)월 \(day)일"
+    }
 
     private var requestedDateString: String?
     private var latestFetchRequestID = 0
@@ -23,27 +35,50 @@ final class BriefingViewModel {
         self.service = service
     }
 
-    func fetchDailyBriefings(for date: Date) async {
-        let dateString = formattedDate(date)
-        requestedDateString = dateString
+    func fetchDailyBriefings() async {
         latestFetchRequestID += 1
         let requestID = latestFetchRequestID
 
-        guard let briefing = try? await service.fetchDailyBriefings(date: dateString) else {
+        guard let briefing = try? await service.fetchDailyBriefings() else {
             return
         }
         guard latestFetchRequestID == requestID else { return }
         self.briefing = briefing
+        requestedDateString = briefing.date
+        if service.isMock {
+            sentKidIDs = []
+        } else {
+            let storedIDs = UserDefaults.standard.array(forKey: sentKey(for: briefing.date)) as? [Int]
+            sentKidIDs = Set(storedIDs ?? [])
+        }
     }
 
-    func isBriefing(for date: Date) -> Bool {
-        briefing?.date == formattedDate(date)
+    func markSent(kidID: Int) {
+        guard let briefing,
+              briefing.date == requestedDateString,
+              briefing.kids.contains(where: { $0.id == kidID })
+        else { return }
+
+        sentKidIDs.insert(kidID)
+        if !service.isMock {
+            UserDefaults.standard.set(Array(sentKidIDs), forKey: sentKey(for: briefing.date))
+        }
     }
 
-    func createDailyBriefing(kidID: Int, for date: Date) async {
+    func isSent(kidID: Int) -> Bool {
+        sentKidIDs.contains(kidID)
+    }
+
+    func prepareDailyBriefing(kidID: Int) async {
+        guard let kid = briefing?.kids.first(where: { $0.id == kidID }),
+              kid.briefing == nil
+        else { return }
+        await createDailyBriefing(kidID: kidID)
+    }
+
+    private func createDailyBriefing(kidID: Int) async {
         guard generatingKidID == nil, refiningBriefingID == nil else { return }
-        let dateString = formattedDate(date)
-        guard requestedDateString == dateString,
+        guard let dateString = requestedDateString,
               briefing?.date == dateString,
               briefing?.kids.contains(where: { $0.id == kidID }) == true
         else { return }
@@ -91,12 +126,7 @@ final class BriefingViewModel {
         self.briefing = briefing
     }
 
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = .current
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
+    private func sentKey(for date: String) -> String {
+        "briefing.sent.\(date)"
     }
 }

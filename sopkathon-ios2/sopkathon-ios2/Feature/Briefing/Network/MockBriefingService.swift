@@ -5,6 +5,8 @@
 //  Created by Seoyoung Lee on 11/22/26.
 //
 
+import Foundation
+
 final class MockBriefingService {
     private var generatedMessagesByDate: [String: [Int: BriefingMessageModel]] = [:]
     private var lastFetchedDate: String?
@@ -15,19 +17,28 @@ final class MockBriefingService {
 }
 
 extension MockBriefingService: BriefingServiceProtocol {
-    func fetchDailyBriefings(date: String) async throws -> BriefingModel {
+    var isMock: Bool { true }
+
+    func fetchDailyBriefings() async throws -> BriefingModel {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let date = formatter.string(from: Date())
         lastFetchedDate = date
 
         return BriefingModel(
             date: date,
-            recordedKidCount: 2,
+            recordedKidNames: ["김지우", "이하준"],
             kids: [
                 BriefingKidModel(
                     id: 1,
                     name: "김지우",
                     age: 2,
                     recordCount: 6,
-                    summary: BriefingSummaryModel(feeding: 3, sleep: 1, diaper: 2),
+                    summary: [
+                        BriefingSummaryItemModel(category: .feeding, count: 3),
+                        BriefingSummaryItemModel(category: .sleep, count: 1),
+                        BriefingSummaryItemModel(category: .diaper, count: 2)
+                    ],
                     parent: BriefingParentModel(name: "김OO", phone: "010-1234-5678"),
                     briefing: generatedMessagesByDate[date]?[1] ?? BriefingMessageModel(
                         id: 5,
@@ -40,7 +51,10 @@ extension MockBriefingService: BriefingServiceProtocol {
                     name: "이하준",
                     age: 3,
                     recordCount: 2,
-                    summary: BriefingSummaryModel(feeding: 1, sleep: 1, diaper: 0),
+                    summary: [
+                        BriefingSummaryItemModel(category: .feeding, count: 1),
+                        BriefingSummaryItemModel(category: .sleep, count: 1)
+                    ],
                     parent: BriefingParentModel(name: "이OO", phone: "010-5678-1234"),
                     briefing: generatedMessagesByDate[date]?[2]
                 )

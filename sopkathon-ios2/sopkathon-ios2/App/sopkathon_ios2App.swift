@@ -9,7 +9,10 @@ import SwiftUI
 
 @main
 struct sopkathon_ios2App: App {
-    @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+    @State private var dependency = AppDependency(
+        mode: AppPreviewConfiguration.isBriefingEnabled ? .mock : .live,
+        baseService: BaseService.shared
+    )
     @State private var router = AppRouter()
 
     var body: some Scene {

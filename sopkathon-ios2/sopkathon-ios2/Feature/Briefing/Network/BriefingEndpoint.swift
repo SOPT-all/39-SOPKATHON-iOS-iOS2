@@ -8,7 +8,7 @@
 import Foundation
 
 enum BriefingEndpoint {
-    case fetchDailyBriefings(date: String)
+    case fetchDailyBriefings
     case createDailyBriefing(CreateBriefingRequestDTO)
     case updateDailyBriefing(briefingID: Int, request: RefineBriefingRequestDTO)
 }
@@ -17,9 +17,9 @@ extension BriefingEndpoint: Endpoint {
     var path: String {
         switch self {
         case .fetchDailyBriefings, .createDailyBriefing:
-            return "/api/v1/daily-briefings"
+            return "/api/v1/briefings"
         case .updateDailyBriefing(let briefingID, _):
-            return "/api/v1/daily-briefings/\(briefingID)/refine"
+            return "/api/v1/briefings/\(briefingID)/refine"
         }
     }
 
@@ -31,15 +31,6 @@ extension BriefingEndpoint: Endpoint {
             return .post
         case .updateDailyBriefing:
             return .patch
-        }
-    }
-
-    var queryItems: [URLQueryItem] {
-        switch self {
-        case .fetchDailyBriefings(let date):
-            return [URLQueryItem(name: "date", value: date)]
-        default:
-            return []
         }
     }
 

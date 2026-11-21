@@ -19,7 +19,9 @@ struct RootView: View {
             tabContentView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .safeAreaInset(edge: .bottom) {
-                    tabBarView
+                    if router.selectedTab != .briefing {
+                        tabBarView
+                    }
                 }
                 .navigationDestination(for: Route.self) { route in
                     destinationView(for: route)
@@ -32,6 +34,11 @@ struct RootView: View {
             .easeOut(duration: Metric.sheetAnimationDuration),
             value: router.presentedSheet
         )
+        .task {
+            if AppPreviewConfiguration.isBriefingEnabled {
+                router.selectTab(.briefing)
+            }
+        }
     }
 
     private var sheetOverlayView: some View {
