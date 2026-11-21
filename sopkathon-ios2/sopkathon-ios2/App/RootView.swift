@@ -133,8 +133,10 @@ struct RootView: View {
                 Text(tab.title)
                     .typography(.caption3)
                     .foregroundStyle(isSelected ? .primary500 : .disabled150)
+                    .lineLimit(1)
+                    .fixedSize()
             }
-            .frame(width: Metric.tabItemSize, height: Metric.tabItemSize)
+            .frame(minWidth: Metric.tabItemSize, minHeight: Metric.tabItemSize)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
