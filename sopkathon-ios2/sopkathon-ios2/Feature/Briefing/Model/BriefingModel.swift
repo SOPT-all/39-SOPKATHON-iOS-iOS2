@@ -8,7 +8,7 @@
 struct BriefingModel {
     let date: String
     let recordedKidCount: Int
-    let kids: [BriefingKidModel]
+    var kids: [BriefingKidModel]
 }
 
 struct BriefingKidModel: Identifiable {
@@ -18,7 +18,7 @@ struct BriefingKidModel: Identifiable {
     let recordCount: Int
     let summary: BriefingSummaryModel
     let parent: BriefingParentModel
-    let briefing: BriefingMessageModel?
+    var briefing: BriefingMessageModel?
 }
 
 struct BriefingSummaryModel {
