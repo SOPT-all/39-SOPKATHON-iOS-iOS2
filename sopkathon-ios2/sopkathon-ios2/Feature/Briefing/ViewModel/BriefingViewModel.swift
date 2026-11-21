@@ -11,6 +11,7 @@ import Observation
 @Observable
 final class BriefingViewModel {
     private(set) var briefing: BriefingModel?
+    private(set) var hasFetched = false
     private(set) var generatingKidID: Int?
     private(set) var refiningBriefingID: Int?
     private(set) var sentKidIDs: Set<Int> = []
@@ -38,6 +39,7 @@ final class BriefingViewModel {
     func fetchDailyBriefings() async {
         latestFetchRequestID += 1
         let requestID = latestFetchRequestID
+        defer { hasFetched = true }
 
         guard let briefing = try? await service.fetchDailyBriefings() else {
             return
