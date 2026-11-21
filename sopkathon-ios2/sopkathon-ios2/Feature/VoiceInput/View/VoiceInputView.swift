@@ -20,7 +20,7 @@ struct VoiceInputView: View {
         VStack(spacing: Metric.spacing) {
             ScrollView {
                 Text(viewModel.transcript)
-                    .typography(.h1Rg16)
+                    .typography(.body3)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 

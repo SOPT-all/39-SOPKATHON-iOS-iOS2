@@ -52,7 +52,7 @@ struct DropdownField<Option: Hashable>: View {
         } label: {
             HStack {
                 Text(selection.map(optionTitle) ?? placeholder)
-                    .typography(.h3Rg14)
+                    .typography(.body5)
                     .foregroundStyle(selection == nil ? Color(.placeholderText) : Color.primary)
 
                 Spacer()
@@ -84,7 +84,7 @@ struct DropdownField<Option: Hashable>: View {
         } label: {
             HStack {
                 Text(optionTitle(option))
-                    .typography(option == selection ? .h3Sb14 : .h3Rg14)
+                    .typography(option == selection ? .body4 : .body5)
                     .foregroundStyle(Color.primary)
 
                 Spacer()

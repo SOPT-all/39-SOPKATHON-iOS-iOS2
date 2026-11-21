@@ -12,6 +12,6 @@ struct RecordListView: View {
 
     var body: some View {
         Text("아이별 기록 목록 \(childID)")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

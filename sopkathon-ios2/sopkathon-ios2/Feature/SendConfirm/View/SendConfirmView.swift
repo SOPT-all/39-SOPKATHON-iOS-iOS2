@@ -10,6 +10,6 @@ import SwiftUI
 struct SendConfirmView: View {
     var body: some View {
         Text("발송 전 확인")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

@@ -41,7 +41,7 @@ struct TagLabel: View {
 
     var body: some View {
         Text(text)
-            .typography(.bodySb12)
+            .typography(.caption3)
             .foregroundStyle(appearance.foregroundColor)
             .padding(.horizontal, Metric.horizontalPadding)
             .padding(.vertical, Metric.verticalPadding)
