@@ -19,12 +19,16 @@ struct BriefingModalButtonView: View {
     }
 
     var body: some View {
-        Button(title, action: action)
-            .typography(.subHeader2)
-            .foregroundStyle(appearance == .secondary ? .textBlack : .baseWhite)
-            .frame(maxWidth: .infinity)
-            .frame(height: 45)
-            .background(appearance == .secondary ? .gray100 : .primary400)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+        Button(action: action) {
+            Text(title)
+                .typography(.subHeader2)
+                .foregroundStyle(appearance == .secondary ? .textBlack : .baseWhite)
+                .frame(maxWidth: .infinity)
+                .frame(height: 45)
+                .background(appearance == .secondary ? .gray100 : .primary400)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .contentShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
     }
 }
