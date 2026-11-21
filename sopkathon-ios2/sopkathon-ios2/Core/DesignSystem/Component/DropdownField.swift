@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DropdownField<Option: Hashable>: View {
     @Binding private var selection: Option?
-
     @State private var isExpanded = false
 
     private let title: String?
