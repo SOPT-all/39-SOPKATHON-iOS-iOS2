@@ -11,9 +11,11 @@ struct NavigationHeader: View {
     @Environment(\.dismiss) private var dismiss
 
     private let title: String
+    private let style: NavigationHeaderStyle
 
-    init(title: String) {
+    init(title: String, style: NavigationHeaderStyle) {
         self.title = title
+        self.style = style
     }
 
     var body: some View {
@@ -32,15 +34,34 @@ struct NavigationHeader: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, Metric.horizontalPadding)
-            .padding(.top, Metric.topPadding)
+            .padding(.horizontal, style.horizontalPadding)
+            .padding(.top, style.topPadding)
+            .padding(.bottom, style.bottomPadding)
+            .background {
+                if style.hasBackground {
+                    backgroundView
+                }
+            }
+            .zIndex(Metric.zIndex)
+    }
+
+    private var backgroundView: some View {
+        Color.baseWhite
+            .shadow(
+                color: .baseShadow.opacity(Metric.shadowOpacity),
+                radius: Metric.shadowRadius,
+                y: Metric.shadowOffsetY
+            )
+            .ignoresSafeArea(edges: .top)
     }
 }
 
 private extension NavigationHeader {
     enum Metric {
         static let height: CGFloat = 24
-        static let horizontalPadding: CGFloat = 24
-        static let topPadding: CGFloat = 17
+        static let shadowOpacity: Double = 0.1
+        static let shadowRadius: CGFloat = 2
+        static let shadowOffsetY: CGFloat = 4
+        static let zIndex: Double = 1
     }
 }

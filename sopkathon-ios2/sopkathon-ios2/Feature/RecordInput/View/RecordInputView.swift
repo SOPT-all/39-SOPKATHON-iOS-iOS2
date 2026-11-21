@@ -18,7 +18,7 @@ struct RecordInputView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NavigationHeader(title: Title.navigation)
+            NavigationHeader(title: Title.navigation, style: .plain)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
