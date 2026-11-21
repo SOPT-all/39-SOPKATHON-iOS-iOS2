@@ -53,6 +53,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				App/AppDependency.swift,
+				Core/Connectivity/WatchSyncMessage.swift,
 				Core/Network/BaseResponseDTO.swift,
 				Core/Network/BaseService.swift,
 				Core/Network/Endpoint.swift,

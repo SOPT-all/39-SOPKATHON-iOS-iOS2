@@ -13,9 +13,14 @@ final class VoiceMemoViewModel {
     private(set) var savedRecords: [CareRecordModel] = []
 
     private let service: any CareRecordServiceProtocol
+    private let phoneSyncService: any PhoneSyncServiceProtocol
 
-    init(service: any CareRecordServiceProtocol) {
+    init(
+        service: any CareRecordServiceProtocol,
+        phoneSyncService: any PhoneSyncServiceProtocol
+    ) {
         self.service = service
+        self.phoneSyncService = phoneSyncService
     }
 
     func saveMemo(_ memo: String) async {
@@ -24,5 +29,6 @@ final class VoiceMemoViewModel {
               let records = try? await service.createCareRecords(CareRecordDraftModel(text: text))
         else { return }
         savedRecords = records
+        phoneSyncService.notifyCareRecordSaved()
     }
 }

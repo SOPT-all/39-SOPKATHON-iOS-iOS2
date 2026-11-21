@@ -11,12 +11,17 @@ import SwiftUI
 struct sopkathon_ios2App: App {
     @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
     @State private var router = AppRouter()
+    @State private var watchSyncReceiver = WatchSyncReceiver()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(dependency)
                 .environment(router)
+                .environment(watchSyncReceiver)
+                .task {
+                    watchSyncReceiver.activate()
+                }
         }
     }
 }

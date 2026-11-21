@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(WatchSyncReceiver.self) private var watchSyncReceiver
     @State private var viewModel: HomeViewModel
 
     init(viewModel: HomeViewModel) {
@@ -36,7 +37,7 @@ struct HomeView: View {
             .padding(.vertical, Metric.verticalPadding)
         }
         .background { backgroundView }
-        .task {
+        .task(id: watchSyncReceiver.careRecordSavedCount) {
             await viewModel.fetchHome()
         }
     }
