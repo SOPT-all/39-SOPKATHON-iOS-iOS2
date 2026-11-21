@@ -7,7 +7,7 @@
 
 struct BriefingResponseDTO: Decodable {
     let date: String
-    let recordedKidCount: Int
+    let recordedKidNames: [String]
     let kids: [Kid]
 }
 
@@ -17,8 +17,8 @@ extension BriefingResponseDTO {
         let name: String
         let age: Int
         let recordCount: Int
-        let summary: Summary
-        let parent: Parent
+        let summary: [String: Int]
+        let parent: Parent?
         let briefing: Briefing?
 
         enum CodingKeys: String, CodingKey {
@@ -29,18 +29,6 @@ extension BriefingResponseDTO {
             case summary
             case parent
             case briefing
-        }
-    }
-
-    struct Summary: Decodable {
-        let feeding: Int
-        let sleep: Int
-        let diaper: Int
-
-        enum CodingKeys: String, CodingKey {
-            case feeding = "FEEDING"
-            case sleep = "SLEEP"
-            case diaper = "DIAPER"
         }
     }
 

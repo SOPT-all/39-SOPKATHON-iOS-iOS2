@@ -6,7 +6,9 @@
 //
 
 protocol BriefingServiceProtocol {
-    func fetchDailyBriefings(date: String) async throws -> BriefingModel
+    var isMock: Bool { get }
+
+    func fetchDailyBriefings() async throws -> BriefingModel
     func createDailyBriefing(kidID: Int, date: String) async throws -> BriefingMessageModel
     func updateDailyBriefing(
         briefingID: Int,
@@ -23,9 +25,11 @@ final class BriefingService {
 }
 
 extension BriefingService: BriefingServiceProtocol {
-    func fetchDailyBriefings(date: String) async throws -> BriefingModel {
+    var isMock: Bool { false }
+
+    func fetchDailyBriefings() async throws -> BriefingModel {
         let response: BriefingResponseDTO = try await baseService.request(
-            BriefingEndpoint.fetchDailyBriefings(date: date)
+            BriefingEndpoint.fetchDailyBriefings
         )
         return BriefingMapper.map(response)
     }

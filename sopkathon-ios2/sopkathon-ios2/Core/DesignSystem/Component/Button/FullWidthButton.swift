@@ -11,6 +11,7 @@ struct FullWidthButton: View {
     private let title: String
     private let appearance: ButtonAppearance
     private let size: ButtonSize
+    private let textStyle: Typography
     private let isEnabled: Bool
     private let action: () -> Void
 
@@ -18,12 +19,14 @@ struct FullWidthButton: View {
         title: String,
         appearance: ButtonAppearance = .primary,
         size: ButtonSize = .large,
+        textStyle: Typography = .subHeader2,
         isEnabled: Bool = true,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.appearance = appearance
         self.size = size
+        self.textStyle = textStyle
         self.isEnabled = isEnabled
         self.action = action
     }
@@ -33,7 +36,9 @@ struct FullWidthButton: View {
             Text(title)
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(AppButtonStyle(appearance: appearance, size: size))
+        .buttonStyle(
+            AppButtonStyle(appearance: appearance, size: size, textStyle: textStyle)
+        )
         .disabled(!isEnabled)
     }
 }

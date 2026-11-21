@@ -16,7 +16,10 @@ struct sopkathon_ios2App: App {
     @State private var isSplashFinished = false
 
     init() {
-        let dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+        let dependency = AppDependency(
+            mode: AppPreviewConfiguration.isBriefingEnabled ? .mock : .live,
+            baseService: BaseService.shared
+        )
         let notificationService = LocalNotificationService()
         _dependency = State(initialValue: dependency)
         _notificationService = State(initialValue: notificationService)

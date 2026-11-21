@@ -2,143 +2,454 @@
 //  BriefingView.swift
 //  sopkathon-ios2
 //
-//  Created by h2e on 11/21/26.
+//  Created by Seoyoung Lee on 11/21/26.
 //
 
 import SwiftUI
 
 struct BriefingView: View {
+    @Environment(AppRouter.self) private var router
     @State private var viewModel: BriefingViewModel
-    @State private var selectedDate = Date()
-    @State private var instructions: [Int: String] = [:]
+    @State private var selectedKidID: Int?
+    @State private var lastSentKidID: Int?
+    @State private var instruction = ""
+    @State private var isConfirming = false
+    @State private var isMessagePresented = false
+    @State private var isFirstTextVisible = true
+    @State private var isSecondTextVisible = false
+    @State private var isStampVisible = false
+    @State private var phase: BriefingPhase = .compose
 
     init(viewModel: BriefingViewModel) {
         _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                dateSelectionView
-                briefingListView
+        Group {
+            switch phase {
+            case .compose: composeView
+            case .sent: sentView
+            case .allDone: allDoneView
             }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .scrollDismissesKeyboard(.interactively)
-        .navigationTitle("일일 브리핑")
-        .task(id: selectedDate) {
-            await viewModel.fetchDailyBriefings(for: selectedDate)
+        .toolbar(.hidden, for: .navigationBar)
+        .background(.baseWhite)
+        .task {
+            await viewModel.fetchDailyBriefings()
+            selectInitialKid()
         }
-        .onChange(of: selectedDate) { _, _ in
-            instructions.removeAll()
+        .sheet(isPresented: $isMessagePresented) {
+            if let selectedKid,
+               let parent = selectedKid.parent,
+               let message = selectedKid.briefing {
+                BriefingMessageComposeView(
+                    isPresented: $isMessagePresented,
+                    recipient: parent.phone,
+                    content: message.content,
+                    onFinish: handleMessageResult
+                )
+            }
+        }
+        .overlay {
+            if isConfirming { confirmationView }
         }
     }
 
-    private var dateSelectionView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            DatePicker("브리핑 날짜", selection: $selectedDate, displayedComponents: .date)
+    private var composeView: some View {
+        VStack(spacing: 0) {
+            headerView
 
-            Button("목록 다시 조회") {
-                Task { await viewModel.fetchDailyBriefings(for: selectedDate) }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    introductionView
+                    profileSelectionView
+                    Rectangle().fill(.gray50).frame(height: 2)
+                    childDetailsView
+                        .background(alignment: .top) {
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .baseWhite.opacity(0), location: 0),
+                                    .init(color: .baseWhite.opacity(0), location: 0.2),
+                                    .init(color: .baseGradient, location: 1)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .opacity(0.8)
+                            .frame(height: Metric.gradientHeight)
+                            .offset(y: -Metric.gradientTopOverlap)
+                        }
+                }
+            }
+            .scrollDismissesKeyboard(.interactively)
+
+            BriefingBottomButtonView(title: "문자 발송하기", isEnabled: canComposeMessage) {
+                isConfirming = true
             }
         }
+        .task(id: selectedKidID) {
+            guard let selectedKidID else { return }
+            await viewModel.prepareDailyBriefing(kidID: selectedKidID)
+        }
+    }
+
+    private var headerView: some View {
+        NavigationHeader(title: "브리핑 작성", style: .bar) {
+            router.selectTab(.home)
+        }
+    }
+
+    private var introductionView: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(viewModel.briefingDateText)
+                .typography(.caption1)
+            Text("돌봄 기록을 마무리해요")
+                .typography(.header2)
+            (Text("기록한 아이 ").font(Typography.caption1.font)
+                + Text("\(viewModel.briefing?.recordedKidNames.count ?? 0)명")
+                    .font(Typography.body2.font))
+        }
+        .foregroundStyle(.textBlack)
+        .padding(.horizontal, 24)
+        .padding(.top, 24)
+        .padding(.bottom, 18)
+    }
+
+    private var profileSelectionView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(viewModel.briefing?.kids ?? []) { kid in
+                    Button {
+                        selectedKidID = kid.id
+                        instruction = ""
+                    } label: {
+                        BriefingCompletedProfileView(
+                            kid: kid,
+                            size: .medium,
+                            isCompleted: viewModel.isSent(kidID: kid.id)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 21)
+        }
+        .padding(.bottom, 20)
     }
 
     @ViewBuilder
-    private var briefingListView: some View {
-        if let briefing = viewModel.briefing, viewModel.isBriefing(for: selectedDate) {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("\(briefing.date) · 기록 있는 아이 \(briefing.recordedKidCount)명")
-                    .font(.headline)
+    private var childDetailsView: some View {
+        if let kid = selectedKid {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 20) {
+                    BriefingCompletedProfileView(
+                        kid: kid,
+                        size: .large,
+                        isCompleted: viewModel.isSent(kidID: kid.id)
+                    )
 
-                ForEach(briefing.kids) { kid in
-                    kidCardView(kid)
+                    VStack(alignment: .leading, spacing: 3) {
+                        (Text(kid.name).font(Typography.body4.font)
+                            + Text(" 만\(kid.age)세").font(Typography.body5.font))
+                        Text("오늘 기록 \(kid.recordCount)건 완료")
+                            .typography(.body5)
+                    }
+                    .foregroundStyle(.textBlack)
+                }
+                .padding(.bottom, 29)
+
+                summaryView(kid)
+                    .padding(.bottom, 38)
+
+                refinementView(kid)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 25)
+            .padding(.bottom, 30)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func summaryView(_ kid: BriefingKidModel) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(kid.summaryRows.indices, id: \.self) { index in
+                HStack(spacing: 10) {
+                    ForEach(kid.summaryRows[index], id: \.category) { item in
+                        CategorySummaryChip(category: item.category, summary: "\(item.count)회")
+                    }
                 }
             }
         }
     }
 
-    private func kidCardView(_ kid: BriefingKidModel) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(kid.name)
-                .font(.headline)
-            Text("만 \(kid.age)세 · 기록 \(kid.recordCount)건")
-            Text(
-                "수유 \(kid.summary.feeding) · 수면 \(kid.summary.sleep) · "
-                    + "기저귀 \(kid.summary.diaper)"
-            )
-            Text("보호자 \(kid.parent.name) · \(kid.parent.phone)")
+    private func refinementView(_ kid: BriefingKidModel) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("내용 다듬기")
+                .typography(.subHeader1)
+                .foregroundStyle(.textBlack)
 
             if let message = kid.briefing {
-                Text(message.content)
-                refinementView(message, for: kid.id)
-            } else {
-                Text("생성된 메시지가 없습니다.")
-                    .foregroundStyle(.secondary)
-            }
+                VStack(alignment: .leading, spacing: 20) {
+                    Text(message.content)
+                        .typography(.body5)
+                        .foregroundStyle(.textBlack)
 
-            Button {
-                Task { await viewModel.createDailyBriefing(kidID: kid.id, for: selectedDate) }
-            } label: {
-                HStack {
-                    if viewModel.generatingKidID == kid.id {
-                        ProgressView()
+                    HStack(spacing: 8) {
+                        TextField(
+                            "수정하고 싶은 방향을 알려주세요",
+                            text: $instruction
+                        )
+                            .font(Typography.body5.font)
+                            .submitLabel(.done)
+
+                        Button("수정") {
+                            Task {
+                                await viewModel.updateDailyBriefing(
+                                    briefingID: message.id,
+                                    instruction: instruction
+                                )
+                                if selectedKid?.briefing?.content != message.content {
+                                    instruction = ""
+                                }
+                            }
+                        }
+                        .typography(.body4)
+                        .foregroundStyle(.baseWhite)
+                        .padding(.horizontal, 12)
+                        .frame(height: 31)
+                        .background(.primary400)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .disabled(
+                            instruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        )
                     }
-                    Text(kid.briefing == nil ? "AI 메시지 생성" : "AI 메시지 다시 생성")
+                    .padding(7)
+                    .background(.gray50)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
-                .frame(maxWidth: .infinity)
+                .padding(15)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.baseWhite)
+                .clipShape(RoundedRectangle(cornerRadius: 15))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 15).stroke(.gray300, lineWidth: 1)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(viewModel.generatingKidID != nil || viewModel.refiningBriefingID != nil)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func refinementView(
-        _ message: BriefingMessageModel,
-        for kidID: Int
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            TextField(
-                "다듬기 요청사항",
-                text: instructionBinding(for: kidID),
-                axis: .vertical
-            )
-            .lineLimit(2...4)
-            .textFieldStyle(.roundedBorder)
+    private var confirmationView: some View {
+        ZStack {
+            Color.baseBlack.opacity(0.6).ignoresSafeArea()
 
-            Button {
-                Task {
-                    await viewModel.updateDailyBriefing(
-                        briefingID: message.id,
-                        instruction: instructions[kidID] ?? ""
+            VStack(spacing: 0) {
+                if let selectedKid {
+                    ProfileCard(childID: selectedKid.id, name: selectedKid.name, size: .extraLarge)
+                        .padding(.top, 50)
+                }
+
+                Text("문자를 전송 할까요?")
+                    .typography(.subHeader1)
+                    .foregroundStyle(.textBlack)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 27)
+
+                Text("메시지는 저장된 정보의 연락처로 전송돼요")
+                    .typography(.caption1)
+                    .foregroundStyle(.disabled150)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 4)
+
+                HStack(spacing: 15) {
+                    BriefingModalButtonView(title: "취소", appearance: .secondary) {
+                        isConfirming = false
+                    }
+                    BriefingModalButtonView(title: "전송", appearance: .primary) {
+                        isConfirming = false
+                        if viewModel.isMockPreview {
+                            handleMessageResult(.sent)
+                        } else {
+                            isMessagePresented = true
+                        }
+                    }
+                }
+                .padding(.top, 21)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 15)
+            .frame(width: 331)
+            .background(.baseWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 30))
+        }
+    }
+
+    private var sentView: some View {
+        VStack {
+            Spacer()
+
+            if let lastSentKid = viewModel.briefing?.kids.first(where: { $0.id == lastSentKidID }) {
+                HStack(spacing: 9) {
+                    BriefingCompletedProfileView(
+                        kid: lastSentKid,
+                        size: .extraLarge,
+                        isCompleted: isStampVisible,
+                        stampScale: isStampVisible ? 1 : 0.1
                     )
-                }
-            } label: {
-                HStack {
-                    if viewModel.refiningBriefingID == message.id {
-                        ProgressView()
+
+                    ForEach(remainingKids.prefix(3)) { kid in
+                        ProfileCard(childID: kid.id, name: kid.name, size: .medium)
                     }
-                    Text("AI 메시지 다듬기")
                 }
-                .frame(maxWidth: .infinity)
+
+                VStack(spacing: 4) {
+                    if isFirstTextVisible {
+                        Text("\(lastSentKid.name.dropFirst())이의 부모님에게")
+                            .typography(.header2)
+                            .transition(.move(edge: .leading).combined(with: .opacity))
+                    }
+
+                    VStack(spacing: 3) {
+                        Text("전송을 완료했어요")
+                            .typography(.header2)
+                            .foregroundStyle(.primary400)
+                        Text("이어서 브리핑을 작성해볼까요?")
+                            .typography(.header3)
+                    }
+                    .offset(y: isSecondTextVisible ? 0 : 50)
+                    .opacity(isSecondTextVisible ? 1 : 0)
+                }
+                .foregroundStyle(.textBlack)
+                .padding(.top, 48)
             }
-            .buttonStyle(.bordered)
-            .disabled(
-                viewModel.generatingKidID != nil
-                    || viewModel.refiningBriefingID != nil
-                    || (instructions[kidID] ?? "").isEmpty
-            )
+
+            Spacer()
+
+            BriefingBottomButtonView(title: "이어서 작성", isEnabled: isSecondTextVisible) {
+                selectedKidID = remainingKids.first?.id
+                instruction = ""
+                phase = .compose
+            }
         }
     }
 
-    private func instructionBinding(for kidID: Int) -> Binding<String> {
-        Binding(
-            get: { instructions[kidID] ?? "" },
-            set: { instructions[kidID] = $0 }
-        )
+    private var allDoneView: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                Spacer()
+
+                carouselView
+                    .frame(height: 85)
+
+                Text("오늘의 브리핑 완료!")
+                    .typography(.header2)
+                    .foregroundStyle(.primary400)
+                    .padding(.top, 48)
+                Text("아이들과 함께하느라 수고 많으셨어요")
+                    .typography(.header3)
+                    .foregroundStyle(.textBlack)
+                    .padding(.top, 4)
+
+                Spacer()
+
+                BriefingBottomButtonView(title: "홈 으로", isEnabled: true) {
+                    router.selectTab(.home)
+                }
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+        }
     }
+
+    private var carouselView: some View {
+        GeometryReader { geometry in
+            TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { timeline in
+                let kids = viewModel.briefing?.kids ?? []
+                let cycleWidth = CGFloat(kids.count) * 99
+                let elapsed = timeline.date.timeIntervalSinceReferenceDate
+                let offset = cycleWidth > 0
+                    ? CGFloat(elapsed * 30).truncatingRemainder(dividingBy: cycleWidth)
+                    : 0
+
+                HStack(spacing: 14) {
+                    ForEach(0..<7, id: \.self) { repetition in
+                        ForEach(kids) { kid in
+                            BriefingCompletedProfileView(
+                                kid: kid,
+                                size: .extraLarge,
+                                isCompleted: viewModel.isSent(kidID: kid.id)
+                            )
+                                .scaleEffect(85.0 / 90.0)
+                                .frame(width: 85, height: 85)
+                                .id("\(repetition)-\(kid.id)")
+                        }
+                    }
+                }
+                .offset(x: -cycleWidth - offset)
+                .frame(width: geometry.size.width, alignment: .leading)
+                .clipped()
+            }
+        }
+    }
+
+    private var selectedKid: BriefingKidModel? {
+        viewModel.briefing?.kids.first(where: { $0.id == selectedKidID })
+    }
+
+    private var remainingKids: [BriefingKidModel] {
+        viewModel.briefing?.kids.filter { !viewModel.isSent(kidID: $0.id) } ?? []
+    }
+
+    private var canComposeMessage: Bool {
+        guard let selectedKid else { return false }
+        return selectedKid.briefing != nil
+            && selectedKid.parent != nil
+            && !viewModel.isSent(kidID: selectedKid.id)
+            && (viewModel.isMockPreview || BriefingMessageComposeView.canSendText)
+    }
+
+    private func selectInitialKid() {
+        guard let kids = viewModel.briefing?.kids, !kids.isEmpty else { return }
+        selectedKidID = remainingKids.first?.id ?? kids.first?.id
+        if remainingKids.isEmpty {
+            phase = .allDone
+        }
+    }
+
+    private func handleMessageResult(_ result: BriefingMessageComposeResult) {
+        guard case .sent = result, let selectedKidID else { return }
+        viewModel.markSent(kidID: selectedKidID)
+        lastSentKidID = selectedKidID
+
+        if remainingKids.isEmpty {
+            phase = .allDone
+            return
+        }
+
+        isFirstTextVisible = true
+        isSecondTextVisible = false
+        isStampVisible = false
+        phase = .sent
+
+        Task {
+            try? await Task.sleep(for: .milliseconds(350))
+            withAnimation(.easeInOut(duration: 0.35)) {
+                isFirstTextVisible = false
+            }
+            try? await Task.sleep(for: .milliseconds(300))
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                isSecondTextVisible = true
+                isStampVisible = true
+            }
+        }
+    }
+}
+
+private enum BriefingPhase {
+    case compose
+    case sent
+    case allDone
+}
+
+private enum Metric {
+    static let gradientHeight: CGFloat = 722
+    static let gradientTopOverlap: CGFloat = 31
 }

@@ -11,11 +11,17 @@ struct NavigationHeader: View {
     @Environment(\.dismiss) private var dismiss
 
     private let title: String
+    private let onBack: (() -> Void)?
     private let style: NavigationHeaderStyle
 
-    init(title: String, style: NavigationHeaderStyle) {
+    init(
+        title: String,
+        style: NavigationHeaderStyle,
+        onBack: (() -> Void)? = nil
+    ) {
         self.title = title
         self.style = style
+        self.onBack = onBack
     }
 
     var body: some View {
@@ -26,7 +32,11 @@ struct NavigationHeader: View {
             .frame(height: Metric.height)
             .overlay(alignment: .leading) {
                 Button {
-                    dismiss()
+                    if let onBack {
+                        onBack()
+                    } else {
+                        dismiss()
+                    }
                 } label: {
                     Image(.iconBack)
                         .frame(width: Metric.height, height: Metric.height)
