@@ -10,8 +10,11 @@ import Observation
 
 @Observable
 final class VoiceInputViewModel {
+    private(set) var audioLevel: Float = 0
+
     private var transcript = ""
     private var transcriptTask: Task<Void, Never>?
+    private var audioLevelTask: Task<Void, Never>?
 
     private let service: any VoiceInputServiceProtocol
     private let careRecordService: any CareRecordServiceProtocol
@@ -31,14 +34,22 @@ final class VoiceInputViewModel {
         async let childNames = fetchChildNames()
 
         guard await service.requestAuthorization(), !Task.isCancelled else { return }
-        guard let stream = try? service.startRecognition(contextualStrings: await childNames)
+        guard let recognition = try? service.startRecognition(contextualStrings: await childNames)
         else { return }
 
         transcriptTask?.cancel()
         transcriptTask = Task {
-            for await text in stream {
+            for await text in recognition.transcripts {
                 transcript = text
             }
+        }
+
+        audioLevelTask?.cancel()
+        audioLevelTask = Task {
+            for await level in recognition.audioLevels {
+                audioLevel = max(level, audioLevel * Limit.audioLevelDecay)
+            }
+            audioLevel = 0
         }
     }
 
@@ -76,5 +87,6 @@ final class VoiceInputViewModel {
 private extension VoiceInputViewModel {
     enum Limit {
         static let childNamesTimeout: Duration = .milliseconds(700)
+        static let audioLevelDecay: Float = 0.85
     }
 }
