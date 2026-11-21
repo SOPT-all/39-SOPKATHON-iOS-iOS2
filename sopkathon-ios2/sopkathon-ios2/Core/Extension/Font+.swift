@@ -17,65 +17,55 @@ enum PretendardWeight: String {
 }
 
 enum Typography: CaseIterable {
-    case displayB20
-    case displayB18
-    case displaySb18
-    case displayRg18
+    case header1
+    case header2
+    case header3
 
-    case h1B16
-    case h1Sb16
-    case h1Md16
-    case h1Rg16
+    case subHeader1
+    case subHeader2
 
-    case h3B14
-    case h3Sb14
-    case h3Md14
-    case h3Rg14
+    case body1
+    case body2
+    case body3
+    case body4
+    case body5
 
-    case bodyB12
-    case bodySb12
-    case bodyMd12
-    case bodyRg12
-
-    case captionB10
-    case captionSb10
-    case captionMd10
-    case captionB8
+    case caption1
+    case caption2
+    case caption3
 
     var weight: PretendardWeight {
         switch self {
-        case .displayB20, .displayB18, .h1B16, .h3B14, .bodyB12, .captionB10, .captionB8:
+        case .header1, .header3:
             .bold
-        case .displaySb18, .h1Sb16, .h3Sb14, .bodySb12, .captionSb10:
+        case .header2, .subHeader1, .body2, .body4, .caption2:
             .semiBold
-        case .h1Md16, .h3Md14, .bodyMd12, .captionMd10:
+        case .subHeader2, .body1, .caption3:
             .medium
-        case .displayRg18, .h1Rg16, .h3Rg14, .bodyRg12:
+        case .body3, .body5, .caption1:
             .regular
         }
     }
 
     var size: CGFloat {
         switch self {
-        case .displayB20: 20
-        case .displayB18, .displaySb18, .displayRg18: 18
-        case .h1B16, .h1Sb16, .h1Md16, .h1Rg16: 16
-        case .h3B14, .h3Sb14, .h3Md14, .h3Rg14: 14
-        case .bodyB12, .bodySb12, .bodyMd12, .bodyRg12: 12
-        case .captionB10, .captionSb10, .captionMd10: 10
-        case .captionB8: 8
+        case .header1, .header2: 24
+        case .header3: 20
+        case .subHeader1: 18
+        case .subHeader2, .body1, .body2, .body3: 16
+        case .caption1: 15
+        case .body4, .body5, .caption2: 14
+        case .caption3: 13
         }
     }
 
     var lineHeight: CGFloat {
         switch self {
-        case .displayB20: 30
-        case .displayB18, .displaySb18, .displayRg18: 27
-        case .h1B16, .h1Sb16, .h1Md16, .h1Rg16: 24
-        case .h3B14, .h3Sb14, .h3Md14, .h3Rg14: 20
-        case .bodyB12, .bodySb12, .bodyMd12, .bodyRg12: 16
-        case .captionB10, .captionSb10, .captionMd10: 14
-        case .captionB8: 10
+        case .header1, .header2: 28
+        case .subHeader1: 26
+        case .header3, .subHeader2, .body1, .body2, .body3: 24
+        case .body4, .body5: 20
+        case .caption1, .caption2, .caption3: 16
         }
     }
 
