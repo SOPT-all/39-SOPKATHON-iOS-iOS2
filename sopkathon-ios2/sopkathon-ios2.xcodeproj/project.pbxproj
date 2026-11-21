@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		940CF24C30AF399C00CB7472 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 940CF24B30AF399C00CB7472 /* Alamofire */; };
 		940CF25430AF39C100CB7472 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 940CF25330AF39C100CB7472 /* Kingfisher */; };
+		9BF0CF4D30B21F4300402625 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9BF0CF4C30B21F4300402625 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 			files = (
 				940CF25430AF39C100CB7472 /* Kingfisher in Frameworks */,
 				940CF24C30AF399C00CB7472 /* Alamofire in Frameworks */,
+				9BF0CF4D30B21F4300402625 /* Lottie in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 			packageProductDependencies = (
 				940CF24B30AF399C00CB7472 /* Alamofire */,
 				940CF25330AF39C100CB7472 /* Kingfisher */,
+				9BF0CF4C30B21F4300402625 /* Lottie */,
 			);
 			productName = "sopkathon-ios2";
 			productReference = 940CF21230AF390600CB7472 /* sopkathon-ios2.app */;
@@ -117,6 +120,7 @@
 			packageReferences = (
 				940CF24A30AF399C00CB7472 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				940CF25230AF39C100CB7472 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				9BF0CF4B30B21F4300402625 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 940CF21330AF390600CB7472 /* Products */;
@@ -372,6 +376,14 @@
 				minimumVersion = 8.16.0;
 			};
 		};
+		9BF0CF4B30B21F4300402625 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -384,6 +396,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 940CF25230AF39C100CB7472 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		9BF0CF4C30B21F4300402625 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BF0CF4B30B21F4300402625 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
