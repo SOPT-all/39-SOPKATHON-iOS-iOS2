@@ -16,15 +16,18 @@ final class WatchSyncReceiver: NSObject {
     private let voiceInputService: any VoiceInputServiceProtocol
     private let careRecordService: any CareRecordServiceProtocol
     private let childService: any ChildServiceProtocol
+    private let notificationService: any LocalNotificationServiceProtocol
 
     init(
         voiceInputService: any VoiceInputServiceProtocol,
         careRecordService: any CareRecordServiceProtocol,
-        childService: any ChildServiceProtocol
+        childService: any ChildServiceProtocol,
+        notificationService: any LocalNotificationServiceProtocol
     ) {
         self.voiceInputService = voiceInputService
         self.careRecordService = careRecordService
         self.childService = childService
+        self.notificationService = notificationService
     }
 
     func activate() {
@@ -38,18 +41,45 @@ final class WatchSyncReceiver: NSObject {
     private func saveCareRecords(fromRecordingAt url: URL) async {
         defer { try? FileManager.default.removeItem(at: url) }
 
+        guard let records = await createCareRecords(fromRecordingAt: url) else {
+            await notificationService.sendNotification(
+                title: Message.failedTitle,
+                body: Message.failedBody
+            )
+            return
+        }
+
+        careRecordSavedCount += 1
+        await notificationService.sendNotification(
+            title: Message.savedTitle,
+            body: records.map(makeSummary).joined(separator: Message.recordSeparator)
+        )
+    }
+
+    private func createCareRecords(fromRecordingAt url: URL) async -> [CareRecordModel]? {
         let children = (try? await childService.fetchChildren(keyword: nil)) ?? []
         guard await voiceInputService.requestAuthorization(),
               let text = try? await voiceInputService.transcribeRecording(
                 at: url,
                 contextualStrings: children.flatMap(\.spokenNames)
               ),
-              !text.isEmpty,
-              (try? await careRecordService.createCareRecords(
-                CareRecordDraftModel(text: text)
-              )) != nil
-        else { return }
-        careRecordSavedCount += 1
+              !text.isEmpty else { return nil }
+        return try? await careRecordService.createCareRecords(CareRecordDraftModel(text: text))
+    }
+
+    private func makeSummary(of record: CareRecordModel) -> String {
+        guard let category = record.category else { return record.childName }
+        return record.childName + Message.categorySeparator + category.title
+    }
+}
+
+private extension WatchSyncReceiver {
+    enum Message {
+        static let savedTitle = "돌봄 기록이 저장됐어요"
+        static let failedTitle = "기록을 저장하지 못했어요"
+        static let failedBody = "아이 이름과 함께 다시 말해 주세요."
+        static let categorySeparator = " · "
+        static let recordSeparator = ", "
     }
 }
 

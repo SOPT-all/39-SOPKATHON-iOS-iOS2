@@ -12,15 +12,19 @@ struct sopkathon_ios2App: App {
     @State private var dependency: AppDependency
     @State private var router = AppRouter()
     @State private var watchSyncReceiver: WatchSyncReceiver
+    @State private var notificationService: LocalNotificationService
 
     init() {
         let dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+        let notificationService = LocalNotificationService()
         _dependency = State(initialValue: dependency)
+        _notificationService = State(initialValue: notificationService)
         _watchSyncReceiver = State(
             initialValue: WatchSyncReceiver(
                 voiceInputService: dependency.voiceInputService,
                 careRecordService: dependency.careRecordService,
-                childService: dependency.childService
+                childService: dependency.childService,
+                notificationService: notificationService
             )
         )
     }
@@ -33,6 +37,12 @@ struct sopkathon_ios2App: App {
                 .environment(watchSyncReceiver)
                 .task {
                     watchSyncReceiver.activate()
+                    await notificationService.activate()
+                }
+                .onChange(of: notificationService.openedCount) {
+                    router.dismissSheet()
+                    router.popToRoot()
+                    router.selectTab(.home)
                 }
         }
     }
