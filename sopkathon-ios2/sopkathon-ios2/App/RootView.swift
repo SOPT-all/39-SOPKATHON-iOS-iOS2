@@ -151,9 +151,10 @@ struct RootView: View {
     @ViewBuilder
     private func sheetView(for sheet: AppSheet) -> some View {
         switch sheet {
-        case .voiceInput:
+        case .voiceInput(let teacherName):
             VoiceInputView(
                 viewModel: VoiceInputViewModel(
+                    teacherName: teacherName,
                     service: dependency.voiceInputService,
                     careRecordService: dependency.careRecordService,
                     childService: dependency.childService

@@ -123,7 +123,7 @@ struct HomeView: View {
                 }
 
                 HomeMemoCard(kind: .voice) {
-                    router.presentSheet(.voiceInput)
+                    router.presentSheet(.voiceInput(teacherName: viewModel.home?.teacherName ?? ""))
                 }
             }
         }
