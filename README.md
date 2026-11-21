@@ -27,12 +27,20 @@ speakids는 20대 및 신규 부임 어린이집 교사가 아이별 돌봄 내�
 
 | <img src="https://github.com/user-attachments/assets/f68742e2-90d6-4d1d-87d9-a946cc3d1e3f" width="200"> | <img src="https://github.com/user-attachments/assets/6118a728-fb50-4996-bc13-e8aa1f7a299b" width="200"> | <img src="https://github.com/user-attachments/assets/61d4238d-8414-4190-b1cb-7e0141d7d4ad" width="200"> | <img src="https://github.com/user-attachments/assets/9f03e051-68cc-4a43-a927-bce3d56a0109" width="200"> |
 | :---: | :---: | :---: | :---: |
-| <b>[최주희](https://github.com/dearosmar)</b> | <b>[이서영](https://github.com/amie-lee)</b> | <b>[김보민](https://github.com/bominnnkimmm)</b> | <b>[허다연](https://github.com/dxxeon)</b> |
+| <b>[최주희(L)](https://github.com/dearosmar)</b> | <b>[이서영](https://github.com/amie-lee)</b> | <b>[김보민](https://github.com/bominnnkimmm)</b> | <b>[허다연](https://github.com/dxxeon)</b> |
 | `돌봄 기록·음성 입력 및 공통 UI` | `일일 브리핑·메시지 발송` | `아이 등록·관리` | `홈 화면 및 공통 컴포넌트` |
 
 <br>
 
-### ios 팀원 사진 
+## 🖼️ 시연 영상
+
+| 음성 메모 | 워치 음성 주입 | 개별 문자 전송 | 아이 관리 |
+|---|---|---|---|
+|<video src="https://github.com/user-attachments/assets/db08ade0-6cd9-45f2-983d-d39d6d53ed7f">|<video src="https://github.com/user-attachments/assets/890c5c67-d6fc-4cc3-af93-d86b4e6998bd">|<video src="https://github.com/user-attachments/assets/1750d20d-381b-4392-84a8-64eb5faa7562">|<video src="https://github.com/user-attachments/assets/084dad72-c1d2-4192-b86e-1325dde25e50">|
+
+<br>
+
+### iOS 팀원 사진 
 | Before | After |
 |:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/8308d35e-974a-4a04-88cf-ba283bb9c121" width="400"> | <img width="400" alt="after" src="https://github.com/user-attachments/assets/27d260f3-3483-46ec-ae11-08de654a9b8d" /> |
@@ -93,7 +101,7 @@ speakids는 20대 및 신규 부임 어린이집 교사가 아이별 돌봄 내�
 등록한 정보는 언제든 수정할 수 있어요.
 
 
-<br> <br>
+<br> 
 
 
 ## 🤝 Git Convention
