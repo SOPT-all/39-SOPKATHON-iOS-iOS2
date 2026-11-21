@@ -30,26 +30,4 @@ extension View {
             for: nil
         )
     }
-
-    func confirmModal(
-        isPresented: Binding<Bool>,
-        title: String,
-        message: String,
-        cancelTitle: String,
-        confirmTitle: String,
-        confirmAppearance: ButtonAppearance = .primary,
-        onConfirm: @escaping () -> Void
-    ) -> some View {
-        modifier(
-            ConfirmModalModifier(
-                isPresented: isPresented,
-                title: title,
-                message: message,
-                cancelTitle: cancelTitle,
-                confirmTitle: confirmTitle,
-                confirmAppearance: confirmAppearance,
-                onConfirm: onConfirm
-            )
-        )
-    }
 }
