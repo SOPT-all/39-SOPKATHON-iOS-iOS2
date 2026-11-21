@@ -22,10 +22,6 @@ extension View {
         )
     }
 
-    func backButton(action: @escaping () -> Void) -> some View {
-        modifier(BackButtonModifier(action: action))
-    }
-
     func hideKeyboard() {
         UIApplication.shared.sendAction(
             #selector(UIResponder.resignFirstResponder),

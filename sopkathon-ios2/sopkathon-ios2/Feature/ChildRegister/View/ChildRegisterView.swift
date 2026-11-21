@@ -17,27 +17,27 @@ struct ChildRegisterView: View {
     }
 
     var body: some View {
-        ScrollView {
-            ChildFormView(
-                childName: $viewModel.childName,
-                gender: $viewModel.gender,
-                parentName: $viewModel.parentName,
-                parentPhoneNumber: $viewModel.parentPhoneNumber,
-                relationship: $viewModel.relationship,
-                notes: $viewModel.notes,
-                isValidParentPhoneNumber: viewModel.isValidParentPhoneNumber
-            )
+        VStack(spacing: 0) {
+            NavigationHeader(title: Title.navigation)
+
+            ScrollView {
+                ChildFormView(
+                    childName: $viewModel.childName,
+                    gender: $viewModel.gender,
+                    parentName: $viewModel.parentName,
+                    parentPhoneNumber: $viewModel.parentPhoneNumber,
+                    relationship: $viewModel.relationship,
+                    notes: $viewModel.notes,
+                    isValidParentPhoneNumber: viewModel.isValidParentPhoneNumber
+                )
+            }
+            .scrollDismissesKeyboard(.interactively)
         }
-        .scrollDismissesKeyboard(.interactively)
         .background(Color.baseWhite)
         .safeAreaInset(edge: .bottom) {
             submitButtonView
         }
-        .navigationTitle(Title.navigation)
-        .navigationBarTitleDisplayMode(.inline)
-        .backButton {
-            router.pop()
-        }
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private var submitButtonView: some View {

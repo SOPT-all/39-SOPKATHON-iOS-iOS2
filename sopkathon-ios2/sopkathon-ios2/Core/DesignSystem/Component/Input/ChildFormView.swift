@@ -159,9 +159,7 @@ struct ChildFormView: View {
     }
 
     private var chevronView: some View {
-        Image(systemName: Symbol.chevronDown)
-            .font(.system(size: Metric.chevronSize, weight: .semibold))
-            .foregroundStyle(Color.disabled200)
+        Image(.iconChevronDown)
     }
 
     private var fieldShape: RoundedRectangle {
@@ -286,7 +284,6 @@ private extension ChildFormView {
         static let notesCornerRadius: CGFloat = 4
         static let notesInnerPadding: CGFloat = 8
         static let borderWidth: CGFloat = 1
-        static let chevronSize: CGFloat = 12
     }
 
     enum Title {
@@ -306,9 +303,5 @@ private extension ChildFormView {
     enum Option {
         static let genders = ["남자", "여자"]
         static let relationships = ["엄마", "아빠", "보호자"]
-    }
-
-    enum Symbol {
-        static let chevronDown = "chevron.down"
     }
 }
