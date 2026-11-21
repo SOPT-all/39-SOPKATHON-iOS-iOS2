@@ -18,7 +18,7 @@ struct ChildDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NavigationHeader(title: Title.navigation, style: .plain)
+            NavigationHeader(title: Title.navigation, style: .bar)
 
             ScrollView {
                 ChildFormView(
