@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(AppDependency.self) private var dependency
 
     var body: some View {
         @Bindable var router = router
@@ -31,7 +32,7 @@ struct RootView: View {
         case .recordInput:
             RecordInputView()
         case .voiceInput:
-            VoiceInputView()
+            VoiceInputView(viewModel: VoiceInputViewModel(service: dependency.voiceInputService))
         case .recordList(let childID):
             RecordListView(childID: childID)
         case .recordEdit(let recordID):
