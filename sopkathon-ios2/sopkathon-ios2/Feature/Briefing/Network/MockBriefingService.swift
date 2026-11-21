@@ -24,7 +24,8 @@ extension MockBriefingService: BriefingServiceProtocol {
                     parent: BriefingParentModel(name: "김OO", phone: "010-1234-5678"),
                     briefing: generatedMessages[1] ?? BriefingMessageModel(
                         id: 5,
-                        content: "지우는 오늘 수유 3회, 낮잠 1회, 기저귀 교체 2회를 했어요."
+                        content: "지우는 오늘 수유 3회, 낮잠 1회, "
+                            + "기저귀 교체 2회를 했어요."
                     )
                 ),
                 BriefingKidModel(
@@ -44,6 +45,19 @@ extension MockBriefingService: BriefingServiceProtocol {
         let message = BriefingMessageModel(
             id: kidID + 4,
             content: "오늘의 돌봄 기록을 바탕으로 브리핑을 생성했어요."
+        )
+        generatedMessages[kidID] = message
+        return message
+    }
+
+    func updateDailyBriefing(
+        briefingID: Int,
+        instruction: String
+    ) async throws -> BriefingMessageModel {
+        let kidID = briefingID - 4
+        let message = BriefingMessageModel(
+            id: briefingID,
+            content: "\(instruction) 요청을 반영해 브리핑을 다듬었어요."
         )
         generatedMessages[kidID] = message
         return message

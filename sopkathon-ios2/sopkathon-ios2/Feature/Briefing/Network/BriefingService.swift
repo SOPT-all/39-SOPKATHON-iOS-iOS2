@@ -8,6 +8,10 @@
 protocol BriefingServiceProtocol {
     func fetchDailyBriefings(date: String) async throws -> BriefingModel
     func createDailyBriefing(kidID: Int, date: String) async throws -> BriefingMessageModel
+    func updateDailyBriefing(
+        briefingID: Int,
+        instruction: String
+    ) async throws -> BriefingMessageModel
 }
 
 final class BriefingService {
@@ -30,6 +34,17 @@ extension BriefingService: BriefingServiceProtocol {
         let request = CreateBriefingRequestDTO(kidID: kidID, date: date)
         let response: CreateBriefingResponseDTO = try await baseService.request(
             BriefingEndpoint.createDailyBriefing(request)
+        )
+        return BriefingMapper.map(response)
+    }
+
+    func updateDailyBriefing(
+        briefingID: Int,
+        instruction: String
+    ) async throws -> BriefingMessageModel {
+        let request = RefineBriefingRequestDTO(instruction: instruction)
+        let response: RefineBriefingResponseDTO = try await baseService.request(
+            BriefingEndpoint.updateDailyBriefing(briefingID: briefingID, request: request)
         )
         return BriefingMapper.map(response)
     }
