@@ -65,7 +65,7 @@ struct HomeView: View {
 
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image(.iconLogo)
+            Image(.iconManageOn)
                 .resizable()
                 .frame(width: Metric.logoSize, height: Metric.logoSize)
                 .offset(x: Metric.logoOffsetX)
@@ -105,7 +105,7 @@ struct HomeView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Metric.cardSpacing) {
                     ForEach(children) { child in
-                        HomeProfileCard(name: child.name, palette: child.profileColor)
+                        ProfileCard(childID: child.id, name: child.name, size: .large)
                     }
                 }
             }
@@ -136,9 +136,9 @@ struct HomeView: View {
                 VStack(spacing: Metric.recordSpacing) {
                     ForEach(records) { record in
                         HomeRecordRow(
+                            childID: record.childID,
                             name: record.childName,
                             time: viewModel.timeText(for: record.recordedAt),
-                            palette: record.profileColor,
                             category: record.category
                         )
                     }

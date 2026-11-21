@@ -20,7 +20,7 @@ struct HomeLabelCheck: View {
                 .typography(.caption2)
                 .foregroundStyle(.baseWhite)
 
-            Image(.labelCheck)
+            Image(.iconLabelCheck)
                 .resizable()
                 .frame(width: Metric.iconSize, height: Metric.iconSize)
         }

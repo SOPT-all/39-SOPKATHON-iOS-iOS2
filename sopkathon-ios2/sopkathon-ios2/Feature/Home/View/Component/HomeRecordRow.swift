@@ -8,26 +8,26 @@
 import SwiftUI
 
 struct HomeRecordRow: View {
+    private let childID: Int
     private let name: String
     private let time: String
-    private let palette: HomeProfileColorModel
     private let category: CareRecordCategoryModel
 
     init(
+        childID: Int,
         name: String,
         time: String,
-        palette: HomeProfileColorModel,
         category: CareRecordCategoryModel
     ) {
+        self.childID = childID
         self.name = name
         self.time = time
-        self.palette = palette
         self.category = category
     }
 
     var body: some View {
         HStack(spacing: Metric.spacing) {
-            HomeProfileCard(name: name, palette: palette, size: .small)
+            ProfileCard(childID: childID, name: name, size: .small)
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(name)
