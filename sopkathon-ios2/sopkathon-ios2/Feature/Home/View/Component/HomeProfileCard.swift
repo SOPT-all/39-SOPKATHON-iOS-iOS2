@@ -41,31 +41,68 @@ struct HomeProfileCard: View {
         }
     }
 
+    enum Size {
+        case large
+        case small
+
+        var width: CGFloat {
+            switch self {
+            case .large:
+                return 70
+            case .small:
+                return 41
+            }
+        }
+
+        var height: CGFloat {
+            switch self {
+            case .large:
+                return 70
+            case .small:
+                return 42
+            }
+        }
+
+        var cornerRadius: CGFloat {
+            switch self {
+            case .large:
+                return 25
+            case .small:
+                return 15
+            }
+        }
+
+        var fontSize: CGFloat {
+            switch self {
+            case .large:
+                return 35
+            case .small:
+                return 20
+            }
+        }
+    }
+
     private let name: String
     private let palette: Palette
+    private let size: Size
 
-    init(name: String, palette: Palette) {
+    init(name: String, palette: Palette, size: Size = .large) {
         self.name = name
         self.palette = palette
+        self.size = size
     }
 
     var body: some View {
         Text(initial)
-            .font(.pretendard(.bold, size: Metric.fontSize))
+            .font(.pretendard(.bold, size: size.fontSize))
             .foregroundStyle(palette.textColor)
-            .frame(width: Metric.size, height: Metric.size)
+            .frame(width: size.width, height: size.height)
             .background(palette.backgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
+            .clipShape(RoundedRectangle(cornerRadius: size.cornerRadius))
     }
 
     private var initial: String {
         let givenName = name.count > 1 ? name.dropFirst() : Substring(name)
         return givenName.first.map(String.init) ?? ""
     }
-}
-
-private enum Metric {
-    static let size: CGFloat = 70
-    static let cornerRadius: CGFloat = 25
-    static let fontSize: CGFloat = 35
 }
