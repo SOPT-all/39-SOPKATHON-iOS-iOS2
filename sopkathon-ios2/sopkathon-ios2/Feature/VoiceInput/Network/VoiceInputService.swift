@@ -10,7 +10,7 @@ import Speech
 
 protocol VoiceInputServiceProtocol {
     func requestAuthorization() async -> Bool
-    func startRecognition(contextualStrings: [String]) throws -> AsyncStream<String>
+    func startRecognition(contextualStrings: [String]) throws -> VoiceInputModel
     func stopRecognition()
 }
 
@@ -26,6 +26,7 @@ final class VoiceInputService {
     )
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+    private var audioLevelContinuation: AsyncStream<Float>.Continuation?
 }
 
 extension VoiceInputService: VoiceInputServiceProtocol {
@@ -34,7 +35,7 @@ extension VoiceInputService: VoiceInputServiceProtocol {
         return await AVAudioApplication.requestRecordPermission()
     }
 
-    func startRecognition(contextualStrings: [String]) throws -> AsyncStream<String> {
+    func startRecognition(contextualStrings: [String]) throws -> VoiceInputModel {
         stopRecognition()
 
         guard let speechRecognizer, speechRecognizer.isAvailable else {
@@ -45,8 +46,11 @@ extension VoiceInputService: VoiceInputServiceProtocol {
         request.shouldReportPartialResults = true
         request.contextualStrings = contextualStrings
 
+        let (audioLevels, audioLevelContinuation) = AsyncStream.makeStream(of: Float.self)
+        self.audioLevelContinuation = audioLevelContinuation
+
         do {
-            try startAudioEngine(appendingTo: request)
+            try startAudioEngine(appendingTo: request, audioLevelContinuation: audioLevelContinuation)
         } catch {
             stopRecognition()
             throw error
@@ -59,7 +63,7 @@ extension VoiceInputService: VoiceInputServiceProtocol {
             request: request,
             continuation: continuation
         )
-        return stream
+        return VoiceInputModel(transcripts: stream, audioLevels: audioLevels)
     }
 
     func stopRecognition() {
@@ -69,6 +73,8 @@ extension VoiceInputService: VoiceInputServiceProtocol {
         recognitionTask?.finish()
         recognitionRequest = nil
         recognitionTask = nil
+        audioLevelContinuation?.finish()
+        audioLevelContinuation = nil
         try? AVAudioSession.sharedInstance().setActive(
             false,
             options: .notifyOthersOnDeactivation
@@ -81,9 +87,15 @@ private extension VoiceInputService {
         static let localeIdentifier = "ko-KR"
         static let bus: AVAudioNodeBus = 0
         static let bufferSize: AVAudioFrameCount = 1024
+        static let minimumDecibel: Float = -45
+        static let maximumDecibel: Float = -25
+        static let minimumAmplitude: Float = 1e-7
     }
 
-    func startAudioEngine(appendingTo request: SFSpeechAudioBufferRecognitionRequest) throws {
+    func startAudioEngine(
+        appendingTo request: SFSpeechAudioBufferRecognitionRequest,
+        audioLevelContinuation: AsyncStream<Float>.Continuation
+    ) throws {
         let audioSession = AVAudioSession.sharedInstance()
         try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
@@ -94,7 +106,12 @@ private extension VoiceInputService {
             throw VoiceInputError.microphoneUnavailable
         }
 
-        Self.installTap(on: inputNode, format: format, request: request)
+        Self.installTap(
+            on: inputNode,
+            format: format,
+            request: request,
+            audioLevelContinuation: audioLevelContinuation
+        )
         audioEngine.prepare()
         try audioEngine.start()
     }
@@ -110,7 +127,8 @@ private extension VoiceInputService {
     nonisolated static func installTap(
         on inputNode: AVAudioInputNode,
         format: AVAudioFormat,
-        request: SFSpeechAudioBufferRecognitionRequest
+        request: SFSpeechAudioBufferRecognitionRequest,
+        audioLevelContinuation: AsyncStream<Float>.Continuation
     ) {
         inputNode.installTap(
             onBus: Constant.bus,
@@ -118,7 +136,22 @@ private extension VoiceInputService {
             format: format
         ) { buffer, _ in
             request.append(buffer)
+            audioLevelContinuation.yield(audioLevel(of: buffer))
         }
+    }
+
+    nonisolated static func audioLevel(of buffer: AVAudioPCMBuffer) -> Float {
+        guard let samples = buffer.floatChannelData?[0], buffer.frameLength > 0 else { return 0 }
+
+        let frameCount = Int(buffer.frameLength)
+        var sumOfSquares: Float = 0
+        for index in 0..<frameCount {
+            sumOfSquares += samples[index] * samples[index]
+        }
+        let rms = (sumOfSquares / Float(frameCount)).squareRoot()
+        let decibel = 20 * log10(max(rms, Constant.minimumAmplitude))
+        let range = Constant.maximumDecibel - Constant.minimumDecibel
+        return min(max((decibel - Constant.minimumDecibel) / range, 0), 1)
     }
 
     nonisolated static func makeRecognitionTask(
