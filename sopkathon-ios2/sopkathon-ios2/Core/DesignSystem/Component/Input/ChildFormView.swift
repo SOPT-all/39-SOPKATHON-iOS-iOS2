@@ -17,6 +17,7 @@ struct ChildFormView: View {
     @Binding private var notes: String
 
     @FocusState private var focusedField: Field?
+
     @State private var presentedPicker: PickerType?
     @State private var selectedBirthDate = Date()
     @State private var selectedGender = ChildGenderModel.male
