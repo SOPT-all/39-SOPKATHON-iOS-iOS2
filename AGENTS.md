@@ -27,7 +27,7 @@ xcodebuild -project sopkathon-ios2/sopkathon-ios2.xcodeproj -scheme SopkathonWat
 ```
 
 - 워치 앱 코드는 `sopkathon-ios2/SopkathonWatch/`에 둡니다.
-- 워치는 `Core/Network`, `Feature/CareRecord`, `App/AppDependency.swift`를 아이폰 앱과 같이 씁니다. 이 파일들이 SwiftUI나 UIKit 전용 API, 워치 타깃에 없는 타입을 쓰면 워치 빌드가 깨지므로, 수정했다면 워치 빌드도 확인합니다.
+- 워치는 `Core/Network`, `Feature/CareRecord`, `App/AppDependency.swift`, `Core/Extension/Font+.swift`, Pretendard 폰트를 아이폰 앱과 같이 씁니다. 이 파일들이 SwiftUI나 UIKit 전용 API, 워치 타깃에 없는 타입을 쓰면 워치 빌드가 깨지므로, 수정했다면 워치 빌드도 확인합니다.
 - 워치에서 같이 쓸 파일을 늘리려면 Xcode에서 그 파일의 Target Membership에 `SopkathonWatch`를 체크합니다.
 
 ## 3. 폴더 구조
