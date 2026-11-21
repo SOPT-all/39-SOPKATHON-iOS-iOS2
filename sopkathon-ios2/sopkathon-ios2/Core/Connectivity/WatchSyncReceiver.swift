@@ -64,7 +64,11 @@ final class WatchSyncReceiver: NSObject {
                 contextualStrings: children.flatMap(\.spokenNames)
               ),
               !text.isEmpty else { return nil }
-        return try? await careRecordService.createCareRecords(CareRecordDraftModel(text: text))
+        let records = await careRecordService.createCareRecords(
+            fromSpokenText: text,
+            mentioning: children
+        )
+        return records.isEmpty ? nil : records
     }
 
     private func makeSavedBody(of records: [CareRecordModel]) -> String {
