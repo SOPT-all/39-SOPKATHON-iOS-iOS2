@@ -10,6 +10,8 @@ import SwiftUI
 struct DropdownField<Option: Hashable>: View {
     @Binding private var selection: Option?
 
+    @State private var isExpanded = false
+
     private let title: String?
     private let options: [Option]
     private let placeholder: String
@@ -30,45 +32,79 @@ struct DropdownField<Option: Hashable>: View {
     }
 
     var body: some View {
-        InputFieldContainer(title: title) {
-            Menu {
-                ForEach(options, id: \.self) { option in
-                    optionButton(option)
+        InputFieldContainer(title: title, isFocused: isExpanded) {
+            VStack(spacing: 0) {
+                headerButton
+
+                if isExpanded {
+                    Divider()
+
+                    optionList
                 }
-            } label: {
-                menuLabel
             }
         }
     }
 
-    private var menuLabel: some View {
-        HStack {
-            Text(selection.map(optionTitle) ?? placeholder)
-                .typography(.h3Rg14)
-                .foregroundStyle(selection == nil ? Color(.placeholderText) : Color.primary)
-
-            Spacer()
-
-            Image(systemName: "chevron.down")
-                .foregroundStyle(Color.secondary)
-        }
-        .frame(height: Metric.height)
-        .contentShape(Rectangle())
-    }
-
-    private func optionButton(_ option: Option) -> some View {
+    private var headerButton: some View {
         Button {
-            selection = option
+            withAnimation(.easeInOut(duration: Metric.animationDuration)) {
+                isExpanded.toggle()
+            }
         } label: {
-            if option == selection {
-                Label(optionTitle(option), systemImage: "checkmark")
-            } else {
-                Text(optionTitle(option))
+            HStack {
+                Text(selection.map(optionTitle) ?? placeholder)
+                    .typography(.h3Rg14)
+                    .foregroundStyle(selection == nil ? Color(.placeholderText) : Color.primary)
+
+                Spacer()
+
+                Image(systemName: "chevron.down")
+                    .foregroundStyle(Color.secondary)
+                    .rotationEffect(.degrees(isExpanded ? Metric.expandedChevronDegrees : 0))
+            }
+            .frame(height: Metric.headerHeight)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var optionList: some View {
+        VStack(spacing: 0) {
+            ForEach(options, id: \.self) { option in
+                optionRow(option)
             }
         }
+    }
+
+    private func optionRow(_ option: Option) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: Metric.animationDuration)) {
+                selection = option
+                isExpanded = false
+            }
+        } label: {
+            HStack {
+                Text(optionTitle(option))
+                    .typography(option == selection ? .h3Sb14 : .h3Rg14)
+                    .foregroundStyle(Color.primary)
+
+                Spacer()
+
+                if option == selection {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(Color.primary)
+                }
+            }
+            .frame(height: Metric.optionHeight)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
 private enum Metric {
-    static let height: CGFloat = 52
+    static let headerHeight: CGFloat = 52
+    static let optionHeight: CGFloat = 44
+    static let animationDuration: Double = 0.2
+    static let expandedChevronDegrees: Double = 180
 }
