@@ -18,7 +18,7 @@ struct ChildRegisterView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NavigationHeader(title: Title.navigation)
+            NavigationHeader(title: Title.navigation, style: .bar)
 
             ScrollView {
                 ChildFormView(

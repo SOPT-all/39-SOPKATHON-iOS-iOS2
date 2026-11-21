@@ -9,11 +9,37 @@
 /* Begin PBXBuildFile section */
 		940CF24C30AF399C00CB7472 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 940CF24B30AF399C00CB7472 /* Alamofire */; };
 		940CF25430AF39C100CB7472 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 940CF25330AF39C100CB7472 /* Kingfisher */; };
+		940CFCCD30B222EA00CB7472 /* SopkathonWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 940CFCC330B222E900CB7472 /* SopkathonWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		94A170010000000000000001 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 94A1700200000000000000A2 /* Alamofire */; };
+		9BF0CF4D30B21F4300402625 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9BF0CF4C30B21F4300402625 /* Lottie */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		940CFCCB30B222EA00CB7472 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 940CF20A30AF390600CB7472 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 940CFCC230B222E900CB7472;
+			remoteInfo = SopkathonWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		940CFCCE30B222EA00CB7472 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolder = Product;
+			files = (
+				940CFCCD30B222EA00CB7472 /* SopkathonWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		940CF21230AF390600CB7472 /* sopkathon-ios2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "sopkathon-ios2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		940CF22130AF390700CB7472 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		940CFCC330B222E900CB7472 /* SopkathonWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SopkathonWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -24,6 +50,38 @@
 			);
 			target = 940CF21130AF390600CB7472 /* sopkathon-ios2 */;
 		};
+		94A1700300000000000000A3 /* Exceptions for "sopkathon-ios2" folder in "SopkathonWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				App/AppDependency.swift,
+				"Core/Extension/Font+.swift",
+				Core/Network/BaseResponseDTO.swift,
+				Core/Network/BaseService.swift,
+				Core/Network/Endpoint.swift,
+				Core/Network/HTTPMethod.swift,
+				Core/Network/NetworkError.swift,
+				Core/Network/NetworkLogger.swift,
+				Feature/CareRecord/Model/CareRecordModel.swift,
+				Feature/CareRecord/Network/CareRecordEndpoint.swift,
+				Feature/CareRecord/Network/CareRecordMapper.swift,
+				Feature/CareRecord/Network/CareRecordService.swift,
+				Feature/CareRecord/Network/DTO/CareRecordsResponseDTO.swift,
+				Feature/CareRecord/Network/DTO/CreateCareRecordRequestDTO.swift,
+				Feature/CareRecord/Network/MockCareRecordService.swift,
+				"Resource/Font/Pretendard-Bold.otf",
+				"Resource/Font/Pretendard-Medium.otf",
+				"Resource/Font/Pretendard-Regular.otf",
+				"Resource/Font/Pretendard-SemiBold.otf",
+			);
+			target = 940CFCC230B222E900CB7472 /* SopkathonWatch */;
+		};
+		94A1700400000000000000A4 /* Exceptions for "SopkathonWatch" folder in "SopkathonWatch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 940CFCC230B222E900CB7472 /* SopkathonWatch */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -31,8 +89,17 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				940CF22030AF390700CB7472 /* Exceptions for "sopkathon-ios2" folder in "sopkathon-ios2" target */,
+				94A1700300000000000000A3 /* Exceptions for "sopkathon-ios2" folder in "SopkathonWatch" target */,
 			);
 			path = "sopkathon-ios2";
+			sourceTree = "<group>";
+		};
+		940CFCC430B222E900CB7472 /* SopkathonWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				94A1700400000000000000A4 /* Exceptions for "SopkathonWatch" folder in "SopkathonWatch" target */,
+			);
+			path = SopkathonWatch;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +110,13 @@
 			files = (
 				940CF25430AF39C100CB7472 /* Kingfisher in Frameworks */,
 				940CF24C30AF399C00CB7472 /* Alamofire in Frameworks */,
+				9BF0CF4D30B21F4300402625 /* Lottie in Frameworks */,
+			);
+		};
+		940CFCC030B222E900CB7472 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				94A170010000000000000001 /* Alamofire in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -53,6 +127,7 @@
 			children = (
 				940CF22130AF390700CB7472 /* Config.xcconfig */,
 				940CF21430AF390600CB7472 /* sopkathon-ios2 */,
+				940CFCC430B222E900CB7472 /* SopkathonWatch */,
 				940CF21330AF390600CB7472 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,6 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				940CF21230AF390600CB7472 /* sopkathon-ios2.app */,
+				940CFCC330B222E900CB7472 /* SopkathonWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -75,8 +151,12 @@
 				940CF20E30AF390600CB7472 /* Sources */,
 				940CF20F30AF390600CB7472 /* Frameworks */,
 				940CF21030AF390600CB7472 /* Resources */,
+				940CFCCE30B222EA00CB7472 /* Embed Watch Content */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				940CFCCC30B222EA00CB7472 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				940CF21430AF390600CB7472 /* sopkathon-ios2 */,
@@ -85,9 +165,31 @@
 			packageProductDependencies = (
 				940CF24B30AF399C00CB7472 /* Alamofire */,
 				940CF25330AF39C100CB7472 /* Kingfisher */,
+				9BF0CF4C30B21F4300402625 /* Lottie */,
 			);
 			productName = "sopkathon-ios2";
 			productReference = 940CF21230AF390600CB7472 /* sopkathon-ios2.app */;
+			productType = "com.apple.product-type.application";
+		};
+		940CFCC230B222E900CB7472 /* SopkathonWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 940CFCD130B222EA00CB7472 /* Build configuration list for PBXNativeTarget "SopkathonWatch" */;
+			buildPhases = (
+				940CFCBF30B222E900CB7472 /* Sources */,
+				940CFCC030B222E900CB7472 /* Frameworks */,
+				940CFCC130B222E900CB7472 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				940CFCC430B222E900CB7472 /* SopkathonWatch */,
+			);
+			name = SopkathonWatch;
+			packageProductDependencies = (
+				94A1700200000000000000A2 /* Alamofire */,
+			);
+			productName = SopkathonWatch;
+			productReference = 940CFCC330B222E900CB7472 /* SopkathonWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -101,6 +203,9 @@
 				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					940CF21130AF390600CB7472 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					940CFCC230B222E900CB7472 = {
 						CreatedOnToolsVersion = 27.1;
 					};
 				};
@@ -117,6 +222,7 @@
 			packageReferences = (
 				940CF24A30AF399C00CB7472 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				940CF25230AF39C100CB7472 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				9BF0CF4B30B21F4300402625 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 940CF21330AF390600CB7472 /* Products */;
@@ -124,12 +230,18 @@
 			projectRoot = "";
 			targets = (
 				940CF21130AF390600CB7472 /* sopkathon-ios2 */,
+				940CFCC230B222E900CB7472 /* SopkathonWatch */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		940CF21030AF390600CB7472 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		940CFCC130B222E900CB7472 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -142,7 +254,20 @@
 			files = (
 			);
 		};
+		940CFCBF30B222E900CB7472 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		940CFCCC30B222EA00CB7472 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 940CFCC230B222E900CB7472 /* SopkathonWatch */;
+			targetProxy = 940CFCCB30B222EA00CB7472 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		940CF21B30AF390700CB7472 /* Debug configuration for PBXProject "sopkathon-ios2" */ = {
@@ -275,6 +400,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "sopkathon-ios2/Resource/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "돌봄 내용을 음성으로 기록할 때 마이크를 사용합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말한 내용을 글로 바꿔 돌봄 기록으로 저장하기 위해 음성 인식을 사용합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -310,6 +436,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "sopkathon-ios2/Resource/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "돌봄 내용을 음성으로 기록할 때 마이크를 사용합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말한 내용을 글로 바꿔 돌봄 기록으로 저장하기 위해 음성 인식을 사용합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -334,6 +461,74 @@
 			};
 			name = Release;
 		};
+		940CFCCF30B222EA00CB7472 /* Debug configuration for PBXNativeTarget "SopkathonWatch" */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 940CF22130AF390700CB7472 /* Config.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SopkathonWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.h2e.sopkathon-ios2";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.h2e.sopkathon-ios2.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		940CFCD030B222EA00CB7472 /* Release configuration for PBXNativeTarget "SopkathonWatch" */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 940CF22130AF390700CB7472 /* Config.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SopkathonWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.h2e.sopkathon-ios2";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.h2e.sopkathon-ios2.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -350,6 +545,14 @@
 			buildConfigurations = (
 				940CF21E30AF390700CB7472 /* Debug configuration for PBXNativeTarget "sopkathon-ios2" */,
 				940CF21F30AF390700CB7472 /* Release configuration for PBXNativeTarget "sopkathon-ios2" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		940CFCD130B222EA00CB7472 /* Build configuration list for PBXNativeTarget "SopkathonWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				940CFCCF30B222EA00CB7472 /* Debug configuration for PBXNativeTarget "SopkathonWatch" */,
+				940CFCD030B222EA00CB7472 /* Release configuration for PBXNativeTarget "SopkathonWatch" */,
 			);
 			defaultConfigurationName = Release;
 		};
@@ -372,6 +575,14 @@
 				minimumVersion = 8.16.0;
 			};
 		};
+		9BF0CF4B30B21F4300402625 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -384,6 +595,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 940CF25230AF39C100CB7472 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		94A1700200000000000000A2 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 940CF24A30AF399C00CB7472 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		9BF0CF4C30B21F4300402625 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BF0CF4B30B21F4300402625 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

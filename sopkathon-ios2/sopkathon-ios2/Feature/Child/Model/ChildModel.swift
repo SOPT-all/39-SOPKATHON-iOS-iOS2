@@ -19,6 +19,43 @@ extension ChildModel {
     }
 }
 
+struct ChildMentionModel {
+    let child: ChildModel
+    let text: String
+}
+
+extension [ChildModel] {
+    func mentions(in text: String) -> [ChildMentionModel] {
+        let positions = compactMap { child -> (child: ChildModel, position: String.Index)? in
+            let positions = child.spokenNames
+                .filter { $0 == child.name || isUniqueSpokenName($0) }
+                .compactMap { text.range(of: spacedPattern(of: $0), options: .regularExpression) }
+                .map(\.lowerBound)
+            guard let position = positions.min() else { return nil }
+            return (child, position)
+        }
+        .sorted { $0.position < $1.position }
+
+        return positions.enumerated().map { index, mention in
+            let start = index == 0 ? text.startIndex : mention.position
+            let end = index + 1 < positions.count ? positions[index + 1].position : text.endIndex
+            return ChildMentionModel(
+                child: mention.child,
+                text: text[start..<end].trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+        }
+    }
+
+    private func isUniqueSpokenName(_ spokenName: String) -> Bool {
+        filter { $0.spokenNames.contains(spokenName) }.count == 1
+    }
+
+    private func spacedPattern(of name: String) -> String {
+        name.map { NSRegularExpression.escapedPattern(for: String($0)) }
+            .joined(separator: NameRule.spacePattern)
+    }
+}
+
 struct ChildDraftModel {
     let name: String
     let birthDate: Date
@@ -42,4 +79,5 @@ enum ChildRelationshipModel: CaseIterable {
 
 private enum NameRule {
     static let surnameCount = 1
+    static let spacePattern = "\\s*"
 }

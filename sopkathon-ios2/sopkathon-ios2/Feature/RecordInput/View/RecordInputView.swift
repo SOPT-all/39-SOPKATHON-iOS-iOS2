@@ -11,6 +11,7 @@ struct RecordInputView: View {
     @Environment(AppRouter.self) private var router
 
     @State private var viewModel: RecordInputViewModel
+    @State private var isKeyboardVisible = false
 
     init(viewModel: RecordInputViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -18,32 +19,64 @@ struct RecordInputView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NavigationHeader(title: Title.navigation)
+            NavigationHeader(title: Title.navigation, style: .plain)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    childSectionView
-
-                    categorySectionView
-                        .padding(.top, Metric.categoryTopPadding)
-
-                    contentSectionView
-                        .padding(.top, Metric.contentTopPadding)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    formView
                 }
-                .padding(.horizontal, Metric.horizontalPadding)
-                .padding(.top, Metric.topPadding)
-                .padding(.bottom, Metric.bottomPadding)
+                .defaultScrollAnchor(isKeyboardVisible ? .bottom : .top)
+                .scrollDismissesKeyboard(.interactively)
+                .onReceive(keyboardDidShow) { _ in
+                    withAnimation {
+                        proxy.scrollTo(ScrollID.bottom, anchor: .bottom)
+                    }
+                }
             }
-            .scrollDismissesKeyboard(.interactively)
+
+            saveButtonView
         }
         .background(.baseWhite)
-        .safeAreaInset(edge: .bottom) {
-            saveButtonView
+        .onReceive(keyboardWillShow) { _ in
+            isKeyboardVisible = true
+        }
+        .onReceive(keyboardWillHide) { _ in
+            isKeyboardVisible = false
         }
         .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.fetchChildren()
         }
+    }
+
+    private var keyboardWillShow: NotificationCenter.Publisher {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+    }
+
+    private var keyboardDidShow: NotificationCenter.Publisher {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)
+    }
+
+    private var keyboardWillHide: NotificationCenter.Publisher {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+    }
+
+    private var formView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            childSectionView
+
+            categorySectionView
+                .padding(.top, Metric.categoryTopPadding)
+
+            contentSectionView
+                .padding(.top, Metric.contentTopPadding)
+
+            Color.clear
+                .frame(height: Metric.bottomPadding)
+                .id(ScrollID.bottom)
+        }
+        .padding(.horizontal, Metric.horizontalPadding)
+        .padding(.top, Metric.topPadding)
     }
 
     private var childSectionView: some View {
@@ -102,6 +135,7 @@ struct RecordInputView: View {
             saveRecord()
         }
         .padding(.horizontal, Metric.horizontalPadding)
+        .padding(.top, Metric.saveButtonTopPadding)
         .padding(.bottom, Metric.saveButtonBottomPadding)
         .background(.baseWhite)
     }
@@ -132,7 +166,12 @@ private extension RecordInputView {
         static let chipVerticalSpacing: CGFloat = 8
         static let contentTopPadding: CGFloat = 59
         static let contentTitleSpacing: CGFloat = 6
+        static let saveButtonTopPadding: CGFloat = 12
         static let saveButtonBottomPadding: CGFloat = 15
+    }
+
+    enum ScrollID {
+        static let bottom = "bottom"
     }
 
     enum Title {

@@ -94,12 +94,9 @@ struct BriefingView: View {
     }
 
     private var headerView: some View {
-        NavigationHeader(title: "브리핑 작성") {
+        NavigationHeader(title: "브리핑 작성", style: .bar) {
             router.selectTab(.home)
         }
-            .frame(height: 75)
-            .background(.baseWhite)
-            .shadow(color: .baseBlack.opacity(0.06), radius: 3, y: 3)
     }
 
     private var introductionView: some View {

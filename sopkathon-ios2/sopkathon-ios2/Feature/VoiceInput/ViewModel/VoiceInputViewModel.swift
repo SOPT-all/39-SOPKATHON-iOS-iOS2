@@ -10,35 +10,52 @@ import Observation
 
 @Observable
 final class VoiceInputViewModel {
+    let teacherName: String
+    private(set) var audioLevel: Float = 0
+
     private var transcript = ""
+    private var children: [ChildModel] = []
     private var transcriptTask: Task<Void, Never>?
+    private var audioLevelTask: Task<Void, Never>?
 
     private let service: any VoiceInputServiceProtocol
     private let careRecordService: any CareRecordServiceProtocol
     private let childService: any ChildServiceProtocol
 
     init(
+        teacherName: String,
         service: any VoiceInputServiceProtocol,
         careRecordService: any CareRecordServiceProtocol,
         childService: any ChildServiceProtocol
     ) {
+        self.teacherName = teacherName
         self.service = service
         self.careRecordService = careRecordService
         self.childService = childService
     }
 
     func startRecording() async {
-        async let childNames = fetchChildNames()
+        async let fetchedChildren = fetchChildren()
 
         guard await service.requestAuthorization(), !Task.isCancelled else { return }
-        guard let stream = try? service.startRecognition(contextualStrings: await childNames)
-        else { return }
+        children = await fetchedChildren
+        guard let recognition = try? service.startRecognition(
+            contextualStrings: children.flatMap(\.spokenNames)
+        ) else { return }
 
         transcriptTask?.cancel()
         transcriptTask = Task {
-            for await text in stream {
+            for await text in recognition.transcripts {
                 transcript = text
             }
+        }
+
+        audioLevelTask?.cancel()
+        audioLevelTask = Task {
+            for await level in recognition.audioLevels {
+                audioLevel = max(level, audioLevel * Limit.audioLevelDecay)
+            }
+            audioLevel = 0
         }
     }
 
@@ -52,11 +69,17 @@ final class VoiceInputViewModel {
 
         let text = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
-        _ = try? await careRecordService.createCareRecords(CareRecordDraftModel(text: text))
+        if children.isEmpty {
+            children = (try? await childService.fetchChildren(keyword: nil)) ?? []
+        }
+        _ = await careRecordService.createCareRecords(
+            fromSpokenText: text,
+            mentioning: children
+        )
     }
 
-    private func fetchChildNames() async -> [String] {
-        let children = await withTaskGroup(of: [ChildModel]?.self) { group in
+    private func fetchChildren() async -> [ChildModel] {
+        await withTaskGroup(of: [ChildModel]?.self) { group in
             group.addTask { [childService] in
                 try? await childService.fetchChildren(keyword: nil)
             }
@@ -69,12 +92,12 @@ final class VoiceInputViewModel {
             group.cancelAll()
             return children ?? []
         }
-        return children.flatMap(\.spokenNames)
     }
 }
 
 private extension VoiceInputViewModel {
     enum Limit {
         static let childNamesTimeout: Duration = .milliseconds(700)
+        static let audioLevelDecay: Float = 0.85
     }
 }
