@@ -400,6 +400,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "sopkathon-ios2/Resource/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "돌봄 내용을 음성으로 기록할 때 마이크를 사용합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말한 내용을 글로 바꿔 돌봄 기록으로 저장하기 위해 음성 인식을 사용합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -435,6 +436,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "sopkathon-ios2/Resource/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "돌봄 내용을 음성으로 기록할 때 마이크를 사용합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말한 내용을 글로 바꿔 돌봄 기록으로 저장하기 위해 음성 인식을 사용합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -470,7 +472,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SopkathonWatch/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "sopkathon-ios2";
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.h2e.sopkathon-ios2";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -504,7 +506,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SopkathonWatch/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "sopkathon-ios2";
+				INFOPLIST_KEY_CFBundleDisplayName = speakids;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.h2e.sopkathon-ios2";
 				LD_RUNPATH_SEARCH_PATHS = (
