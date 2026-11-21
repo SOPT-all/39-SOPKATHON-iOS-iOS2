@@ -8,8 +8,8 @@
 import Foundation
 
 enum ChildEndpoint {
-    case createChild
-    case updateChild(childID: Int)
+    case createChild(CreateChildRequestDTO)
+    case updateChild(childID: Int, UpdateChildRequestDTO)
     case deleteChild(childID: Int)
     case fetchChildren(keyword: String?)
 }
@@ -19,7 +19,7 @@ extension ChildEndpoint: Endpoint {
         switch self {
         case .createChild, .fetchChildren:
             return "/api/v1/kids"
-        case .updateChild(let childID), .deleteChild(let childID):
+        case .updateChild(let childID, _), .deleteChild(let childID):
             return "/api/v1/kids/\(childID)"
         }
     }
@@ -44,6 +44,17 @@ extension ChildEndpoint: Endpoint {
             return [URLQueryItem(name: "keyword", value: keyword)]
         default:
             return []
+        }
+    }
+
+    var body: (any Encodable)? {
+        switch self {
+        case .createChild(let request):
+            return request
+        case .updateChild(_, let request):
+            return request
+        case .deleteChild, .fetchChildren:
+            return nil
         }
     }
 }
