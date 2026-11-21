@@ -17,8 +17,10 @@ struct ChildFormView: View {
     @Binding private var notes: String
 
     @FocusState private var focusedField: Field?
-    @State private var isBirthDatePickerPresented = false
+    @State private var presentedPicker: PickerType?
     @State private var selectedBirthDate = Date()
+    @State private var selectedGender = ChildGenderModel.male
+    @State private var selectedRelationship = ChildRelationshipModel.mother
 
     private let isValidParentPhoneNumber: Bool
 
@@ -68,12 +70,7 @@ struct ChildFormView: View {
 
             birthDateFieldView
 
-            dropdownFieldView(
-                title: Title.gender,
-                selection: $gender,
-                options: ChildGenderModel.allCases,
-                optionTitle: \.title
-            )
+            genderFieldView
         }
         .padding(.horizontal, Metric.horizontalPadding)
     }
@@ -89,13 +86,8 @@ struct ChildFormView: View {
 
             phoneNumberFieldView
 
-            dropdownFieldView(
-                title: Title.relationship,
-                selection: $relationship,
-                options: ChildRelationshipModel.allCases,
-                optionTitle: \.title
-            )
-            .padding(.bottom, Metric.notesTopPadding - Metric.fieldSpacing)
+            relationshipFieldView
+                .padding(.bottom, Metric.notesTopPadding - Metric.fieldSpacing)
 
             notesFieldView
         }
@@ -103,59 +95,65 @@ struct ChildFormView: View {
     }
 
     private var birthDateFieldView: some View {
-        labeledView(title: Title.birthDate) {
-            Button {
-                focusedField = nil
-                selectedBirthDate = birthDate ?? Date()
-                isBirthDatePickerPresented = true
-            } label: {
-                HStack {
-                    birthDateTextView
-
-                    Spacer()
-
-                    chevronView
-                }
-                .padding(.horizontal, Metric.fieldHorizontalPadding)
-                .frame(height: Metric.fieldHeight)
-                .background(Color.gray50, in: fieldShape)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+        selectFieldView(title: Title.birthDate, value: birthDate?.formatted(Format.birthDate)) {
+            selectedBirthDate = birthDate ?? Date()
+            presentedPicker = .birthDate
         }
-        .bottomSheet(isPresented: $isBirthDatePickerPresented, title: Title.birthDate) {
-            birthDatePickerView
-        }
-    }
-
-    @ViewBuilder
-    private var birthDateTextView: some View {
-        if let birthDate {
-            Text(birthDate.formatted(Format.birthDate))
-                .typography(.body5)
-                .foregroundStyle(Color.textBlack)
-        } else {
-            Text(Title.placeholder)
-                .typography(.body5)
-                .foregroundStyle(Color.disabled200)
-        }
-    }
-
-    private var birthDatePickerView: some View {
-        VStack(spacing: Metric.pickerSpacing) {
-            DatePicker(
-                "",
-                selection: $selectedBirthDate,
-                in: ...Date(),
-                displayedComponents: .date
-            )
-            .datePickerStyle(.wheel)
-            .labelsHidden()
-            .environment(\.locale, Format.locale)
-
-            FullWidthButton(title: Title.confirm) {
+        .bottomSheet(isPresented: isPresented(.birthDate), title: Title.birthDate) {
+            pickerSheetView {
+                DatePicker(
+                    "",
+                    selection: $selectedBirthDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .environment(\.locale, Format.locale)
+            } onConfirm: {
                 birthDate = selectedBirthDate
-                isBirthDatePickerPresented = false
+            }
+        }
+    }
+
+    private var genderFieldView: some View {
+        selectFieldView(title: Title.gender, value: gender?.title) {
+            selectedGender = gender ?? .male
+            presentedPicker = .gender
+        }
+        .bottomSheet(isPresented: isPresented(.gender), title: Title.gender) {
+            pickerSheetView {
+                Picker("", selection: $selectedGender) {
+                    ForEach(ChildGenderModel.allCases, id: \.self) { gender in
+                        Text(gender.title)
+                            .tag(gender)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .labelsHidden()
+            } onConfirm: {
+                gender = selectedGender
+            }
+        }
+    }
+
+    private var relationshipFieldView: some View {
+        selectFieldView(title: Title.relationship, value: relationship?.title) {
+            selectedRelationship = relationship ?? .mother
+            presentedPicker = .relationship
+        }
+        .bottomSheet(isPresented: isPresented(.relationship), title: Title.relationship) {
+            pickerSheetView {
+                Picker("", selection: $selectedRelationship) {
+                    ForEach(ChildRelationshipModel.allCases, id: \.self) { relationship in
+                        Text(relationship.title)
+                            .tag(relationship)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .labelsHidden()
+            } onConfirm: {
+                relationship = selectedRelationship
             }
         }
     }
@@ -243,41 +241,56 @@ struct ChildFormView: View {
         }
     }
 
-    private func dropdownFieldView<Option: Hashable>(
+    private func selectFieldView(
         title: String,
-        selection: Binding<Option?>,
-        options: [Option],
-        optionTitle: @escaping (Option) -> String
+        value: String?,
+        action: @escaping () -> Void
     ) -> some View {
         labeledView(title: title) {
-            HStack {
-                Text(selection.wrappedValue.map(optionTitle) ?? Title.placeholder)
-                    .typography(.body5)
-                    .foregroundStyle(
-                        selection.wrappedValue == nil ? Color.disabled200 : Color.textBlack
-                    )
+            Button {
+                focusedField = nil
+                action()
+            } label: {
+                HStack {
+                    Text(value ?? Title.placeholder)
+                        .typography(.body5)
+                        .foregroundStyle(value == nil ? Color.disabled200 : Color.textBlack)
 
-                Spacer()
+                    Spacer()
 
-                chevronView
-            }
-            .padding(.horizontal, Metric.fieldHorizontalPadding)
-            .frame(height: Metric.fieldHeight)
-            .background(Color.gray50, in: fieldShape)
-            .overlay {
-                Menu {
-                    ForEach(options, id: \.self) { option in
-                        Button(optionTitle(option)) {
-                            selection.wrappedValue = option
-                        }
-                    }
-                } label: {
-                    Color.clear
-                        .contentShape(Rectangle())
+                    chevronView
                 }
-                .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
+                .padding(.horizontal, Metric.fieldHorizontalPadding)
+                .frame(height: Metric.fieldHeight)
+                .background(Color.gray50, in: fieldShape)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func pickerSheetView(
+        @ViewBuilder picker: () -> some View,
+        onConfirm: @escaping () -> Void
+    ) -> some View {
+        VStack(spacing: Metric.pickerSpacing) {
+            picker()
+
+            FullWidthButton(title: Title.confirm) {
+                onConfirm()
+                presentedPicker = nil
             }
         }
+    }
+
+    private func isPresented(_ picker: PickerType) -> Binding<Bool> {
+        Binding(
+            get: { presentedPicker == picker },
+            set: { isPresented in
+                guard !isPresented else { return }
+                presentedPicker = nil
+            }
+        )
     }
 }
 
@@ -313,6 +326,12 @@ private extension ChildFormView {
         case parentName
         case parentPhoneNumber
         case notes
+    }
+
+    enum PickerType {
+        case birthDate
+        case gender
+        case relationship
     }
 
     enum Metric {
