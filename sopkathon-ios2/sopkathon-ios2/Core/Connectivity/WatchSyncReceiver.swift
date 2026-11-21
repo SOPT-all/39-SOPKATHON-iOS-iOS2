@@ -5,7 +5,6 @@
 //  Created by h2e on 11/22/26.
 //
 
-import Foundation
 import Observation
 import UIKit
 import WatchConnectivity
