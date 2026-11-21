@@ -36,7 +36,7 @@ struct SelectableChip: View {
                 }
 
                 Text(title)
-                    .typography(.h3Sb14)
+                    .typography(.body4)
             }
             .foregroundStyle(isSelected ? Color(.systemBackground) : Color.primary)
             .padding(.horizontal, Metric.horizontalPadding)

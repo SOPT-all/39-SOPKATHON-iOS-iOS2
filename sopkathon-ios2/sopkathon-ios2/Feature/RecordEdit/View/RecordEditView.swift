@@ -12,6 +12,6 @@ struct RecordEditView: View {
 
     var body: some View {
         Text("기록 수정 \(recordID)")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }
