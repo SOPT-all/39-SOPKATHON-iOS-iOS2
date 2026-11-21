@@ -12,6 +12,10 @@ final class VoiceInputViewModel {
     private(set) var transcript = ""
     private(set) var isRecording = false
 
+    var canSubmit: Bool {
+        !isRecording && !transcript.isEmpty
+    }
+
     private var transcriptTask: Task<Void, Never>?
 
     private let service: any VoiceInputServiceProtocol

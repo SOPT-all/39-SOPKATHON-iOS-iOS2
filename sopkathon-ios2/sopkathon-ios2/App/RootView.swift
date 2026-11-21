@@ -29,8 +29,8 @@ struct RootView: View {
             ChildRegisterView()
         case .childDetail(let childID):
             ChildDetailView(childID: childID)
-        case .recordInput:
-            RecordInputView()
+        case .recordInput(let content):
+            RecordInputView(viewModel: RecordInputViewModel(content: content))
         case .voiceInput:
             VoiceInputView(viewModel: VoiceInputViewModel(service: dependency.voiceInputService))
         case .recordList(let childID):

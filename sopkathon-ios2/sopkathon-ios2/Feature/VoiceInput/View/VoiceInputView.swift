@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct VoiceInputView: View {
+    @Environment(AppRouter.self) private var router
+
     @State private var viewModel: VoiceInputViewModel
 
     init(viewModel: VoiceInputViewModel) {
@@ -26,6 +28,14 @@ struct VoiceInputView: View {
                 Task {
                     await viewModel.toggleRecording()
                 }
+            }
+
+            FullWidthButton(
+                title: Title.next,
+                appearance: .secondary,
+                isEnabled: viewModel.canSubmit
+            ) {
+                router.push(.recordInput(content: viewModel.transcript))
             }
         }
         .padding(Metric.padding)
@@ -48,5 +58,6 @@ private extension VoiceInputView {
     enum Title {
         static let start = "음성 입력 시작"
         static let stop = "음성 입력 종료"
+        static let next = "기록으로 옮기기"
     }
 }
