@@ -8,35 +8,9 @@
 import SwiftUI
 
 struct HomeLabelCheck: View {
-    enum Category {
-        case feeding
-        case meal
-        case sleep
-        case play
-        case toilet
-        case health
+    private let category: CareRecordCategoryModel
 
-        var title: String {
-            switch self {
-            case .feeding:
-                return "수유"
-            case .meal:
-                return "식사"
-            case .sleep:
-                return "수면"
-            case .play:
-                return "놀이"
-            case .toilet:
-                return "배변"
-            case .health:
-                return "건강"
-            }
-        }
-    }
-
-    private let category: Category
-
-    init(category: Category) {
+    init(category: CareRecordCategoryModel) {
         self.category = category
     }
 
