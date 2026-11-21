@@ -381,7 +381,8 @@ struct HomeView: View {
 - 순서: 프로퍼티 → `init` → `body` → 하위 View → `private func`
 - `@State`, `@FocusState`는 항상 `private`으로 선언합니다.
 - View는 ViewModel의 값을 읽어 그리기만 합니다. 네트워크 호출과 데이터 가공을 View에 두지 않습니다.
-- 로딩 화면과 실패 화면을 만들지 않습니다. `ProgressView`, "다시 시도" 버튼, 에러 문구를 넣지 않고, 데이터가 아직 없으면 빈 상태로 둡니다.
+- 실패 화면을 만들지 않습니다. `ProgressView`, "다시 시도" 버튼, 에러 문구를 넣지 않습니다.
+- 첫 데이터를 받아 오는 동안에는 `Core/DesignSystem/Component/Skeleton`의 `SkeletonBox`나 `.skeleton(_:)`으로 자리 표시를 보여 줍니다. 받아 온 뒤 데이터가 없으면 빈 상태로 둡니다.
 - 첫 데이터 요청은 `.task`에서 합니다.
 - View는 ViewModel을 직접 만들지 않고 `init`으로 받습니다. 화면에 넘길 값(`postID` 등)은 띄우는 쪽에서 ViewModel을 만들 때 넣습니다.
 
@@ -399,6 +400,7 @@ struct HomeView: View {
 - 순서: 공개 상태 → `private` 상태 → 의존성 → `init` → 공개 메서드 → `private` 메서드
 - 서버에서 받아 온 데이터는 ViewModel의 프로퍼티로 그대로 둡니다. 하나짜리는 옵셔널(`var home: HomeModel?`), 목록은 빈 배열(`var posts: [HomePostModel] = []`)로 시작합니다.
 - 로딩·실패 상태를 만들지 않습니다. `State` enum, `isLoading`, `errorMessage`를 두지 않습니다.
+- 스켈레톤을 보여 줄지는 `private(set) var hasFetched = false` 하나로 정합니다. 첫 요청이 성공하든 실패하든 끝나면 `true`로 바꿉니다. (`defer { hasFetched = true }`)
 - 요청이 실패하면 기존 값을 그대로 두고 아무것도 하지 않습니다. (`guard let home = try? await service.fetchHome() else { return }`)
 - View가 읽기만 하는 값은 `private(set)`으로 선언합니다.
 - `~ServiceProtocol`에만 의존하고 `init`에서 기본값 없이 주입받습니다. `BaseService`, `Endpoint`, DTO, Mapper를 직접 쓰지 않습니다.
@@ -437,7 +439,7 @@ struct HomeView: View {
 - 한 번만 쓰이는 View를 미리 `struct`로 빼지 않습니다. 두 번째로 쓰이게 될 때 분리합니다.
 - `body`가 40줄을 넘으면 `private var` 하위 View로 나눕니다. 이때도 `struct`로 빼지 않습니다.
 - 새로 만들기 전에 `Core/DesignSystem`과 같은 기능 폴더에 같은 역할의 컴포넌트가 있는지 먼저 찾아봅니다.
-- 공통 컴포넌트는 `Core/DesignSystem/Component` 아래 종류별 폴더에 둡니다: `Button`(버튼), `Input`(입력 필드·검색), `Overlay`(바텀시트·모달), `Chip`(칩·태그), `Profile`(아이 프로필 카드·색), `Header`(화면 상단 헤더). 여러 화면에서 쓰는 레이아웃은 `Core/DesignSystem/Layout`에 둡니다. 맞는 폴더가 없으면 새 폴더를 만듭니다.
+- 공통 컴포넌트는 `Core/DesignSystem/Component` 아래 종류별 폴더에 둡니다: `Button`(버튼), `Input`(입력 필드·검색), `Overlay`(바텀시트·모달), `Chip`(칩·태그), `Profile`(아이 프로필 카드·색), `Header`(화면 상단 헤더), `Skeleton`(로딩 자리 표시). 여러 화면에서 쓰는 레이아웃은 `Core/DesignSystem/Layout`에 둡니다. 맞는 폴더가 없으면 새 폴더를 만듭니다.
 
 ## 8. 코드 스타일
 
