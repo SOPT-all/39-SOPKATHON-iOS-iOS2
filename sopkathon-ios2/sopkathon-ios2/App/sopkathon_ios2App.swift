@@ -19,14 +19,14 @@ struct sopkathon_ios2App: App {
         let notificationService = LocalNotificationService()
         _dependency = State(initialValue: dependency)
         _notificationService = State(initialValue: notificationService)
-        _watchSyncReceiver = State(
-            initialValue: WatchSyncReceiver(
-                voiceInputService: dependency.voiceInputService,
-                careRecordService: dependency.careRecordService,
-                childService: dependency.childService,
-                notificationService: notificationService
-            )
+        let watchSyncReceiver = WatchSyncReceiver(
+            voiceInputService: dependency.voiceInputService,
+            careRecordService: dependency.careRecordService,
+            childService: dependency.childService,
+            notificationService: notificationService
         )
+        watchSyncReceiver.activate()
+        _watchSyncReceiver = State(initialValue: watchSyncReceiver)
     }
 
     var body: some Scene {
@@ -36,7 +36,6 @@ struct sopkathon_ios2App: App {
                 .environment(router)
                 .environment(watchSyncReceiver)
                 .task {
-                    watchSyncReceiver.activate()
                     await notificationService.activate()
                 }
                 .onChange(of: notificationService.openedCount) {

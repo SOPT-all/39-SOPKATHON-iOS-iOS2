@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import UIKit
 import WatchConnectivity
 
 @Observable
@@ -106,7 +107,9 @@ extension WatchSyncReceiver: WCSessionDelegate {
         guard (try? FileManager.default.moveItem(at: file.fileURL, to: url)) != nil else { return }
 
         Task { @MainActor in
+            let backgroundTaskID = UIApplication.shared.beginBackgroundTask()
             await saveCareRecords(fromRecordingAt: url)
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
         }
     }
 }
