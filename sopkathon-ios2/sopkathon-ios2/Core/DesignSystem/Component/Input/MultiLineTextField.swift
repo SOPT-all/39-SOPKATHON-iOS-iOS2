@@ -10,8 +10,6 @@ import SwiftUI
 struct MultiLineTextField: View {
     @Binding private var text: String
 
-    @FocusState private var isFocused: Bool
-
     private let title: String?
     private let placeholder: String
 
@@ -26,26 +24,39 @@ struct MultiLineTextField: View {
     }
 
     var body: some View {
-        InputFieldContainer(title: title, isFocused: isFocused) {
+        VStack(alignment: .leading, spacing: Metric.spacing) {
+            if let title {
+                Text(title)
+                    .typography(.caption2)
+                    .foregroundStyle(.textBlack)
+            }
+
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $text)
-                    .typography(.body5)
+                    .font(Typography.body5.font)
+                    .foregroundStyle(.textBlack)
                     .scrollContentBackground(.hidden)
-                    .focused($isFocused)
 
                 if text.isEmpty {
                     placeholderText
                 }
             }
+            .padding(.horizontal, Metric.horizontalPadding)
             .padding(.vertical, Metric.verticalPadding)
             .frame(height: Metric.height)
+            .background(.baseWhite)
+            .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: Metric.cornerRadius)
+                    .stroke(.gray300, lineWidth: Metric.borderWidth)
+            }
         }
     }
 
     private var placeholderText: some View {
         Text(placeholder)
-            .typography(.body5)
-            .foregroundStyle(Color(.placeholderText))
+            .font(Typography.body5.font)
+            .foregroundStyle(.disabled200)
             .padding(.top, Metric.placeholderTopPadding)
             .padding(.leading, Metric.placeholderLeadingPadding)
             .allowsHitTesting(false)
@@ -53,8 +64,12 @@ struct MultiLineTextField: View {
 }
 
 private enum Metric {
-    static let height: CGFloat = 120
-    static let verticalPadding: CGFloat = 4
+    static let spacing: CGFloat = 8
+    static let height: CGFloat = 176
+    static let horizontalPadding: CGFloat = 14
+    static let verticalPadding: CGFloat = 10
+    static let cornerRadius: CGFloat = 25
+    static let borderWidth: CGFloat = 1
     static let placeholderTopPadding: CGFloat = 8
     static let placeholderLeadingPadding: CGFloat = 5
 }

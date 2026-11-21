@@ -10,18 +10,15 @@ import SwiftUI
 struct InputFieldContainer<Content: View>: View {
     private let title: String?
     private let errorMessage: String?
-    private let isFocused: Bool
     private let content: Content
 
     init(
         title: String?,
         errorMessage: String? = nil,
-        isFocused: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.errorMessage = errorMessage
-        self.isFocused = isFocused
         self.content = content()
     }
 
@@ -30,16 +27,18 @@ struct InputFieldContainer<Content: View>: View {
             if let title {
                 Text(title)
                     .typography(.caption2)
-                    .foregroundStyle(Color.primary)
+                    .foregroundStyle(.textBlack)
             }
 
             content
                 .padding(.horizontal, Metric.horizontalPadding)
-                .background(Color(.systemBackground))
+                .background(.gray50)
                 .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
                 .overlay {
-                    RoundedRectangle(cornerRadius: Metric.cornerRadius)
-                        .stroke(borderColor, lineWidth: Metric.borderWidth)
+                    if errorMessage != nil {
+                        RoundedRectangle(cornerRadius: Metric.cornerRadius)
+                            .stroke(Color(.systemRed), lineWidth: Metric.borderWidth)
+                    }
                 }
 
             if let errorMessage {
@@ -49,18 +48,11 @@ struct InputFieldContainer<Content: View>: View {
             }
         }
     }
-
-    private var borderColor: Color {
-        if errorMessage != nil {
-            return Color(.systemRed)
-        }
-        return isFocused ? Color.primary : Color(.systemGray4)
-    }
 }
 
 private enum Metric {
     static let spacing: CGFloat = 8
-    static let horizontalPadding: CGFloat = 16
-    static let cornerRadius: CGFloat = 6
+    static let horizontalPadding: CGFloat = 12
+    static let cornerRadius: CGFloat = 10
     static let borderWidth: CGFloat = 1
 }

@@ -9,9 +9,11 @@ import SwiftUI
 
 struct CategoryChip: View {
     private let category: CareRecordCategoryModel
+    private let isSelected: Bool
 
-    init(category: CareRecordCategoryModel) {
+    init(category: CareRecordCategoryModel, isSelected: Bool = false) {
         self.category = category
+        self.isSelected = isSelected
     }
 
     var body: some View {
@@ -27,8 +29,14 @@ struct CategoryChip: View {
         }
         .padding(.horizontal, Metric.horizontalPadding)
         .frame(height: Metric.height)
-        .background(.gray50)
+        .background(isSelected ? Color.primary50 : Color.gray50)
         .clipShape(Capsule())
+        .overlay {
+            if isSelected {
+                Capsule()
+                    .stroke(.primary400, lineWidth: Metric.selectedBorderWidth)
+            }
+        }
     }
 }
 
@@ -38,5 +46,6 @@ private extension CategoryChip {
         static let horizontalPadding: CGFloat = 13
         static let spacing: CGFloat = 10
         static let iconSize: CGFloat = 20
+        static let selectedBorderWidth: CGFloat = 1.5
     }
 }

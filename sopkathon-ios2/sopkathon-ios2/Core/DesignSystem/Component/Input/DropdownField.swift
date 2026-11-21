@@ -31,7 +31,7 @@ struct DropdownField<Option: Hashable>: View {
     }
 
     var body: some View {
-        InputFieldContainer(title: title, isFocused: isExpanded) {
+        InputFieldContainer(title: title) {
             VStack(spacing: 0) {
                 headerButton
 
@@ -52,13 +52,12 @@ struct DropdownField<Option: Hashable>: View {
         } label: {
             HStack {
                 Text(selection.map(optionTitle) ?? placeholder)
-                    .typography(.body5)
-                    .foregroundStyle(selection == nil ? Color(.placeholderText) : Color.primary)
+                    .font(Typography.body5.font)
+                    .foregroundStyle(selection == nil ? Color.disabled200 : Color.textBlack)
 
                 Spacer()
 
-                Image(systemName: "chevron.down")
-                    .foregroundStyle(Color.secondary)
+                Image(.iconChevronDown)
                     .rotationEffect(.degrees(isExpanded ? Metric.expandedChevronDegrees : 0))
             }
             .frame(height: Metric.headerHeight)
@@ -84,15 +83,10 @@ struct DropdownField<Option: Hashable>: View {
         } label: {
             HStack {
                 Text(optionTitle(option))
-                    .typography(option == selection ? .body4 : .body5)
-                    .foregroundStyle(Color.primary)
+                    .font((option == selection ? Typography.body4 : Typography.body5).font)
+                    .foregroundStyle(.textBlack)
 
                 Spacer()
-
-                if option == selection {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(Color.primary)
-                }
             }
             .frame(height: Metric.optionHeight)
             .contentShape(Rectangle())
@@ -102,8 +96,8 @@ struct DropdownField<Option: Hashable>: View {
 }
 
 private enum Metric {
-    static let headerHeight: CGFloat = 52
-    static let optionHeight: CGFloat = 44
+    static let headerHeight: CGFloat = 43
+    static let optionHeight: CGFloat = 43
     static let animationDuration: Double = 0.2
     static let expandedChevronDegrees: Double = 180
 }
