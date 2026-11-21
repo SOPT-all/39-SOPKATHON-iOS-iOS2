@@ -31,9 +31,4 @@ final class ChildListViewModel {
         guard let children = try? await service.fetchChildren(keyword: trimmedKeyword) else { return }
         self.children = children
     }
-
-    func deleteChild(childID: Int) async {
-        guard (try? await service.deleteChild(childID: childID)) != nil else { return }
-        children.removeAll { $0.id == childID }
-    }
 }

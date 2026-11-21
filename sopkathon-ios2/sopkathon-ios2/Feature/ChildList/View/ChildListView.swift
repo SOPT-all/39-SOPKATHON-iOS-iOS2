@@ -10,7 +10,6 @@ import SwiftUI
 struct ChildListView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: ChildListViewModel
-    @State private var deletingChild: ChildModel?
 
     init(viewModel: ChildListViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -32,11 +31,9 @@ struct ChildListView: View {
         .task(id: viewModel.keyword) {
             await viewModel.fetchChildren()
         }
-        .transaction(value: deletingChild?.id) { transaction in
-            transaction.disablesAnimations = true
-        }
-        .fullScreenCover(item: $deletingChild) { child in
-            deleteModalView(child)
+        .onChange(of: router.presentedSheet) { oldSheet, newSheet in
+            guard case .childDelete = oldSheet, newSheet == nil else { return }
+            Task { await viewModel.fetchChildren() }
         }
     }
 
@@ -50,7 +47,7 @@ struct ChildListView: View {
                         .listRowSeparator(.hidden)
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(Title.delete) {
-                                deletingChild = child
+                                router.presentSheet(.childDelete(child: child))
                             }
                             .tint(.primary400)
                         }
@@ -140,69 +137,6 @@ struct ChildListView: View {
         }
         .frame(height: Metric.rowHeight)
     }
-
-    private func deleteModalView(_ child: ChildModel) -> some View {
-        ZStack {
-            Color.textBlack
-                .opacity(Metric.dimOpacity)
-                .ignoresSafeArea()
-
-            VStack(spacing: Metric.modalSpacing) {
-                ProfileCard(childID: child.id, name: child.name, size: .extraLarge)
-
-                VStack(spacing: Metric.modalButtonTopSpacing) {
-                    VStack(alignment: .leading, spacing: Metric.modalTextSpacing) {
-                        Text(Title.deleteTitle)
-                            .typography(.subHeader1)
-                            .foregroundStyle(.textBlack)
-
-                        Text(Title.deleteMessage)
-                            .typography(.caption1)
-                            .foregroundStyle(.disabled200)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    HStack(spacing: Metric.modalButtonSpacing) {
-                        modalButton(Title.cancel, foreground: .textBlack, background: .gray100) {
-                            deletingChild = nil
-                        }
-
-                        modalButton(Title.delete, foreground: .baseWhite, background: .primary400) {
-                            deletingChild = nil
-                            Task { await viewModel.deleteChild(childID: child.id) }
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal, Metric.modalHorizontalPadding)
-            .padding(.top, Metric.modalTopPadding)
-            .padding(.bottom, Metric.modalBottomPadding)
-            .background(.baseWhite)
-            .clipShape(RoundedRectangle(cornerRadius: Metric.modalCornerRadius))
-            .frame(maxWidth: Metric.modalMaxWidth)
-            .padding(.horizontal, Metric.modalMargin)
-        }
-        .presentationBackground(.clear)
-    }
-
-    private func modalButton(
-        _ title: String,
-        foreground: Color,
-        background: Color,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Text(title)
-                .typography(.body1)
-                .foregroundStyle(foreground)
-                .frame(maxWidth: .infinity)
-                .frame(height: Metric.modalButtonHeight)
-                .background(background)
-                .clipShape(RoundedRectangle(cornerRadius: Metric.modalButtonCornerRadius))
-        }
-        .buttonStyle(.plain)
-    }
 }
 
 private extension ChildListView {
@@ -221,19 +155,6 @@ private extension ChildListView {
         static let registerBottomPadding: CGFloat = 17
         static let gradientTopOffset: CGFloat = 130
         static let gradientOpacity: Double = 0.8
-        static let dimOpacity: Double = 0.65
-        static let modalSpacing: CGFloat = 26
-        static let modalTextSpacing: CGFloat = 9
-        static let modalButtonTopSpacing: CGFloat = 20
-        static let modalButtonSpacing: CGFloat = 15
-        static let modalButtonHeight: CGFloat = 45
-        static let modalButtonCornerRadius: CGFloat = 10
-        static let modalHorizontalPadding: CGFloat = 20
-        static let modalTopPadding: CGFloat = 31
-        static let modalBottomPadding: CGFloat = 15
-        static let modalCornerRadius: CGFloat = 30
-        static let modalMaxWidth: CGFloat = 331
-        static let modalMargin: CGFloat = 31
         static let skeletonRowCount = 6
         static let skeletonNameWidth: CGFloat = 72
         static let skeletonNameHeight: CGFloat = 16
@@ -244,8 +165,5 @@ private extension ChildListView {
         static let register = "아이 등록"
         static let edit = "수정"
         static let delete = "삭제"
-        static let cancel = "취소"
-        static let deleteTitle = "아이 정보 삭제"
-        static let deleteMessage = "삭제시 아이의 모든 돌봄 기록과 연락처 정보가\n함께 삭제되며 되돌릴 수 없습니다."
     }
 }
