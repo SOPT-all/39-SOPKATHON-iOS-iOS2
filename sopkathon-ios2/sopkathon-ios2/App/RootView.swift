@@ -131,9 +131,9 @@ struct RootView: View {
     private func destinationView(for route: Route) -> some View {
         switch route {
         case .childRegister:
-            ChildRegisterView()
+            ChildRegisterView(viewModel: ChildRegisterViewModel())
         case .childDetail(let childID):
-            ChildDetailView(childID: childID)
+            ChildDetailView(viewModel: ChildDetailViewModel(childID: childID))
         case .recordInput:
             RecordInputView(viewModel: RecordInputViewModel())
         }
