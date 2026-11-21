@@ -24,9 +24,7 @@ struct VoiceInputView: View {
             Color.clear
                 .frame(height: Metric.graphicHeight)
                 .overlay {
-                    Image(.graphicVoice)
-                        .resizable()
-                        .scaledToFill()
+                    voiceGraphicView
                 }
                 .padding(.top, Metric.graphicTopPadding)
 
@@ -55,6 +53,17 @@ struct VoiceInputView: View {
         .padding(.horizontal, Metric.titleHorizontalPadding)
     }
 
+    private var voiceGraphicView: some View {
+        ZStack {
+            graphicImage(.graphicVoiceLine)
+
+            ForEach(Array(Graphic.dots.enumerated()), id: \.offset) { index, dots in
+                graphicImage(dots)
+                    .opacity(isDotsVisible(at: index) ? 1 : 0)
+            }
+        }
+    }
+
     private var buttonRowView: some View {
         HStack(spacing: Metric.buttonSpacing) {
             FullWidthButton(title: Title.cancel, appearance: .secondary) {
@@ -70,6 +79,17 @@ struct VoiceInputView: View {
         }
         .padding(.horizontal, Metric.buttonHorizontalPadding)
     }
+
+    private func graphicImage(_ resource: ImageResource) -> some View {
+        Image(resource)
+            .resizable()
+            .scaledToFill()
+    }
+
+    private func isDotsVisible(at index: Int) -> Bool {
+        let threshold = Float(index + 1) / Float(Graphic.dots.count + 1)
+        return viewModel.audioLevel >= threshold
+    }
 }
 
 private extension VoiceInputView {
@@ -78,11 +98,21 @@ private extension VoiceInputView {
         static let titleSpacing: CGFloat = 5
         static let titleHorizontalPadding: CGFloat = 45
         static let graphicTopPadding: CGFloat = 86
-        static let graphicHeight: CGFloat = 69
+        static let graphicHeight: CGFloat = 109
         static let buttonTopPadding: CGFloat = 100
         static let buttonSpacing: CGFloat = 15
         static let buttonHorizontalPadding: CGFloat = 24
         static let bottomPadding: CGFloat = 15
+    }
+
+    enum Graphic {
+        static let dots: [ImageResource] = [
+            .graphicVoiceDots1,
+            .graphicVoiceDots2,
+            .graphicVoiceDots3,
+            .graphicVoiceDots4,
+            .graphicVoiceDots5
+        ]
     }
 
     enum Title {

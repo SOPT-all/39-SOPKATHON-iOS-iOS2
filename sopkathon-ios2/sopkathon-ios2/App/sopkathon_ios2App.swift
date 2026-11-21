@@ -13,6 +13,7 @@ struct sopkathon_ios2App: App {
     @State private var router = AppRouter()
     @State private var watchSyncReceiver: WatchSyncReceiver
     @State private var notificationService: LocalNotificationService
+    @State private var isSplashFinished = false
 
     init() {
         let dependency = AppDependency(mode: .live, baseService: BaseService.shared)
@@ -31,18 +32,34 @@ struct sopkathon_ios2App: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environment(dependency)
-                .environment(router)
-                .environment(watchSyncReceiver)
-                .task {
-                    await notificationService.activate()
+            ZStack {
+                RootView()
+                    .environment(dependency)
+                    .environment(router)
+                    .environment(watchSyncReceiver)
+
+                if !isSplashFinished {
+                    SplashView {
+                        withAnimation(.easeOut(duration: Metric.splashFadeDuration)) {
+                            isSplashFinished = true
+                        }
+                    }
+                    .transition(.opacity)
+                    .zIndex(1)
                 }
-                .onChange(of: notificationService.openedCount) {
-                    router.dismissSheet()
-                    router.popToRoot()
-                    router.selectTab(.home)
-                }
+            }
+            .task {
+                await notificationService.activate()
+            }
+            .onChange(of: notificationService.openedCount) {
+                router.dismissSheet()
+                router.popToRoot()
+                router.selectTab(.home)
+            }
         }
     }
+}
+
+private enum Metric {
+    static let splashFadeDuration: Double = 0.3
 }

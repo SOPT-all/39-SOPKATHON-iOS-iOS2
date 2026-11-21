@@ -9,32 +9,214 @@ import SwiftUI
 
 struct ChildListView: View {
     @Environment(AppRouter.self) private var router
+    @State private var viewModel: ChildListViewModel
+    @State private var deletingChild: ChildModel?
+
+    init(viewModel: ChildListViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: Metric.spacing) {
-                FullWidthButton(title: Title.register, appearance: .secondary) {
-                    router.push(.childRegister)
-                }
+        VStack(spacing: Metric.searchBarBottomSpacing) {
+            SearchBar(text: $viewModel.keyword, placeholder: Title.searchPlaceholder)
+                .padding(.horizontal, Metric.horizontalPadding)
+                .padding(.top, Metric.topPadding)
 
-                FullWidthButton(title: Title.detail, appearance: .secondary) {
-                    router.push(.childDetail(childID: Metric.sampleID))
+            childListView
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .overlay(alignment: .bottomTrailing) {
+            registerButton
+        }
+        .background { backgroundView }
+        .task(id: viewModel.keyword) {
+            await viewModel.fetchChildren()
+        }
+        .transaction(value: deletingChild?.id) { transaction in
+            transaction.disablesAnimations = true
+        }
+        .fullScreenCover(item: $deletingChild) { child in
+            deleteModalView(child)
+        }
+    }
+
+    private var childListView: some View {
+        List(viewModel.children) { child in
+            childRowView(child)
+                .listRowInsets(Metric.rowInsets)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(Title.delete) {
+                        deletingChild = child
+                    }
+                    .tint(.red)
+                }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.immediately)
+        .contentMargins(.bottom, Metric.listBottomMargin, for: .scrollContent)
+    }
+
+    private var registerButton: some View {
+        Button {
+            router.push(.childRegister)
+        } label: {
+            Text(Title.register)
+                .typography(.body1)
+                .foregroundStyle(.baseWhite)
+                .padding(.horizontal, Metric.registerHorizontalPadding)
+                .frame(height: Metric.registerHeight)
+                .background(.primary400)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .padding(.trailing, Metric.horizontalPadding)
+        .padding(.bottom, Metric.registerBottomPadding)
+    }
+
+    private var backgroundView: some View {
+        VStack(spacing: 0) {
+            Color.baseWhite
+                .frame(height: Metric.gradientTopOffset)
+
+            LinearGradient(
+                colors: [.baseWhite, .baseGradient.opacity(Metric.gradientOpacity)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        .ignoresSafeArea()
+    }
+
+    private func childRowView(_ child: ChildModel) -> some View {
+        HStack(spacing: Metric.rowSpacing) {
+            ProfileCard(childID: child.id, name: child.name)
+
+            Text(child.name)
+                .typography(.caption3)
+                .foregroundStyle(.textBlack)
+                .lineLimit(1)
+
+            Spacer()
+
+            Button {
+                router.push(.childDetail(childID: child.id))
+            } label: {
+                Text(Title.edit)
+                    .typography(.caption2)
+                    .foregroundStyle(.disabled200)
+                    .frame(width: Metric.editWidth, height: Metric.editHeight)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(height: Metric.rowHeight)
+    }
+
+    private func deleteModalView(_ child: ChildModel) -> some View {
+        ZStack {
+            Color.textBlack
+                .opacity(Metric.dimOpacity)
+                .ignoresSafeArea()
+
+            VStack(spacing: Metric.modalSpacing) {
+                ProfileCard(childID: child.id, name: child.name, size: .extraLarge)
+
+                VStack(spacing: Metric.modalButtonTopSpacing) {
+                    VStack(alignment: .leading, spacing: Metric.modalTextSpacing) {
+                        Text(Title.deleteTitle)
+                            .typography(.subHeader1)
+                            .foregroundStyle(.textBlack)
+
+                        Text(Title.deleteMessage)
+                            .typography(.caption1)
+                            .foregroundStyle(.disabled200)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    HStack(spacing: Metric.modalButtonSpacing) {
+                        modalButton(Title.cancel, foreground: .textBlack, background: .gray100) {
+                            deletingChild = nil
+                        }
+
+                        modalButton(Title.delete, foreground: .baseWhite, background: .primary400) {
+                            deletingChild = nil
+                            Task { await viewModel.deleteChild(childID: child.id) }
+                        }
+                    }
                 }
             }
-            .padding(Metric.padding)
+            .padding(.horizontal, Metric.modalHorizontalPadding)
+            .padding(.top, Metric.modalTopPadding)
+            .padding(.bottom, Metric.modalBottomPadding)
+            .background(.baseWhite)
+            .clipShape(RoundedRectangle(cornerRadius: Metric.modalCornerRadius))
+            .frame(maxWidth: Metric.modalMaxWidth)
+            .padding(.horizontal, Metric.modalMargin)
         }
+        .presentationBackground(.clear)
+    }
+
+    private func modalButton(
+        _ title: String,
+        foreground: Color,
+        background: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .typography(.body1)
+                .foregroundStyle(foreground)
+                .frame(maxWidth: .infinity)
+                .frame(height: Metric.modalButtonHeight)
+                .background(background)
+                .clipShape(RoundedRectangle(cornerRadius: Metric.modalButtonCornerRadius))
+        }
+        .buttonStyle(.plain)
     }
 }
 
 private extension ChildListView {
     enum Metric {
-        static let spacing: CGFloat = 12
-        static let padding: CGFloat = 20
-        static let sampleID = 1
+        static let horizontalPadding: CGFloat = 24
+        static let topPadding: CGFloat = 12
+        static let searchBarBottomSpacing: CGFloat = 13
+        static let rowInsets = EdgeInsets(top: 7.5, leading: 24, bottom: 7.5, trailing: 24)
+        static let rowHeight: CGFloat = 50
+        static let rowSpacing: CGFloat = 12
+        static let editWidth: CGFloat = 52
+        static let editHeight: CGFloat = 36
+        static let listBottomMargin: CGFloat = 80
+        static let registerHeight: CGFloat = 48
+        static let registerHorizontalPadding: CGFloat = 19
+        static let registerBottomPadding: CGFloat = 17
+        static let gradientTopOffset: CGFloat = 130
+        static let gradientOpacity: Double = 0.8
+        static let dimOpacity: Double = 0.65
+        static let modalSpacing: CGFloat = 26
+        static let modalTextSpacing: CGFloat = 9
+        static let modalButtonTopSpacing: CGFloat = 20
+        static let modalButtonSpacing: CGFloat = 15
+        static let modalButtonHeight: CGFloat = 45
+        static let modalButtonCornerRadius: CGFloat = 10
+        static let modalHorizontalPadding: CGFloat = 20
+        static let modalTopPadding: CGFloat = 31
+        static let modalBottomPadding: CGFloat = 15
+        static let modalCornerRadius: CGFloat = 30
+        static let modalMaxWidth: CGFloat = 331
+        static let modalMargin: CGFloat = 31
     }
 
     enum Title {
+        static let searchPlaceholder = "아이 이름으로 검색"
         static let register = "아이 등록"
-        static let detail = "아이 수정"
+        static let edit = "수정"
+        static let delete = "삭제"
+        static let cancel = "취소"
+        static let deleteTitle = "아이 정보 삭제"
+        static let deleteMessage = "삭제시 아이의 모든 돌봄 기록과 연락처 정보가\n함께 삭제되며 되돌릴 수 없습니다."
     }
 }
