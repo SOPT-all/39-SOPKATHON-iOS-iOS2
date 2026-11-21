@@ -20,6 +20,16 @@ sopkathon-ios2에서 작업하는 코딩 에이전트가 따라야 하는 규칙
 xcodebuild -project sopkathon-ios2/sopkathon-ios2.xcodeproj -scheme sopkathon-ios2 -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
+워치 앱(`SopkathonWatch` 타깃)을 건드렸다면 아래 명령으로 워치 빌드도 확인합니다.
+
+```bash
+xcodebuild -project sopkathon-ios2/sopkathon-ios2.xcodeproj -scheme SopkathonWatch -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO build
+```
+
+- 워치 앱 코드는 `sopkathon-ios2/SopkathonWatch/`에 둡니다.
+- 워치는 `Core/Network`, `Feature/CareRecord`, `App/AppDependency.swift`, `Core/Extension/Font+.swift`, Pretendard 폰트를 아이폰 앱과 같이 씁니다. 이 파일들이 SwiftUI나 UIKit 전용 API, 워치 타깃에 없는 타입을 쓰면 워치 빌드가 깨지므로, 수정했다면 워치 빌드도 확인합니다.
+- 워치에서 같이 쓸 파일을 늘리려면 Xcode에서 그 파일의 Target Membership에 `SopkathonWatch`를 체크합니다.
+
 ## 3. 폴더 구조
 
 ```

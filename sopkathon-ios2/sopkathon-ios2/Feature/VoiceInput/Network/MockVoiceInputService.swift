@@ -43,6 +43,10 @@ extension MockVoiceInputService: VoiceInputServiceProtocol {
         return VoiceInputModel(transcripts: stream, audioLevels: audioLevels)
     }
 
+    func transcribeRecording(at url: URL, contextualStrings: [String]) async throws -> String {
+        Sample.words.joined(separator: Sample.separator)
+    }
+
     func stopRecognition() {
         recognitionTask?.cancel()
         recognitionTask = nil

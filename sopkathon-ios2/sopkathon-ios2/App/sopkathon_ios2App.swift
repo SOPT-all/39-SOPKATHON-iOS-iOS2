@@ -9,9 +9,26 @@ import SwiftUI
 
 @main
 struct sopkathon_ios2App: App {
-    @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+    @State private var dependency: AppDependency
     @State private var router = AppRouter()
+    @State private var watchSyncReceiver: WatchSyncReceiver
+    @State private var notificationService: LocalNotificationService
     @State private var isSplashFinished = false
+
+    init() {
+        let dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+        let notificationService = LocalNotificationService()
+        _dependency = State(initialValue: dependency)
+        _notificationService = State(initialValue: notificationService)
+        let watchSyncReceiver = WatchSyncReceiver(
+            voiceInputService: dependency.voiceInputService,
+            careRecordService: dependency.careRecordService,
+            childService: dependency.childService,
+            notificationService: notificationService
+        )
+        watchSyncReceiver.activate()
+        _watchSyncReceiver = State(initialValue: watchSyncReceiver)
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +36,7 @@ struct sopkathon_ios2App: App {
                 RootView()
                     .environment(dependency)
                     .environment(router)
+                    .environment(watchSyncReceiver)
 
                 if !isSplashFinished {
                     SplashView {
@@ -29,6 +47,14 @@ struct sopkathon_ios2App: App {
                     .transition(.opacity)
                     .zIndex(1)
                 }
+            }
+            .task {
+                await notificationService.activate()
+            }
+            .onChange(of: notificationService.openedCount) {
+                router.dismissSheet()
+                router.popToRoot()
+                router.selectTab(.home)
             }
         }
     }
