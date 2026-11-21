@@ -14,6 +14,10 @@ enum BriefingMapper {
         )
     }
 
+    static func map(_ dto: CreateBriefingResponseDTO) -> BriefingMessageModel {
+        BriefingMessageModel(id: dto.briefingID, content: dto.content)
+    }
+
     private static func map(_ dto: BriefingResponseDTO.Kid) -> BriefingKidModel {
         BriefingKidModel(
             id: dto.kidID,
