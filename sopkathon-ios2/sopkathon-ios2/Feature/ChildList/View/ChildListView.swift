@@ -52,7 +52,7 @@ struct ChildListView: View {
                             Button(Title.delete) {
                                 deletingChild = child
                             }
-                            .tint(.red)
+                            .tint(.primary400)
                         }
                 }
             } else {
