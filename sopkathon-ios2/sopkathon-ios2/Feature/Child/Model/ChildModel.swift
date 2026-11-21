@@ -19,14 +19,9 @@ extension ChildModel {
     }
 }
 
-struct ChildMentionModel {
-    let child: ChildModel
-    let text: String
-}
-
 extension [ChildModel] {
-    func mentions(in text: String) -> [ChildMentionModel] {
-        let positions = compactMap { child -> (child: ChildModel, position: String.Index)? in
+    func mentioned(in text: String) -> [ChildModel] {
+        compactMap { child -> (child: ChildModel, position: String.Index)? in
             let positions = child.spokenNames
                 .filter { $0 == child.name || isUniqueSpokenName($0) }
                 .compactMap { text.range(of: spacedPattern(of: $0), options: .regularExpression) }
@@ -35,15 +30,7 @@ extension [ChildModel] {
             return (child, position)
         }
         .sorted { $0.position < $1.position }
-
-        return positions.enumerated().map { index, mention in
-            let start = index == 0 ? text.startIndex : mention.position
-            let end = index + 1 < positions.count ? positions[index + 1].position : text.endIndex
-            return ChildMentionModel(
-                child: mention.child,
-                text: text[start..<end].trimmingCharacters(in: .whitespacesAndNewlines)
-            )
-        }
+        .map(\.child)
     }
 
     private func isUniqueSpokenName(_ spokenName: String) -> Bool {

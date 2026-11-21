@@ -11,13 +11,8 @@ extension CareRecordServiceProtocol {
         mentioning children: [ChildModel]
     ) async -> [CareRecordModel] {
         var records: [CareRecordModel] = []
-        for mention in children.mentions(in: text) {
-            let mentionedCategory = CareRecordCategoryModel.mentioned(in: mention.text)
-            let draft = CareRecordDraftModel(
-                childID: mention.child.id,
-                category: mentionedCategory ?? .mentioned(in: text),
-                text: mentionedCategory == nil ? text : mention.text
-            )
+        for child in children.mentioned(in: text) {
+            let draft = CareRecordDraftModel(childID: child.id, text: text)
             records += (try? await createCareRecords(draft)) ?? []
         }
         return records
