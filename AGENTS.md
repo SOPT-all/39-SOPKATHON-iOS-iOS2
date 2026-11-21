@@ -24,7 +24,7 @@ xcodebuild -project sopkathon-ios2/sopkathon-ios2.xcodeproj -scheme sopkathon-io
 
 ```
 sopkathon-ios2/sopkathon-ios2/
-├─ App/                      앱 진입점, 루트 화면
+├─ App/                      앱 진입점, 루트 화면, AppDependency
 ├─ Core/
 │  ├─ Network/               공통 네트워크 레이어 (6개 파일 고정)
 │  ├─ DesignSystem/          색, 폰트, 두 기능 이상에서 쓰는 공통 컴포넌트
@@ -37,6 +37,7 @@ sopkathon-ios2/sopkathon-ios2/
 │     └─ Network/
 │        ├─ <기능>Endpoint.swift
 │        ├─ <기능>Service.swift
+│        ├─ Mock<기능>Service.swift
 │        ├─ <기능>Mapper.swift
 │        └─ DTO/<이름>ResponseDTO.swift, <이름>RequestDTO.swift
 └─ Resource/                 Assets.xcassets, Info.plist, 폰트
@@ -58,6 +59,7 @@ sopkathon-ios2/sopkathon-ios2/
 | 화면의 대표 Model | `<기능>Model` | `HomeModel` |
 | 그 밖의 Model | `<기능><이름>Model` | `HomePostModel` |
 | Service | `<기능>ServiceProtocol`, `<기능>Service` | `HomeServiceProtocol`, `HomeService` |
+| Mock Service | `Mock<기능>Service` | `MockHomeService` |
 | Endpoint | `<기능>Endpoint` | `HomeEndpoint` |
 | Mapper | `<기능>Mapper` | `HomeMapper` |
 | DTO | `<이름>ResponseDTO`, `<이름>RequestDTO` | `HomeResponseDTO`, `CreatePostRequestDTO` |
@@ -174,7 +176,7 @@ protocol HomeServiceProtocol {
 final class HomeService {
     private let baseService: any BaseServiceProtocol
 
-    init(baseService: any BaseServiceProtocol = BaseService.shared) {
+    init(baseService: any BaseServiceProtocol) {
         self.baseService = baseService
     }
 }
@@ -188,6 +190,38 @@ extension HomeService: HomeServiceProtocol {
     func deletePost(postID: Int) async throws {
         try await baseService.request(HomeEndpoint.deletePost(postID: postID))
     }
+}
+
+extension AppDependency {
+    var homeService: any HomeServiceProtocol {
+        switch mode {
+        case .live:
+            return HomeService(baseService: baseService)
+        case .mock:
+            return MockHomeService()
+        }
+    }
+}
+```
+
+### Mock Service: `Feature/Home/Network/MockHomeService.swift`
+
+```swift
+struct MockHomeService {}
+
+extension MockHomeService: HomeServiceProtocol {
+    func fetchHome() async throws -> HomeModel {
+        HomeModel(
+            userID: 1,
+            nickname: "솝트",
+            posts: [
+                HomePostModel(id: 1, title: "첫 번째 글"),
+                HomePostModel(id: 2, title: "두 번째 글")
+            ]
+        )
+    }
+
+    func deletePost(postID: Int) async throws {}
 }
 ```
 
@@ -208,7 +242,7 @@ final class HomeViewModel {
 
     private let service: any HomeServiceProtocol
 
-    init(service: any HomeServiceProtocol = HomeService()) {
+    init(service: any HomeServiceProtocol) {
         self.service = service
     }
 
@@ -242,7 +276,11 @@ final class HomeViewModel {
 import SwiftUI
 
 struct HomeView: View {
-    @State private var viewModel = HomeViewModel()
+    @State private var viewModel: HomeViewModel
+
+    init(viewModel: HomeViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         contentView
@@ -281,7 +319,30 @@ struct HomeView: View {
 }
 ```
 
+### 화면을 띄우는 쪽
+
+`HomeView`를 띄우는 상위 View가 `AppDependency`에서 Service를 꺼내 ViewModel을 만들어 넘깁니다.
+
+```swift
+struct ContentView: View {
+    @Environment(AppDependency.self) private var dependency
+
+    var body: some View {
+        HomeView(viewModel: HomeViewModel(service: dependency.homeService))
+    }
+}
+```
+
 ## 6. 계층별 규칙
+
+### 의존성 주입
+
+- **`BaseService.shared`를 직접 쓰지 않습니다.** 앱 루트(`App/sopkathon_ios2App.swift`)에서 `AppDependency`를 만들 때 한 번만 넣고, 그 밖의 코드는 모두 프로토콜(`any BaseServiceProtocol`, `any <기능>ServiceProtocol`)로 주입받습니다.
+- Service와 ViewModel의 `init`에 기본값을 주지 않습니다. (`= BaseService.shared`, `= HomeService()` 금지)
+- 실제 구현과 Mock 중 무엇을 쓸지는 앱 루트의 `AppDependency(mode:)` 한 곳에서 정합니다. `.live`는 실제 Service, `.mock`은 Mock Service를 씁니다.
+- 기능마다 `<기능>Service.swift` 맨 아래에 `extension AppDependency`를 두고, `mode`에 따라 실제 Service나 Mock Service를 돌려주는 프로퍼티를 만듭니다. `App/AppDependency.swift`는 수정하지 않습니다.
+- View는 `@Environment(AppDependency.self)`로 꺼낸 Service로 하위 화면의 ViewModel을 만들어 넘깁니다. View가 Service의 메서드를 직접 호출하지 않습니다.
+- `mode: .mock`으로 바꾼 채 커밋하지 않습니다.
 
 ### View
 
@@ -290,11 +351,11 @@ struct HomeView: View {
 - `@State`, `@FocusState`는 항상 `private`으로 선언합니다.
 - View는 `viewModel.state`를 읽어 그리기만 합니다. 네트워크 호출, 데이터 가공, 에러 문구 결정을 View에 두지 않습니다.
 - 첫 데이터 요청은 `.task`에서 합니다.
-- 화면에 값을 넘겨받아야 하면 `init`에서 받아 ViewModel을 만듭니다.
+- View는 ViewModel을 직접 만들지 않고 `init`으로 받습니다. 화면에 넘길 값(`postID` 등)은 띄우는 쪽에서 ViewModel을 만들 때 넣습니다.
 
   ```swift
-  init(postID: Int) {
-      _viewModel = State(initialValue: PostDetailViewModel(postID: postID))
+  init(viewModel: PostDetailViewModel) {
+      _viewModel = State(initialValue: viewModel)
   }
   ```
 
@@ -306,7 +367,7 @@ struct HomeView: View {
 - 순서: 공개 상태 → `private` 상태 → 의존성 → `init` → 공개 메서드 → `private` 메서드
 - 서버에서 받아 오는 화면 상태는 `State` enum(`loading`, `loaded`, `failed`) 하나로 표현합니다. `isLoading`, `errorMessage`, 데이터를 따로따로 두지 않습니다.
 - View가 읽기만 하는 값은 `private(set)`으로 선언합니다.
-- `~ServiceProtocol`에만 의존하고, `init`에서 주입받되 기본값으로 실제 Service를 줍니다. `BaseService`, `Endpoint`, DTO, Mapper를 직접 쓰지 않습니다.
+- `~ServiceProtocol`에만 의존하고 `init`에서 기본값 없이 주입받습니다. `BaseService`, `Endpoint`, DTO, Mapper를 직접 쓰지 않습니다.
 - 사용자에게 보여 줄 에러 문구는 ViewModel에서 정합니다.
 
 ### Model
@@ -325,7 +386,8 @@ struct HomeView: View {
   - 서버 문자열을 enum으로 바꾸거나 문자열을 `URL`로 바꾸는 일도 Mapper에서 합니다.
   - Model을 요청 DTO로 바꿔야 할 때도 같은 Mapper에 `map`을 추가합니다.
 - **Endpoint**는 기능마다 enum을 따로 만들고 `path`, `method`만 구현합니다. `queryItems`, `body`는 필요한 경우에만 구현합니다.
-- **Service**는 `any BaseServiceProtocol`을 주입받고 기본값으로 `BaseService.shared`를 줍니다. `BaseService`를 상속하지 않습니다.
+- **Service**는 `any BaseServiceProtocol`을 `init`에서 기본값 없이 주입받습니다. `BaseService`를 상속하지 않습니다.
+- **Mock Service**는 같은 `~ServiceProtocol`을 채택하고, 서버 없이 화면을 확인할 수 있는 가짜 Model을 돌려줍니다.
 - Service는 요청을 보내고 `Mapper.map`으로 바꾼 Model을 돌려줍니다. DTO를 밖으로 내보내지 않습니다.
 - 기능 폴더에서 `import Alamofire`를 하지 않습니다.
 
@@ -543,3 +605,4 @@ API 연결 작업은 `feat`를 사용하고, 이슈와 PR에 `API` 라벨을 추
 4. 한 번만 쓰이는 View를 `struct`로 빼지 않았는가
 5. 헤더 주석이 있고, 그 외 주석과 `#Preview`는 없는가
 6. 화면을 건드렸다면 10번의 세 기종에서 실행해 확인했는가
+7. `BaseService.shared`를 직접 쓰거나 `init`에 기본값을 준 곳이 없는가
