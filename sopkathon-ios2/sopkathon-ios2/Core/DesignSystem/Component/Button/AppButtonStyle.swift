@@ -12,15 +12,21 @@ struct AppButtonStyle: ButtonStyle {
 
     private let appearance: ButtonAppearance
     private let size: ButtonSize
+    private let textStyle: Typography
 
-    init(appearance: ButtonAppearance, size: ButtonSize) {
+    init(
+        appearance: ButtonAppearance,
+        size: ButtonSize,
+        textStyle: Typography = .subHeader2
+    ) {
         self.appearance = appearance
         self.size = size
+        self.textStyle = textStyle
     }
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .typography(.subHeader2)
+            .typography(textStyle)
             .foregroundStyle(.baseWhite)
             .frame(height: size.height)
             .background(
