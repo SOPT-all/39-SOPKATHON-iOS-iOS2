@@ -19,7 +19,7 @@ struct RecordInputView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            NavigationHeader(title: Title.navigation)
+            NavigationHeader(title: Title.navigation, style: .plain)
 
             ScrollViewReader { proxy in
                 ScrollView {
