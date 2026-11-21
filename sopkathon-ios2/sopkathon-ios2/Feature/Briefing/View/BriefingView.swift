@@ -10,6 +10,6 @@ import SwiftUI
 struct BriefingView: View {
     var body: some View {
         Text("일일 브리핑 작성")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

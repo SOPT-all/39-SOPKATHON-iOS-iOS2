@@ -10,6 +10,6 @@ import SwiftUI
 struct RecordInputView: View {
     var body: some View {
         Text("기록 입력")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

@@ -10,6 +10,6 @@ import SwiftUI
 struct VoiceInputView: View {
     var body: some View {
         Text("음성 입력")
-            .typography(.h1Sb16)
+            .typography(.subHeader2)
     }
 }

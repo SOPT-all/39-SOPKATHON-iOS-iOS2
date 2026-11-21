@@ -29,7 +29,7 @@ struct MultiLineTextField: View {
         InputFieldContainer(title: title, isFocused: isFocused) {
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $text)
-                    .typography(.h3Rg14)
+                    .typography(.body5)
                     .scrollContentBackground(.hidden)
                     .focused($isFocused)
 
@@ -44,7 +44,7 @@ struct MultiLineTextField: View {
 
     private var placeholderText: some View {
         Text(placeholder)
-            .typography(.h3Rg14)
+            .typography(.body5)
             .foregroundStyle(Color(.placeholderText))
             .padding(.top, Metric.placeholderTopPadding)
             .padding(.leading, Metric.placeholderLeadingPadding)

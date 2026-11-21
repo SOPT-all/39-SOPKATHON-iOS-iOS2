@@ -28,7 +28,7 @@ struct CompactButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .typography(.h3Sb14)
+                .typography(.body4)
                 .foregroundStyle(appearance.foregroundColor(isEnabled: isEnabled))
                 .padding(.horizontal, Metric.horizontalPadding)
                 .frame(height: Metric.height)

@@ -37,11 +37,11 @@ struct ConfirmModal: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Metric.spacing) {
             Text(title)
-                .typography(.h1B16)
+                .typography(.subHeader2)
                 .foregroundStyle(Color.primary)
 
             Text(message)
-                .typography(.bodyRg12)
+                .typography(.body5)
                 .foregroundStyle(Color.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
