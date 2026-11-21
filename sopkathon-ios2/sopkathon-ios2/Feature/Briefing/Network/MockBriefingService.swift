@@ -6,12 +6,19 @@
 //
 
 final class MockBriefingService {
-    private var generatedMessages: [Int: BriefingMessageModel] = [:]
+    private var generatedMessagesByDate: [String: [Int: BriefingMessageModel]] = [:]
+    private var lastFetchedDate: String?
+
+    private enum MockBriefingError: Error {
+        case missingDate
+    }
 }
 
 extension MockBriefingService: BriefingServiceProtocol {
     func fetchDailyBriefings(date: String) async throws -> BriefingModel {
-        BriefingModel(
+        lastFetchedDate = date
+
+        return BriefingModel(
             date: date,
             recordedKidCount: 2,
             kids: [
@@ -22,7 +29,7 @@ extension MockBriefingService: BriefingServiceProtocol {
                     recordCount: 6,
                     summary: BriefingSummaryModel(feeding: 3, sleep: 1, diaper: 2),
                     parent: BriefingParentModel(name: "김OO", phone: "010-1234-5678"),
-                    briefing: generatedMessages[1] ?? BriefingMessageModel(
+                    briefing: generatedMessagesByDate[date]?[1] ?? BriefingMessageModel(
                         id: 5,
                         content: "지우는 오늘 수유 3회, 낮잠 1회, "
                             + "기저귀 교체 2회를 했어요."
@@ -35,7 +42,7 @@ extension MockBriefingService: BriefingServiceProtocol {
                     recordCount: 2,
                     summary: BriefingSummaryModel(feeding: 1, sleep: 1, diaper: 0),
                     parent: BriefingParentModel(name: "이OO", phone: "010-5678-1234"),
-                    briefing: generatedMessages[2]
+                    briefing: generatedMessagesByDate[date]?[2]
                 )
             ]
         )
@@ -46,7 +53,7 @@ extension MockBriefingService: BriefingServiceProtocol {
             id: kidID + 4,
             content: "오늘의 돌봄 기록을 바탕으로 브리핑을 생성했어요."
         )
-        generatedMessages[kidID] = message
+        generatedMessagesByDate[date, default: [:]][kidID] = message
         return message
     }
 
@@ -54,12 +61,13 @@ extension MockBriefingService: BriefingServiceProtocol {
         briefingID: Int,
         instruction: String
     ) async throws -> BriefingMessageModel {
+        guard let lastFetchedDate else { throw MockBriefingError.missingDate }
         let kidID = briefingID - 4
         let message = BriefingMessageModel(
             id: briefingID,
             content: "\(instruction) 요청을 반영해 브리핑을 다듬었어요."
         )
-        generatedMessages[kidID] = message
+        generatedMessagesByDate[lastFetchedDate, default: [:]][kidID] = message
         return message
     }
 }
