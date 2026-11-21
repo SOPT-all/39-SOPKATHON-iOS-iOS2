@@ -13,41 +13,27 @@ enum ButtonAppearance {
     case destructive
 
     func foregroundColor(isEnabled: Bool) -> Color {
-        guard isEnabled else { return Color(.systemGray) }
+        guard isEnabled else { return .baseWhite }
 
         switch self {
-        case .primary:
-            return .white
-        case .secondary:
-            return .accentColor
+        case .primary, .secondary:
+            return .baseWhite
         case .destructive:
             return Color(.systemRed)
         }
     }
 
     func backgroundColor(isEnabled: Bool, isPressed: Bool) -> Color {
-        guard isEnabled else { return Color(.systemGray5) }
+        guard isEnabled else { return .disabled50 }
 
-        let color: Color
         switch self {
         case .primary:
-            color = .accentColor
+            return isPressed ? .primary600 : .primary400
         case .secondary:
-            color = .clear
+            return isPressed ? .disabled100 : .gray300
         case .destructive:
-            color = Color(.systemRed).opacity(Opacity.destructiveBackground)
-        }
-        return isPressed ? color.opacity(Opacity.pressed) : color
-    }
-
-    func borderColor(isEnabled: Bool) -> Color {
-        guard isEnabled else { return .clear }
-
-        switch self {
-        case .primary, .destructive:
-            return .clear
-        case .secondary:
-            return .accentColor
+            let color = Color(.systemRed).opacity(Opacity.destructiveBackground)
+            return isPressed ? color.opacity(Opacity.pressed) : color
         }
     }
 }

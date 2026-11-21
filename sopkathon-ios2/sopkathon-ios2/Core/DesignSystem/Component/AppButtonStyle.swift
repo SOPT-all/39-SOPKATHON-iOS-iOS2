@@ -30,17 +30,9 @@ struct AppButtonStyle: ButtonStyle {
                 )
             )
             .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
-            .overlay {
-                RoundedRectangle(cornerRadius: Metric.cornerRadius)
-                    .stroke(
-                        appearance.borderColor(isEnabled: isEnabled),
-                        lineWidth: Metric.borderWidth
-                    )
-            }
     }
 }
 
 private enum Metric {
     static let cornerRadius: CGFloat = 10
-    static let borderWidth: CGFloat = 1
 }
