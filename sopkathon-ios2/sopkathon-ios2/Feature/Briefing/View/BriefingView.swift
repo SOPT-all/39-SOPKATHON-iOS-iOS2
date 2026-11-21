@@ -45,7 +45,7 @@ struct BriefingView: View {
                 BriefingMessageComposeView(
                     isPresented: $isMessagePresented,
                     recipient: parent.phone,
-                    content: message.content,
+                    content: selectedKid.briefingContent ?? message.content,
                     onFinish: handleMessageResult
                 )
             }
@@ -230,7 +230,7 @@ struct BriefingView: View {
 
             if let message = kid.briefing {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text(message.content)
+                    Text(kid.briefingContent ?? message.content)
                         .typography(.body5)
                         .foregroundStyle(.textBlack)
 
