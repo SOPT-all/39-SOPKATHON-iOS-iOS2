@@ -8,39 +8,6 @@
 import SwiftUI
 
 struct HomeProfileCard: View {
-    enum Palette {
-        case lavender
-        case yellow
-        case green
-        case blue
-
-        var backgroundColor: Color {
-            switch self {
-            case .lavender:
-                return .pointLavender100
-            case .yellow:
-                return .pointYellow100
-            case .green:
-                return .pointGreen100
-            case .blue:
-                return .pointBlue100
-            }
-        }
-
-        var textColor: Color {
-            switch self {
-            case .lavender:
-                return .pointLavender200
-            case .yellow:
-                return .pointYellow200
-            case .green:
-                return .pointGreen200
-            case .blue:
-                return .pointBlue200
-            }
-        }
-    }
-
     enum Size {
         case large
         case small
@@ -83,10 +50,10 @@ struct HomeProfileCard: View {
     }
 
     private let name: String
-    private let palette: Palette
+    private let palette: HomeProfileColorModel
     private let size: Size
 
-    init(name: String, palette: Palette, size: Size = .large) {
+    init(name: String, palette: HomeProfileColorModel, size: Size = .large) {
         self.name = name
         self.palette = palette
         self.size = size
@@ -104,5 +71,33 @@ struct HomeProfileCard: View {
     private var initial: String {
         let givenName = name.count > 1 ? name.dropFirst() : Substring(name)
         return givenName.first.map(String.init) ?? ""
+    }
+}
+
+private extension HomeProfileColorModel {
+    var backgroundColor: Color {
+        switch self {
+        case .lavender:
+            return .pointLavender100
+        case .yellow:
+            return .pointYellow100
+        case .green:
+            return .pointGreen100
+        case .blue:
+            return .pointBlue100
+        }
+    }
+
+    var textColor: Color {
+        switch self {
+        case .lavender:
+            return .pointLavender200
+        case .yellow:
+            return .pointYellow200
+        case .green:
+            return .pointGreen200
+        case .blue:
+            return .pointBlue200
+        }
     }
 }

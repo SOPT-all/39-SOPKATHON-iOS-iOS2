@@ -33,7 +33,7 @@ struct HomeMemoCard: View {
         var titleColor: Color {
             switch self {
             case .text:
-                return .baseText
+                return .textBlack
             case .voice:
                 return .baseWhite
             }

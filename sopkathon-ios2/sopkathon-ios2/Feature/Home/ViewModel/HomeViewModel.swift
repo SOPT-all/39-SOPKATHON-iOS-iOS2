@@ -27,19 +27,12 @@ final class HomeViewModel {
         self.home = HomeModel(
             teacherName: home.teacherName,
             children: home.children.shuffled(),
-            records: home.records.sorted {
-                ($0.recordedAt ?? .distantPast) > ($1.recordedAt ?? .distantPast)
-            }
+            records: home.records.sorted { $0.recordedAt > $1.recordedAt }
         )
     }
 
-    func timeText(for date: Date?) -> String {
-        guard let date else { return "" }
-        return Self.timeFormatter.string(from: date)
-    }
-
-    func childIndex(of childID: Int) -> Int? {
-        home?.children.firstIndex { $0.id == childID }
+    func timeText(for date: Date) -> String {
+        Self.timeFormatter.string(from: date)
     }
 }
 

@@ -45,7 +45,7 @@ struct HomeView: View {
         viewModel.home?.children ?? []
     }
 
-    private var records: [CareRecordModel] {
+    private var records: [HomeRecordModel] {
         viewModel.home?.records ?? []
     }
 
@@ -73,12 +73,12 @@ struct HomeView: View {
 
             Text(viewModel.todayText)
                 .typography(.caption1)
-                .foregroundStyle(.baseText)
+                .foregroundStyle(.textBlack)
                 .padding(.top, Metric.dateTopPadding)
 
             Text("\(viewModel.home?.teacherName ?? "") 선생님 반갑습니다")
                 .typography(.header1)
-                .foregroundStyle(.baseText)
+                .foregroundStyle(.textBlack)
                 .padding(.top, Metric.greetingTopPadding)
         }
     }
@@ -88,7 +88,7 @@ struct HomeView: View {
             HStack {
                 Text("아직은 아이들에 대한 돌봄 기록이 없어요!")
                     .typography(.caption1)
-                    .foregroundStyle(.baseText)
+                    .foregroundStyle(.textBlack)
 
                 Spacer()
 
@@ -104,8 +104,8 @@ struct HomeView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Metric.cardSpacing) {
-                    ForEach(Array(children.enumerated()), id: \.element.id) { index, child in
-                        HomeProfileCard(name: child.name, palette: palette(at: index))
+                    ForEach(children) { child in
+                        HomeProfileCard(name: child.name, palette: child.profileColor)
                     }
                 }
             }
@@ -132,13 +132,13 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: Metric.sectionTitleSpacing) {
             sectionTitle("오늘의 기록")
 
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: Metric.recordSpacing) {
                     ForEach(records) { record in
                         HomeRecordRow(
                             name: record.childName,
                             time: viewModel.timeText(for: record.recordedAt),
-                            palette: palette(at: viewModel.childIndex(of: record.childID) ?? 0),
+                            palette: record.profileColor,
                             category: record.category
                         )
                     }
@@ -160,43 +160,37 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: Metric.shortcutTitleSpacing) {
             sectionTitle("바로가기")
 
-            Button {
-                router.selectTab(.briefing)
-            } label: {
-                HStack {
-                    Text("오늘 하루 브리핑 작성하기")
-                        .typography(.body1)
-                        .foregroundStyle(.baseText)
+            HStack {
+                Text("오늘 하루 브리핑 작성하기")
+                    .typography(.body1)
+                    .foregroundStyle(.textBlack)
 
-                    Spacer()
+                Spacer()
 
+                Button {
+                    router.selectTab(.briefing)
+                } label: {
                     Text("바로가기")
                         .typography(.body2)
                         .foregroundStyle(.primary600)
                 }
-                .padding(.horizontal, Metric.shortcutHorizontalPadding)
-                .frame(height: Metric.shortcutHeight)
-                .background(.baseWhite)
-                .clipShape(RoundedRectangle(cornerRadius: Metric.cardCornerRadius))
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, Metric.shortcutHorizontalPadding)
+            .frame(height: Metric.shortcutHeight)
+            .background(.baseWhite)
+            .clipShape(RoundedRectangle(cornerRadius: Metric.cardCornerRadius))
         }
     }
 
     private func sectionTitle(_ title: String) -> some View {
         Text(title)
             .typography(.subHeader1)
-            .foregroundStyle(.baseText)
-    }
-
-    private func palette(at index: Int) -> HomeProfileCard.Palette {
-        Self.palettes[index % Self.palettes.count]
+            .foregroundStyle(.textBlack)
     }
 }
 
 private extension HomeView {
-    static let palettes: [HomeProfileCard.Palette] = [.lavender, .yellow, .green, .blue]
-
     enum Metric {
         static let horizontalPadding: CGFloat = 24
         static let verticalPadding: CGFloat = 18

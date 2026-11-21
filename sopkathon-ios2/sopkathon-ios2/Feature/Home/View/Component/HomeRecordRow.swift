@@ -10,14 +10,14 @@ import SwiftUI
 struct HomeRecordRow: View {
     private let name: String
     private let time: String
-    private let palette: HomeProfileCard.Palette
-    private let category: CareRecordCategoryModel?
+    private let palette: HomeProfileColorModel
+    private let category: CareRecordCategoryModel
 
     init(
         name: String,
         time: String,
-        palette: HomeProfileCard.Palette,
-        category: CareRecordCategoryModel?
+        palette: HomeProfileColorModel,
+        category: CareRecordCategoryModel
     ) {
         self.name = name
         self.time = time
@@ -38,13 +38,11 @@ struct HomeRecordRow: View {
                     .typography(.body5)
                     .frame(height: Metric.timeHeight)
             }
-            .foregroundStyle(.baseText)
+            .foregroundStyle(.textBlack)
 
             Spacer()
 
-            if let category {
-                HomeLabelCheck(category: category)
-            }
+            HomeLabelCheck(category: category)
         }
         .frame(height: Metric.height)
     }
