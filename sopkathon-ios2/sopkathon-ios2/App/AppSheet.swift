@@ -5,8 +5,6 @@
 //  Created by h2e on 11/22/26.
 //
 
-enum AppSheet: Identifiable {
+enum AppSheet {
     case voiceInput
-
-    var id: Self { self }
 }

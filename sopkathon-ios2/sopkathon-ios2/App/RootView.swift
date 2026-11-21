@@ -24,8 +24,39 @@ struct RootView: View {
                     destinationView(for: route)
                 }
         }
-        .sheet(item: $router.presentedSheet) { sheet in
-            sheetView(for: sheet)
+        .overlay {
+            sheetOverlayView
+        }
+        .animation(
+            .easeOut(duration: Metric.sheetAnimationDuration),
+            value: router.presentedSheet
+        )
+    }
+
+    private var sheetOverlayView: some View {
+        ZStack(alignment: .bottom) {
+            if let sheet = router.presentedSheet {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .ignoresSafeArea()
+
+                sheetView(for: sheet)
+                    .frame(maxWidth: .infinity)
+                    .background {
+                        UnevenRoundedRectangle(
+                            topLeadingRadius: Metric.sheetCornerRadius,
+                            topTrailingRadius: Metric.sheetCornerRadius
+                        )
+                        .fill(.baseWhite)
+                        .shadow(
+                            color: .baseBlack.opacity(Metric.sheetShadowOpacity),
+                            radius: Metric.sheetShadowRadius
+                        )
+                        .ignoresSafeArea(edges: .bottom)
+                    }
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
         }
     }
 
@@ -105,5 +136,9 @@ private extension RootView {
         static let tabBarOuterPadding: CGFloat = 16
         static let tabItemSpacing: CGFloat = 4
         static let tabIconSize: CGFloat = 22
+        static let sheetCornerRadius: CGFloat = 30
+        static let sheetShadowOpacity: Double = 0.12
+        static let sheetShadowRadius: CGFloat = 12
+        static let sheetAnimationDuration: Double = 0.25
     }
 }

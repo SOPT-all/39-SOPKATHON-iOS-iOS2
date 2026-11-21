@@ -34,10 +34,6 @@ struct VoiceInputView: View {
                 .padding(.top, Metric.buttonTopPadding)
                 .padding(.bottom, Metric.bottomPadding)
         }
-        .presentationDetents([.height(Metric.sheetHeight)])
-        .presentationDragIndicator(.hidden)
-        .presentationBackground(.baseWhite)
-        .presentationCornerRadius(Metric.cornerRadius)
         .task {
             await viewModel.startRecording()
         }
@@ -78,8 +74,6 @@ struct VoiceInputView: View {
 
 private extension VoiceInputView {
     enum Metric {
-        static let sheetHeight: CGFloat = 401
-        static let cornerRadius: CGFloat = 30
         static let topPadding: CGFloat = 29
         static let titleSpacing: CGFloat = 5
         static let titleHorizontalPadding: CGFloat = 45
