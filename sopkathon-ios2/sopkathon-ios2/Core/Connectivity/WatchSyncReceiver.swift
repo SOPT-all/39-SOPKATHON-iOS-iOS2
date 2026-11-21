@@ -65,7 +65,7 @@ final class WatchSyncReceiver: NSObject {
         guard await voiceInputService.requestAuthorization(),
               let text = try? await voiceInputService.transcribeRecording(
                 at: url,
-                contextualStrings: children.flatMap(\.spokenNames)
+                contextualStrings: children.flatMap(\.recognitionHints)
               ),
               !text.isEmpty else { return nil }
         let records = await careRecordService.createCareRecords(

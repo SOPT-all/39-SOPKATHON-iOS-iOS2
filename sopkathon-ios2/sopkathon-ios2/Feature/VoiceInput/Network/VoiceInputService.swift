@@ -97,11 +97,11 @@ extension VoiceInputService: VoiceInputServiceProtocol {
 private extension VoiceInputService {
     enum Constant {
         static let localeIdentifier = "ko-KR"
-        static let bus: AVAudioNodeBus = 0
-        static let bufferSize: AVAudioFrameCount = 1024
-        static let minimumDecibel: Float = -45
-        static let maximumDecibel: Float = -25
-        static let minimumAmplitude: Float = 1e-7
+        nonisolated static let bus: AVAudioNodeBus = 0
+        nonisolated static let bufferSize: AVAudioFrameCount = 1024
+        nonisolated static let minimumDecibel: Float = -45
+        nonisolated static let maximumDecibel: Float = -25
+        nonisolated static let minimumAmplitude: Float = 1e-7
     }
 
     func startAudioEngine(
