@@ -25,23 +25,6 @@ struct BriefingMessageComposeView: UIViewControllerRepresentable {
         MFMessageComposeViewController.canSendText()
     }
 
-    func makeUIViewController(context: Context) -> MFMessageComposeViewController {
-        let controller = MFMessageComposeViewController()
-        controller.recipients = [recipient]
-        controller.body = content
-        controller.messageComposeDelegate = context.coordinator
-        return controller
-    }
-
-    func updateUIViewController(
-        _ controller: MFMessageComposeViewController,
-        context: Context
-    ) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(isPresented: $isPresented, onFinish: onFinish)
-    }
-
     final class Coordinator: NSObject, MFMessageComposeViewControllerDelegate {
         private var isPresented: Binding<Bool>
         private let onFinish: (BriefingMessageComposeResult) -> Void
@@ -71,5 +54,22 @@ struct BriefingMessageComposeView: UIViewControllerRepresentable {
                 onFinish(.failed)
             }
         }
+    }
+    
+    func makeUIViewController(context: Context) -> MFMessageComposeViewController {
+        let controller = MFMessageComposeViewController()
+        controller.recipients = [recipient]
+        controller.body = content
+        controller.messageComposeDelegate = context.coordinator
+        return controller
+    }
+
+    func updateUIViewController(
+        _ controller: MFMessageComposeViewController,
+        context: Context
+    ) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(isPresented: $isPresented, onFinish: onFinish)
     }
 }
