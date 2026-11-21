@@ -39,7 +39,7 @@ struct SingleLineTextField: View {
     var body: some View {
         InputFieldContainer(
             title: title,
-            errorMessage: errorMessage,
+            errorMessage: isFocused ? nil : errorMessage,
             isFocused: isFocused
         ) {
             TextField(placeholder, text: $text)

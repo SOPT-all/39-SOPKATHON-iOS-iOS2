@@ -22,6 +22,15 @@ extension View {
         )
     }
 
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+
     func confirmModal(
         isPresented: Binding<Bool>,
         title: String,
