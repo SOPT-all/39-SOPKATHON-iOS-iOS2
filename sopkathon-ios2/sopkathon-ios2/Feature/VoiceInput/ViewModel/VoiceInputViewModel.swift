@@ -45,7 +45,7 @@ final class VoiceInputViewModel {
 
         guard await service.requestAuthorization(), !Task.isCancelled else { return }
         guard let recognition = try? service.startRecognition(
-            contextualStrings: children.flatMap(\.spokenNames)
+            contextualStrings: children.flatMap(\.recognitionHints)
         ) else { return }
 
         transcriptTask?.cancel()
@@ -73,7 +73,12 @@ final class VoiceInputViewModel {
         await transcriptTask?.value
 
         let text = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return false }
+        guard !text.isEmpty else {
+            #if DEBUG
+            print("[Voice] 인식된 문장이 없습니다")
+            #endif
+            return false
+        }
         await childrenTask?.value
         let records = await careRecordService.createCareRecords(
             fromSpokenText: text,
