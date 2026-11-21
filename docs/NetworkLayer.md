@@ -117,7 +117,7 @@ protocol BaseServiceProtocol {
 | `request` (Void) | 성공 여부만 필요할 때 | `data`를 `EmptyData`로 읽고 버림 |
 
 - `BaseService.shared`는 앱 루트에서 `AppDependency`를 만들 때 한 번만 사용합니다. 그 외에는 직접 쓰지 않고 `any BaseServiceProtocol`로 주입받습니다.
-- 공통 헤더를 여기서 붙입니다. `Accept: application/json`은 언제나, `Content-Type: application/json`은 body가 있는 경우에만 붙습니다.
+- 공통 헤더를 여기서 붙입니다. `Member-Id: 1`과 `Accept: application/json`은 언제나, `Content-Type: application/json`은 body가 있는 경우에만 붙습니다.
 - `BASE_URL`은 `Info.plist`로부터 가져옵니다. 값이 존재하지 않거나 비어있는 경우 `NetworkError.invalidBaseURL`을 던집니다.
 
 ### Endpoint.swift
@@ -140,11 +140,11 @@ protocol Endpoint {
 
 ```swift
 enum HTTPMethod: String { case get, post, put, patch, delete }   // rawValue는 "GET" 등 대문자
-enum HeaderType: String { case contentType, accept }              // "Content-Type", "Accept"
+enum HeaderType: String { case contentType, accept, memberID }    // "Content-Type", "Accept", "Member-Id"
 enum ContentType: String { case json }                            // "application/json"
 ```
 
-헤더 키와 값에는 문자열을 직접 사용하지 않고 `HeaderType`, `ContentType`을 사용합니다. 인증헤더 등 새로운 헤더가 필요하다면 `HeaderType`에 case를 추가하고 `BaseService.makeRequest`에서 추가합니다.
+헤더 키와 값에는 문자열을 직접 사용하지 않고 `HeaderType`, `ContentType`을 사용합니다. 임시 회원 ID `1`은 `BaseService.HeaderValue`에서 관리합니다. 새로운 헤더가 필요하다면 `HeaderType`에 case를 추가하고 `BaseService.makeRequest`에서 추가합니다.
 
 ### BaseResponseDTO.swift
 
@@ -555,10 +555,10 @@ DEBUG 빌드에서는 요청할 때마다 Xcode 콘솔에 다음과 같이 찍�
 
 ```
 [Request] POST https://api.example.com/posts
-[Headers] Accept: ***, Content-Type: ***
+[Headers] Accept: ***, Content-Type: ***, Member-Id: ***
 [Body] {"title":"제목","content":"내용"}
 [Response] 201 https://api.example.com/posts
-[Body] {"data":null}
+[Body] {"result":null}
 ```
 
 실패 시 `[Error]` 줄이 추가됩니다.
@@ -595,10 +595,10 @@ BaseService              Bundle.main.object(forInfoDictionaryKey: "BASE_URL")
 
 | 가정한 내용 | 다르면 고칠 곳 |
 |---|---|
-| 성공 응답의 실제 데이터가 `data` 키에 들어 있음 | `BaseResponseDTO` |
+| 성공 응답의 실제 데이터가 `result` 키에 들어 있음 | `BaseResponseDTO` |
 | 실패 응답에 문자열 `code`와 `message`가 있음 | `ErrorResponseDTO`, `ServerErrorCode` |
 | 성공 여부는 HTTP 상태 코드(2xx)로 판단함 | `BaseService.decode` |
-| 인증 헤더 없음 | `HeaderType`, `BaseService.makeRequest` |
+| 임시 회원 식별 헤더 `Member-Id: 1` | `HeaderType`, `BaseService.makeRequest` |
 
 실패 응답 형식이 가정과 다를 경우 디코딩에 실패하더라도 앱은 멈추지 않으며, `NetworkError.server`의 `code`는 `.unknown`, `message`는 빈 문자열로 전달됩니다.
 
@@ -618,7 +618,7 @@ DTO의 속성명과 타입이 서버 JSON과 일치하지 않습니다. 콘솔 `
 
 **Q. 응답은 200인데 `emptyData` 가 나옵니다.**
 
-서버에서 `data`를 주지 않는 API입니다. 반환값이 없는 Void `request`를 사용하세요.
+서버에서 `result`를 주지 않는 API입니다. 반환값이 없는 Void `request`를 사용하세요.
 
 **Q. 본문 없는 응답(204 등)에 `decodingFailed`가 발생합니다.**
 

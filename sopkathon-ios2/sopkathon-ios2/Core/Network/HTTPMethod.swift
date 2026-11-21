@@ -16,6 +16,7 @@ enum HTTPMethod: String {
 enum HeaderType: String {
     case contentType = "Content-Type"
     case accept = "Accept"
+    case memberID = "Member-Id"
 }
 
 enum ContentType: String {
