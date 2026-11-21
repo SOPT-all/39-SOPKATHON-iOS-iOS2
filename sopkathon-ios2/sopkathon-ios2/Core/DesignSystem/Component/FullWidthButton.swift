@@ -28,7 +28,7 @@ struct FullWidthButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.headline)
+                .typography(.h1Sb16)
                 .foregroundStyle(appearance.foregroundColor(isEnabled: isEnabled))
                 .frame(maxWidth: .infinity)
                 .frame(height: Metric.height)

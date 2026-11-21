@@ -62,6 +62,7 @@ struct SearchHeader<TrailingContent: View>: View {
                 .foregroundStyle(Color.secondary)
 
             TextField(placeholder, text: $searchText)
+                .typography(.h1Rg16)
                 .submitLabel(.search)
                 .onSubmit(onSubmit)
 

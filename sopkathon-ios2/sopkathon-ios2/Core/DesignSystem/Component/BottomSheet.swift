@@ -36,7 +36,7 @@ struct BottomSheet<Content: View>: View {
     private var titleBar: some View {
         HStack {
             Text(title)
-                .font(.title3.weight(.bold))
+                .typography(.displayB18)
 
             Spacer()
 
