@@ -10,46 +10,15 @@ import SwiftUI
 enum ButtonAppearance {
     case primary
     case secondary
-    case destructive
 
-    func foregroundColor(isEnabled: Bool) -> Color {
-        guard isEnabled else { return Color(.systemGray) }
-
-        switch self {
-        case .primary:
-            return .white
-        case .secondary:
-            return .accentColor
-        case .destructive:
-            return Color(.systemRed)
-        }
-    }
-
-    func backgroundColor(isEnabled: Bool) -> Color {
-        guard isEnabled else { return Color(.systemGray5) }
+    func backgroundColor(isEnabled: Bool, isPressed: Bool) -> Color {
+        guard isEnabled else { return .disabled50 }
 
         switch self {
         case .primary:
-            return .accentColor
+            return isPressed ? .primary600 : .primary400
         case .secondary:
-            return .clear
-        case .destructive:
-            return Color(.systemRed).opacity(Opacity.destructiveBackground)
+            return isPressed ? .disabled100 : .gray300
         }
     }
-
-    func borderColor(isEnabled: Bool) -> Color {
-        guard isEnabled else { return .clear }
-
-        switch self {
-        case .primary, .destructive:
-            return .clear
-        case .secondary:
-            return .accentColor
-        }
-    }
-}
-
-private enum Opacity {
-    static let destructiveBackground: Double = 0.15
 }
