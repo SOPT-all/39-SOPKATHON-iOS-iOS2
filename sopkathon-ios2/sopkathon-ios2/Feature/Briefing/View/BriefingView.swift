@@ -10,6 +10,7 @@ import SwiftUI
 struct BriefingView: View {
     @State private var viewModel: BriefingViewModel
     @State private var selectedDate = Date()
+    @State private var instructions: [Int: String] = [:]
 
     init(viewModel: BriefingViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -24,6 +25,7 @@ struct BriefingView: View {
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle("일일 브리핑")
         .task(id: selectedDate) {
             await viewModel.fetchDailyBriefings(for: selectedDate)
@@ -59,11 +61,15 @@ struct BriefingView: View {
             Text(kid.name)
                 .font(.headline)
             Text("만 \(kid.age)세 · 기록 \(kid.recordCount)건")
-            Text("수유 \(kid.summary.feeding) · 수면 \(kid.summary.sleep) · 기저귀 \(kid.summary.diaper)")
+            Text(
+                "수유 \(kid.summary.feeding) · 수면 \(kid.summary.sleep) · "
+                    + "기저귀 \(kid.summary.diaper)"
+            )
             Text("보호자 \(kid.parent.name) · \(kid.parent.phone)")
 
             if let message = kid.briefing {
                 Text(message.content)
+                refinementView(message, for: kid.id)
             } else {
                 Text("생성된 메시지가 없습니다.")
                     .foregroundStyle(.secondary)
@@ -86,5 +92,50 @@ struct BriefingView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func refinementView(
+        _ message: BriefingMessageModel,
+        for kidID: Int
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            TextField(
+                "다듬기 요청사항",
+                text: instructionBinding(for: kidID),
+                axis: .vertical
+            )
+            .lineLimit(2...4)
+            .textFieldStyle(.roundedBorder)
+
+            Button {
+                Task {
+                    await viewModel.updateDailyBriefing(
+                        briefingID: message.id,
+                        instruction: instructions[kidID] ?? ""
+                    )
+                }
+            } label: {
+                HStack {
+                    if viewModel.refiningBriefingID == message.id {
+                        ProgressView()
+                    }
+                    Text("AI 메시지 다듬기")
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(
+                viewModel.generatingKidID != nil
+                    || viewModel.refiningBriefingID != nil
+                    || (instructions[kidID] ?? "").isEmpty
+            )
+        }
+    }
+
+    private func instructionBinding(for kidID: Int) -> Binding<String> {
+        Binding(
+            get: { instructions[kidID] ?? "" },
+            set: { instructions[kidID] = $0 }
+        )
     }
 }
