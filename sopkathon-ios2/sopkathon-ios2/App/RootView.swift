@@ -103,6 +103,10 @@ struct RootView: View {
         .frame(height: Metric.tabBarHeight)
         .background(.baseWhite)
         .clipShape(Capsule())
+        .shadow(
+            color: .baseBlack.opacity(Metric.tabBarShadowOpacity),
+            radius: Metric.tabBarShadowRadius
+        )
         .padding(.horizontal, Metric.tabBarOuterPadding)
     }
 
@@ -161,6 +165,8 @@ private extension RootView {
         static let tabItemSpacing: CGFloat = 50
         static let tabItemSize: CGFloat = 48
         static let tabIconTitleSpacing: CGFloat = 3
+        static let tabBarShadowOpacity: Double = 0.1
+        static let tabBarShadowRadius: CGFloat = 4
         static let sheetCornerRadius: CGFloat = 30
         static let sheetDimOpacity: Double = 0.56
         static let sheetDismissDistance: CGFloat = 100
