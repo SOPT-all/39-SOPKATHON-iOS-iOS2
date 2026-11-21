@@ -38,6 +38,17 @@ extension [ChildModel] {
     }
 }
 
+struct ChildDetailModel {
+    let id: Int
+    let name: String
+    let birthDate: Date?
+    let gender: ChildGenderModel?
+    let parentName: String
+    let parentPhoneNumber: String
+    let relationship: ChildRelationshipModel?
+    let note: String
+}
+
 struct ChildDraftModel {
     let name: String
     let birthDate: Date

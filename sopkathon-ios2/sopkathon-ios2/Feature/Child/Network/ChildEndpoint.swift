@@ -12,6 +12,7 @@ enum ChildEndpoint {
     case updateChild(childID: Int, UpdateChildRequestDTO)
     case deleteChild(childID: Int)
     case fetchChildren(keyword: String?)
+    case fetchChild(childID: Int)
 }
 
 extension ChildEndpoint: Endpoint {
@@ -19,7 +20,9 @@ extension ChildEndpoint: Endpoint {
         switch self {
         case .createChild, .fetchChildren:
             return "/api/v1/kids"
-        case .updateChild(let childID, _), .deleteChild(let childID):
+        case .updateChild(let childID, _),
+             .deleteChild(let childID),
+             .fetchChild(let childID):
             return "/api/v1/kids/\(childID)"
         }
     }
@@ -32,7 +35,7 @@ extension ChildEndpoint: Endpoint {
             return .patch
         case .deleteChild:
             return .delete
-        case .fetchChildren:
+        case .fetchChildren, .fetchChild:
             return .get
         }
     }
@@ -53,7 +56,7 @@ extension ChildEndpoint: Endpoint {
             return request
         case .updateChild(_, let request):
             return request
-        case .deleteChild, .fetchChildren:
+        case .deleteChild, .fetchChildren, .fetchChild:
             return nil
         }
     }

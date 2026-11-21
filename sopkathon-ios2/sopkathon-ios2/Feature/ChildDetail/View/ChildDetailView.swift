@@ -39,6 +39,9 @@ struct ChildDetailView: View {
             submitButtonView
         }
         .toolbar(.hidden, for: .navigationBar)
+        .task {
+            await viewModel.fetchChild()
+        }
     }
 
     private var submitButtonView: some View {

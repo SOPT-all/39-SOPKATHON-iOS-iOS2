@@ -5,6 +5,8 @@
 //  Created by h2e on 11/22/26.
 //
 
+import Foundation
+
 struct MockChildService {}
 
 extension MockChildService: ChildServiceProtocol {
@@ -17,6 +19,19 @@ extension MockChildService: ChildServiceProtocol {
         ]
         guard let keyword else { return children }
         return children.filter { $0.name.contains(keyword) }
+    }
+
+    func fetchChild(childID: Int) async throws -> ChildDetailModel {
+        ChildDetailModel(
+            id: childID,
+            name: "김우진",
+            birthDate: Date(timeIntervalSince1970: 1647302400),
+            gender: .male,
+            parentName: "김민수",
+            parentPhoneNumber: "010-1111-2222",
+            relationship: .father,
+            note: "우유 알레르기가 있습니다."
+        )
     }
 
     func createChild(_ draft: ChildDraftModel) async throws -> Int {

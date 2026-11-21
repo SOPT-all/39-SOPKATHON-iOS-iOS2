@@ -12,6 +12,21 @@ enum ChildMapper {
         dto.children.map { map($0) }
     }
 
+    static func map(_ dto: ChildDetailResponseDTO) -> ChildDetailModel {
+        ChildDetailModel(
+            id: dto.childID,
+            name: dto.name,
+            birthDate: birthDateFormatter.date(from: dto.birthDate),
+            gender: ChildGenderModel.allCases.first { $0.serverValue == dto.gender },
+            parentName: dto.parent?.name ?? "",
+            parentPhoneNumber: dto.parent?.phone.formattedPhoneNumber ?? "",
+            relationship: ChildRelationshipModel.allCases.first {
+                $0.serverValue == dto.parent?.relationship
+            },
+            note: dto.note ?? ""
+        )
+    }
+
     static func map(_ draft: ChildDraftModel) -> CreateChildRequestDTO {
         CreateChildRequestDTO(
             name: draft.name,

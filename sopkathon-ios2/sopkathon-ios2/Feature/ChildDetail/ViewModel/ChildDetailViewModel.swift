@@ -58,6 +58,17 @@ final class ChildDetailViewModel {
         self.service = service
     }
 
+    func fetchChild() async {
+        guard let child = try? await service.fetchChild(childID: childID) else { return }
+        childName = child.name
+        birthDate = child.birthDate
+        gender = child.gender
+        parentName = child.parentName
+        parentPhoneNumber = child.parentPhoneNumber
+        relationship = child.relationship
+        notes = child.note
+    }
+
     func updateChild() async -> Bool {
         guard !isSubmitting, let draft else { return false }
 
