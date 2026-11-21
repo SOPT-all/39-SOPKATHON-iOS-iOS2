@@ -12,7 +12,10 @@ struct VoiceInputView: View {
 
     @State private var viewModel: VoiceInputViewModel
 
-    init(viewModel: VoiceInputViewModel) {
+    private let teacherName: String
+
+    init(teacherName: String, viewModel: VoiceInputViewModel) {
+        self.teacherName = teacherName
         _viewModel = State(initialValue: viewModel)
     }
 
@@ -45,7 +48,7 @@ struct VoiceInputView: View {
             Text(Title.status)
                 .font(Typography.caption1.font)
 
-            Text("\(viewModel.teacherName)\(Title.listeningSuffix)")
+            Text("\(teacherName)\(Title.listeningSuffix)")
                 .font(Typography.header3.font)
         }
         .foregroundStyle(.textBlack)
