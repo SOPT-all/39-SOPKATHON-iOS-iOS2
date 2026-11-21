@@ -11,6 +11,8 @@ struct RootView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AppDependency.self) private var dependency
 
+    @State private var sheetDragOffset: CGFloat = 0
+
     var body: some View {
         @Bindable var router = router
 
@@ -36,9 +38,10 @@ struct RootView: View {
     private var sheetOverlayView: some View {
         ZStack(alignment: .bottom) {
             if let sheet = router.presentedSheet {
-                Color.clear
-                    .contentShape(Rectangle())
+                Color.baseBlack
+                    .opacity(Metric.sheetDimOpacity)
                     .ignoresSafeArea()
+                    .transition(.opacity)
 
                 sheetView(for: sheet)
                     .frame(maxWidth: .infinity)
@@ -48,16 +51,34 @@ struct RootView: View {
                             topTrailingRadius: Metric.sheetCornerRadius
                         )
                         .fill(.baseWhite)
-                        .shadow(
-                            color: .baseBlack.opacity(Metric.sheetShadowOpacity),
-                            radius: Metric.sheetShadowRadius
-                        )
                         .ignoresSafeArea(edges: .bottom)
                     }
+                    .offset(y: sheetDragOffset)
+                    .gesture(sheetDragGesture)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }
         }
+        .onChange(of: router.presentedSheet) { _, sheet in
+            guard sheet != nil else { return }
+            sheetDragOffset = 0
+        }
+    }
+
+    private var sheetDragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                sheetDragOffset = max(value.translation.height, 0)
+            }
+            .onEnded { value in
+                guard value.translation.height > Metric.sheetDismissDistance else {
+                    withAnimation(.easeOut(duration: Metric.sheetAnimationDuration)) {
+                        sheetDragOffset = 0
+                    }
+                    return
+                }
+                router.dismissSheet()
+            }
     }
 
     @ViewBuilder
@@ -137,8 +158,8 @@ private extension RootView {
         static let tabItemSpacing: CGFloat = 4
         static let tabIconSize: CGFloat = 22
         static let sheetCornerRadius: CGFloat = 30
-        static let sheetShadowOpacity: Double = 0.12
-        static let sheetShadowRadius: CGFloat = 12
+        static let sheetDimOpacity: Double = 0.56
+        static let sheetDismissDistance: CGFloat = 100
         static let sheetAnimationDuration: Double = 0.25
     }
 }
