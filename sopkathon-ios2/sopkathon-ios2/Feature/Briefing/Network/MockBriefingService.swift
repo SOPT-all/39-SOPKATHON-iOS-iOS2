@@ -37,4 +37,8 @@ extension MockBriefingService: BriefingServiceProtocol {
             ]
         )
     }
+
+    func createDailyBriefing(kidID: Int, date: String) async throws -> BriefingMessageModel {
+        BriefingMessageModel(id: 5, content: "오늘의 돌봄 기록을 바탕으로 브리핑을 생성했어요.")
+    }
 }

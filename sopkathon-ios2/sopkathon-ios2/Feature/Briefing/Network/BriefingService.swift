@@ -7,6 +7,7 @@
 
 protocol BriefingServiceProtocol {
     func fetchDailyBriefings(date: String) async throws -> BriefingModel
+    func createDailyBriefing(kidID: Int, date: String) async throws -> BriefingMessageModel
 }
 
 final class BriefingService {
@@ -21,6 +22,14 @@ extension BriefingService: BriefingServiceProtocol {
     func fetchDailyBriefings(date: String) async throws -> BriefingModel {
         let response: BriefingResponseDTO = try await baseService.request(
             BriefingEndpoint.fetchDailyBriefings(date: date)
+        )
+        return BriefingMapper.map(response)
+    }
+
+    func createDailyBriefing(kidID: Int, date: String) async throws -> BriefingMessageModel {
+        let request = CreateBriefingRequestDTO(kidID: kidID, date: date)
+        let response: CreateBriefingResponseDTO = try await baseService.request(
+            BriefingEndpoint.createDailyBriefing(request)
         )
         return BriefingMapper.map(response)
     }
