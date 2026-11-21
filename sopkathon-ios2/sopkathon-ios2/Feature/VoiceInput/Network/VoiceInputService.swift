@@ -11,6 +11,7 @@ import Speech
 protocol VoiceInputServiceProtocol {
     func requestAuthorization() async -> Bool
     func startRecognition(contextualStrings: [String]) throws -> AsyncStream<String>
+    func transcribeRecording(at url: URL, contextualStrings: [String]) async throws -> String
     func stopRecognition()
 }
 
@@ -62,6 +63,17 @@ extension VoiceInputService: VoiceInputServiceProtocol {
         return stream
     }
 
+    func transcribeRecording(at url: URL, contextualStrings: [String]) async throws -> String {
+        guard let speechRecognizer, speechRecognizer.isAvailable else {
+            throw VoiceInputError.recognizerUnavailable
+        }
+
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        request.shouldReportPartialResults = false
+        request.contextualStrings = contextualStrings
+        return try await Self.transcribe(request, with: speechRecognizer)
+    }
+
     func stopRecognition() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: Constant.bus)
@@ -97,6 +109,26 @@ private extension VoiceInputService {
         Self.installTap(on: inputNode, format: format, request: request)
         audioEngine.prepare()
         try audioEngine.start()
+    }
+
+    nonisolated static func transcribe(
+        _ request: SFSpeechURLRecognitionRequest,
+        with recognizer: SFSpeechRecognizer
+    ) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            var hasResumed = false
+            recognizer.recognitionTask(with: request) { result, error in
+                guard !hasResumed else { return }
+
+                if let result, result.isFinal {
+                    hasResumed = true
+                    continuation.resume(returning: result.bestTranscription.formattedString)
+                } else if let error {
+                    hasResumed = true
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     nonisolated static func requestSpeechAuthorization() async -> Bool {

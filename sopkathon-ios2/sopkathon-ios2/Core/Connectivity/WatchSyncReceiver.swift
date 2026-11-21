@@ -13,6 +13,20 @@ import WatchConnectivity
 final class WatchSyncReceiver: NSObject {
     private(set) var careRecordSavedCount = 0
 
+    private let voiceInputService: any VoiceInputServiceProtocol
+    private let careRecordService: any CareRecordServiceProtocol
+    private let childService: any ChildServiceProtocol
+
+    init(
+        voiceInputService: any VoiceInputServiceProtocol,
+        careRecordService: any CareRecordServiceProtocol,
+        childService: any ChildServiceProtocol
+    ) {
+        self.voiceInputService = voiceInputService
+        self.careRecordService = careRecordService
+        self.childService = childService
+    }
+
     func activate() {
         guard WCSession.isSupported() else { return }
 
@@ -21,12 +35,21 @@ final class WatchSyncReceiver: NSObject {
         session.activate()
     }
 
-    private nonisolated func handle(_ message: [String: Any]) {
-        guard WatchSyncMessage.isCareRecordSaved(message) else { return }
+    private func saveCareRecords(fromRecordingAt url: URL) async {
+        defer { try? FileManager.default.removeItem(at: url) }
 
-        Task { @MainActor in
-            careRecordSavedCount += 1
-        }
+        let children = (try? await childService.fetchChildren(keyword: nil)) ?? []
+        guard await voiceInputService.requestAuthorization(),
+              let text = try? await voiceInputService.transcribeRecording(
+                at: url,
+                contextualStrings: children.flatMap(\.spokenNames)
+              ),
+              !text.isEmpty,
+              (try? await careRecordService.createCareRecords(
+                CareRecordDraftModel(text: text)
+              )) != nil
+        else { return }
+        careRecordSavedCount += 1
     }
 }
 
@@ -43,14 +66,14 @@ extension WatchSyncReceiver: WCSessionDelegate {
         session.activate()
     }
 
-    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        handle(message)
-    }
+    nonisolated func session(_ session: WCSession, didReceive file: WCSessionFile) {
+        let url = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString)
+            .appendingPathExtension(file.fileURL.pathExtension)
+        guard (try? FileManager.default.moveItem(at: file.fileURL, to: url)) != nil else { return }
 
-    nonisolated func session(
-        _ session: WCSession,
-        didReceiveUserInfo userInfo: [String: Any] = [:]
-    ) {
-        handle(userInfo)
+        Task { @MainActor in
+            await saveCareRecords(fromRecordingAt: url)
+        }
     }
 }

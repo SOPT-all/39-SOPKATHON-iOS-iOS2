@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		940CF24C30AF399C00CB7472 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 940CF24B30AF399C00CB7472 /* Alamofire */; };
 		940CF25430AF39C100CB7472 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 940CF25330AF39C100CB7472 /* Kingfisher */; };
-		94A170010000000000000001 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 94A1700200000000000000A2 /* Alamofire */; };
 		940CFCCD30B222EA00CB7472 /* SopkathonWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 940CFCC330B222E900CB7472 /* SopkathonWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		94A170010000000000000001 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 94A1700200000000000000A2 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -19,7 +19,7 @@
 			containerPortal = 940CF20A30AF390600CB7472 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 940CFCC230B222E900CB7472;
-			remoteInfo = "SopkathonWatch";
+			remoteInfo = SopkathonWatch;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -38,7 +38,7 @@
 /* Begin PBXFileReference section */
 		940CF21230AF390600CB7472 /* sopkathon-ios2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "sopkathon-ios2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		940CF22130AF390700CB7472 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		940CFCC330B222E900CB7472 /* SopkathonWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SopkathonWatch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		940CFCC330B222E900CB7472 /* SopkathonWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SopkathonWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -53,7 +53,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				App/AppDependency.swift,
-				Core/Connectivity/WatchSyncMessage.swift,
+				"Core/Extension/Font+.swift",
 				Core/Network/BaseResponseDTO.swift,
 				Core/Network/BaseService.swift,
 				Core/Network/Endpoint.swift,
@@ -67,6 +67,10 @@
 				Feature/CareRecord/Network/DTO/CareRecordsResponseDTO.swift,
 				Feature/CareRecord/Network/DTO/CreateCareRecordRequestDTO.swift,
 				Feature/CareRecord/Network/MockCareRecordService.swift,
+				"Resource/Font/Pretendard-Bold.otf",
+				"Resource/Font/Pretendard-Medium.otf",
+				"Resource/Font/Pretendard-Regular.otf",
+				"Resource/Font/Pretendard-SemiBold.otf",
 			);
 			target = 940CFCC230B222E900CB7472 /* SopkathonWatch */;
 		};
@@ -94,7 +98,7 @@
 			exceptions = (
 				94A1700400000000000000A4 /* Exceptions for "SopkathonWatch" folder in "SopkathonWatch" target */,
 			);
-			path = "SopkathonWatch";
+			path = SopkathonWatch;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -177,11 +181,11 @@
 			fileSystemSynchronizedGroups = (
 				940CFCC430B222E900CB7472 /* SopkathonWatch */,
 			);
-			name = "SopkathonWatch";
+			name = SopkathonWatch;
 			packageProductDependencies = (
 				94A1700200000000000000A2 /* Alamofire */,
 			);
-			productName = "SopkathonWatch";
+			productName = SopkathonWatch;
 			productReference = 940CFCC330B222E900CB7472 /* SopkathonWatch.app */;
 			productType = "com.apple.product-type.application";
 		};

@@ -9,22 +9,21 @@ import SwiftUI
 
 @main
 struct SopkathonWatchApp: App {
-    @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
-
-    private let phoneSyncService = PhoneSyncService()
+    @State private var viewModel: VoiceMemoViewModel
 
     init() {
-        phoneSyncService.activate()
+        let dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+        _viewModel = State(
+            initialValue: VoiceMemoViewModel(
+                recorderService: dependency.voiceRecorderService,
+                phoneSyncService: dependency.phoneSyncService
+            )
+        )
     }
 
     var body: some Scene {
         WindowGroup {
-            VoiceMemoView(
-                viewModel: VoiceMemoViewModel(
-                    service: dependency.careRecordService,
-                    phoneSyncService: phoneSyncService
-                )
-            )
+            VoiceMemoView(viewModel: viewModel)
         }
     }
 }

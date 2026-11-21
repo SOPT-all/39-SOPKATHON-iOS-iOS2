@@ -4,5 +4,14 @@
 <dict>
 	<key>BASE_URL</key>
 	<string>$(BASE_URL)</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>돌봄 내용을 음성으로 기록할 때 마이크를 사용합니다.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Pretendard-Regular.otf</string>
+		<string>Pretendard-Medium.otf</string>
+		<string>Pretendard-SemiBold.otf</string>
+		<string>Pretendard-Bold.otf</string>
+	</array>
 </dict>
 </plist>
