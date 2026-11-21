@@ -116,7 +116,7 @@ protocol BaseServiceProtocol {
 | `request<Response>` | 응답 `data`를 받아야 할 때 | `data`를 `Response`로 디코딩해 반환. `data`가 없으면 `NetworkError.emptyData` |
 | `request` (Void) | 성공 여부만 필요할 때 | `data`를 `EmptyData`로 읽고 버림 |
 
-- `BaseService.shared`를 통해 단일 인스턴스를 공유합니다.
+- `BaseService.shared`는 앱 루트에서 `AppDependency`를 만들 때 한 번만 사용합니다. 그 외에는 직접 쓰지 않고 `any BaseServiceProtocol`로 주입받습니다.
 - 공통 헤더를 여기서 붙입니다. `Accept: application/json`은 언제나, `Content-Type: application/json`은 body가 있는 경우에만 붙습니다.
 - `BASE_URL`은 `Info.plist`로부터 가져옵니다. 값이 존재하지 않거나 비어있는 경우 `NetworkError.invalidBaseURL`을 던집니다.
 
@@ -184,6 +184,7 @@ Feature/Home
 └─ Network
    ├─ HomeEndpoint.swift
    ├─ HomeService.swift
+   ├─ MockHomeService.swift
    ├─ HomeMapper.swift
    └─ DTO
       ├─ HomeResponseDTO.swift
@@ -350,7 +351,7 @@ protocol HomeServiceProtocol {
 final class HomeService {
     private let baseService: any BaseServiceProtocol
 
-    init(baseService: any BaseServiceProtocol = BaseService.shared) {
+    init(baseService: any BaseServiceProtocol) {
         self.baseService = baseService
     }
 }
@@ -370,7 +371,20 @@ extension HomeService: HomeServiceProtocol {
         try await baseService.request(HomeEndpoint.deletePost(postID: postID))
     }
 }
+
+extension AppDependency {
+    var homeService: any HomeServiceProtocol {
+        switch mode {
+        case .live:
+            return HomeService(baseService: baseService)
+        case .mock:
+            return MockHomeService()
+        }
+    }
+}
 ```
+
+`init`에 기본값을 주지 않습니다. 파일 맨 아래의 `extension AppDependency`가 앱 루트에서 정한 `mode`에 따라 실제 Service나 Mock Service를 돌려줍니다.
 
 두 `request`는 수신 타입에 따라 결정됩니다.
 
@@ -405,7 +419,7 @@ final class HomeViewModel {
 
     private let service: any HomeServiceProtocol
 
-    init(service: any HomeServiceProtocol = HomeService()) {
+    init(service: any HomeServiceProtocol) {
         self.service = service
     }
 
@@ -448,7 +462,11 @@ final class HomeViewModel {
 import SwiftUI
 
 struct HomeView: View {
-    @State private var viewModel = HomeViewModel()
+    @State private var viewModel: HomeViewModel
+
+    init(viewModel: HomeViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         contentView
@@ -471,23 +489,48 @@ struct HomeView: View {
 }
 ```
 
-### 5-7. 서버 없이 테스트하기
-
-Service와 ViewModel은 프로토콜에만 의존하기 때문에 가짜 구현체를 넣을 수 있습니다.
+View는 ViewModel을 직접 만들지 않고 `init`으로 받습니다. 화면을 띄우는 상위 View가 `AppDependency`에서 Service를 꺼내 ViewModel을 만들어 넘깁니다.
 
 ```swift
-final class MockBaseService: BaseServiceProtocol {
-    func request<Response: Decodable>(_ endpoint: some Endpoint) async throws -> Response {
-        throw NetworkError.networkConnection
+struct ContentView: View {
+    @Environment(AppDependency.self) private var dependency
+
+    var body: some View {
+        HomeView(viewModel: HomeViewModel(service: dependency.homeService))
     }
-
-    func request(_ endpoint: some Endpoint) async throws {}
 }
-
-let viewModel = HomeViewModel(service: HomeService(baseService: MockBaseService()))
 ```
 
-화면 단위로만 보고 싶다면 `HomeServiceProtocol`을 구현한 Mock을 만들어서 `HomeViewModel(service:)`에 주입해도 됩니다.
+### 5-7. 서버 없이 테스트하기
+
+Service와 ViewModel은 프로토콜에만 의존하기 때문에 가짜 구현체를 넣을 수 있습니다. 기능마다 `Mock<기능>Service`를 만들어 가짜 Model을 반환합니다.
+
+```swift
+struct MockHomeService {}
+
+extension MockHomeService: HomeServiceProtocol {
+    func fetchHome() async throws -> HomeModel {
+        HomeModel(
+            userID: 1,
+            nickname: "솝트",
+            posts: [
+                HomePostModel(id: 1, title: "첫 번째 글"),
+                HomePostModel(id: 2, title: "두 번째 글")
+            ]
+        )
+    }
+
+    func deletePost(postID: Int) async throws {}
+}
+```
+
+실제 구현과 Mock 중 무엇을 쓸지는 앱 루트 한 곳에서 정합니다. `App/sopkathon_ios2App.swift`의 `mode`를 `.mock`으로 바꾸면 모든 기능이 Mock Service를 사용합니다.
+
+```swift
+@State private var dependency = AppDependency(mode: .mock, baseService: BaseService.shared)
+```
+
+`.mock`으로 바꾼 상태는 커밋하지 않습니다.
 
 ## 6. 에러 처리
 

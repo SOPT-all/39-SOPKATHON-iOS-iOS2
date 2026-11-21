@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct sopkathon_ios2App: App {
+    @State private var dependency = AppDependency(mode: .live, baseService: BaseService.shared)
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(dependency)
         }
     }
 }
